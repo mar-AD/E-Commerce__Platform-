@@ -16,7 +16,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/apigateway/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/apigateway/tsconfig.app.json"
+        "tsConfigPath": "apps/apigateway/tsconfig.app.json",
+        "assets": ["proto/**/*"],
+        "watchAssets": true
       }
     },
     "auth": {
@@ -25,7 +27,9 @@
       "entryFile": "main",
       "sourceRoot": "apps/auth/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/auth/tsconfig.app.json"
+        "tsConfigPath": "apps/auth/tsconfig.app.json",
+        "assets": ["proto/**/*"],
+        "watchAssets": true
       }
     },
     "common": {
