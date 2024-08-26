@@ -1,35 +1,51 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  CreateUserDto, FindOneDto, ForgotPasswordDto,
+  LoginDto, LogoutDto, RefreshTokenDto, ResetPasswordDto, UpdateUserEmailDto,
+  UpdateUserPasswordDto,
+  UserServiceController,
+  UserServiceControllerMethods,
+} from '@app/common';
 
 @Controller()
-export class UsersController {
+@UserServiceControllerMethods()
+export class UsersController implements UserServiceController{
   constructor(private readonly usersService: UsersService) {}
 
-  @MessagePattern('createUser')
-  create(@Payload() createUserDto: CreateUserDto) {
+  createUser(createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
-  @MessagePattern('findAllUsers')
-  findAll() {
-    return this.usersService.findAll();
+  userLogin(loginRequest: LoginDto) {
+    return this.usersService.login(loginRequest);
   }
 
-  @MessagePattern('findOneUser')
-  findOne(@Payload() id: number) {
-    return this.usersService.findOne(id);
+  updateUserPassword(updatePasswordDto: UpdateUserPasswordDto) {
+    return this.usersService.updateUserPass(updatePasswordDto.id, updatePasswordDto);
   }
 
-  @MessagePattern('updateUser')
-  update(@Payload() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto.id, updateUserDto);
+  updateUserEmail(updateEmailDto: UpdateUserEmailDto) {
+    return this.usersService.updateUserEmail(updateEmailDto.id, updateEmailDto);
   }
 
-  @MessagePattern('removeUser')
-  remove(@Payload() id: number) {
-    return this.usersService.remove(id);
+  logoutUser(logoutDto: LogoutDto) {
+    return this.usersService.logoutUser(logoutDto.refreshToken);
+  }
+
+  userRefreshToken(refreshTokenDto: RefreshTokenDto) {
+    return this.usersService.userRefreshToken(refreshTokenDto.refreshToken);
+  }
+
+  userForgotPassword(forgotPassDto: ForgotPasswordDto ) {
+    return this.usersService.userForgotPassword(forgotPassDto.email);
+  }
+
+  userResetPassword(resetPasswordDto: ResetPasswordDto) {
+    return this.usersService.userResetPassword(resetPasswordDto);
+  }
+
+  removeUser(findOneDto: FindOneDto) {
+    return this.usersService.remove(findOneDto.id);
   }
 }

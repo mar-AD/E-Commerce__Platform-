@@ -1,35 +1,51 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AdminsService } from './admins.service';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
+import {
+  AdminServiceController,
+  AdminServiceControllerMethods, CreateAdminDto, FindOneDto, ForgotPasswordDto,
+  LoginDto, LogoutDto, RefreshTokenDto, ResetPasswordDto,
+  UpdateAdminEmailDto,
+  UpdateAdminPasswordDto,
+} from '@app/common';
 
 @Controller()
-export class AdminsController {
+@AdminServiceControllerMethods()
+export class AdminsController implements AdminServiceController{
   constructor(private readonly adminsService: AdminsService) {}
 
-  @MessagePattern('createAdmin')
-  create(@Payload() createAdminDto: CreateAdminDto) {
+  createAdmin(createAdminDto: CreateAdminDto) {
     return this.adminsService.create(createAdminDto);
   }
 
-  @MessagePattern('findAllAdmins')
-  findAll() {
-    return this.adminsService.findAll();
+  adminLogin( loginDto : LoginDto) {
+    return this.adminsService.adminLogin(loginDto)
   }
 
-  @MessagePattern('findOneAdmin')
-  findOne(@Payload() id: number) {
-    return this.adminsService.findOne(id);
+  updateAdminEmail(updateAdminEmailDto: UpdateAdminEmailDto) {
+    return this.adminsService.updateAdminEmail(updateAdminEmailDto.id, updateAdminEmailDto);
   }
 
-  @MessagePattern('updateAdmin')
-  update(@Payload() updateAdminDto: UpdateAdminDto) {
-    return this.adminsService.update(updateAdminDto.id, updateAdminDto);
+  updateAdminPassword(updateAdminPassDto: UpdateAdminPasswordDto) {
+    return this.adminsService.updateAdminPassword(updateAdminPassDto.id ,updateAdminPassDto);
   }
 
-  @MessagePattern('removeAdmin')
-  remove(@Payload() id: number) {
-    return this.adminsService.remove(id);
+  logoutAdmin(logoutDto: LogoutDto) {
+    return this.adminsService.logoutAdmin(logoutDto);
+  }
+
+  adminRefreshToken(refreshTokenDto: RefreshTokenDto) {
+    return this.adminsService.adminRefreshToken(refreshTokenDto.refreshToken);
+  }
+
+  adminForgotPassword(forgotPassDto: ForgotPasswordDto) {
+    return this.adminsService.adminForgotPassword(forgotPassDto.email);
+  }
+
+  adminResetPassword(resetPasswordDto: ResetPasswordDto) {
+    return this.adminsService.adminResetPassword(resetPasswordDto);
+  }
+
+  removeAdmin(findOneDto: FindOneDto) {
+    return this.adminsService.remove(findOneDto.id);
   }
 }
