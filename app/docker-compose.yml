@@ -1,0 +1,49 @@
+services:
+  apigateway:
+    build:
+      context: ./
+      dockerfile: ./apps/apigateway/Dockerfile
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    depends_on:
+      - auth
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev apigateway
+
+  auth:
+    build:
+      context: ./
+      dockerfile: ./apps/auth/Dockerfile
+    env_file:
+      - ./apps/auth/.env
+    depends_on:
+      - auth-db
+    ports:
+      - '50051:50051'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev auth
+
+  auth-db:
+    image: postgres
+    env_file:
+      - ./apps/auth/.env
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./db/auth-data:/var/lib/postgresql/data
+      - ./db/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
+
+  postgres_admin:
+    image: dpage/pgadmin4
+    depends_on:
+      - auth-db
+    env_file:
+      - .env
+    ports:
+      - '15432:80'
