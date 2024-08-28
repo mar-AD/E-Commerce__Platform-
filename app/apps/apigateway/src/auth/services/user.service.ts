@@ -1,5 +1,12 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { CreateUserDto, USER_SERVICE_NAME, UserServiceClient } from '@app/common';
+import {
+  CreateUserDto, ForgotPasswordDto,
+  LoginDto, LogoutDto, RefreshTokenDto, ResetPasswordDto,
+  UpdateUserEmailDto,
+  UpdateUserPasswordDto,
+  USER_SERVICE_NAME,
+  UserServiceClient,
+} from '@app/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '../constants';
 
@@ -13,23 +20,40 @@ export class UserService implements OnModuleInit {
   onModuleInit() {
     this.userService = this.client.getService<UserServiceClient>(USER_SERVICE_NAME)
   }
-  create(createAuthDto: CreateUserDto) {
-    return this.userService.createUser(createAuthDto)
+
+  create(createUserDto: CreateUserDto) {
+    return this.userService.createUser(createUserDto)
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  login(loginRequest: LoginDto) {
+    return this.userService.userLogin(loginRequest);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
+  updatePassword(id: string, updatePasswordDto: UpdateUserPasswordDto) {
+    return this.userService.updateUserPassword({id, ...updatePasswordDto});
   }
 
-  update(id: number, updateAuthDto: UpdateUserDto) {
-    return `This action updates a #${id} auth`;
+  updateEmail(id: string, updateEmailDto: UpdateUserEmailDto) {
+    return this.userService.updateUserEmail({id, ...updateEmailDto});
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  logout(logoutDto: LogoutDto){
+    return this.userService.logoutUser(logoutDto);
+  }
+
+  refreshToken(refreshTokenDto: RefreshTokenDto){
+    return this.userService.userRefreshToken(refreshTokenDto)
+  }
+
+  forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    return this.userService.userForgotPassword(forgotPasswordDto)
+  }
+
+  resetPassword(resetPasswordDto: ResetPasswordDto) {
+    return this.userService.userResetPassword(resetPasswordDto)
+  }
+
+  remove(id: string) {
+    return this.userService.removeUser({ id });
   }
 }

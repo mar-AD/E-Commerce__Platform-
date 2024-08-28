@@ -8,53 +8,55 @@ import {
   UpdateUserEmailDto,
   UpdateUserPasswordDto,
 } from '@app/common';
+import { ApiTags } from '@nestjs/swagger';
 
 
-@Controller('auth')
+@ApiTags('AuthUsers')
+@Controller('auth/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
+  @Post('user/register')
   createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
-  @Post()
+  @Post('user/login')
   userLogin(@Body() loginRequest: LoginDto) {
     return this.userService.login(loginRequest);
   }
 
-  @Patch(':id')
+  @Patch('userPupdate/:id')
   updateUserPassword(@Param('id') id: string, @Body() updatePasswordDto: UpdateUserPasswordDto) {
     return this.userService.updatePassword(id, updatePasswordDto);
   }
 
-  @Patch(':id')
+  @Patch('userEupdate/:id')
   updateUserEmail(@Param('id') id: string, @Body() updateEmailDto: UpdateUserEmailDto) {
     return this.userService.updateEmail(id, updateEmailDto);
   }
 
-  @Post()
+  @Post('user/logout')
   logoutUser(@Body() logoutDto: LogoutDto) {
     return this.userService.logout(logoutDto);
   }
 
-  @Post('refresh-token')
+  @Post('user/refresh-token')
   userRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.userService.refreshToken(refreshTokenDto.refreshToken);
+    return this.userService.refreshToken(refreshTokenDto);
   }
 
-  @Post('forgot-password')
+  @Post('user/forgot-password')
   userForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
-    return this.userService.forgotPassword(forgotPassDto.email);
+    return this.userService.forgotPassword(forgotPassDto);
   }
 
-  @Post('reset-password')
+  @Post('user/reset-password')
   userResetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.userService.resetPassword(resetPasswordDto);
   }
 
-  @Delete(':id')
+  @Delete('user/:id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
