@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
+import { CreateAdminDto, LoginDto, ResetPasswordDto, UpdateAdminEmailDto, UpdateAdminPasswordDto } from '@app/common';
 
 @Injectable()
 export class AdminsService {
-  create(createAdminDto: CreateAdminDto) {
-    return 'This action adds a new admin';
+  create(createUserDto: CreateAdminDto) {
+    return 'This action adds a new user';
   }
 
-  findAll() {
-    return `This action returns all admins`;
+  adminLogin(loginRequest: LoginDto) {
+    return `This action logs in users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} admin`;
+  updateAdminPassword(id: string, updatePasswordDto: UpdateAdminPasswordDto) {
+    return `This action updates user password a #${id, updatePasswordDto}`;
   }
 
-  update(id: number, updateAdminDto: UpdateAdminDto) {
-    return `This action updates a #${id} admin`;
+  updateAdminEmail(id: string, updateEmailDto: UpdateAdminEmailDto) {
+    return `This action updates user password a #${id, updateEmailDto}`;
   }
 
-  remove(id: number) {
+  logoutAdmin(refreshToken: string) {
+    return `This action updates a #${refreshToken} user`;
+  }
+
+  adminRefreshToken(refreshToken: string) {
+    return `This action updates a #${refreshToken} admin`;
+  }
+
+  adminForgotPassword(email: string) {
+    return `This action updates a #${email} admin`;
+  }
+
+  adminResetPassword(resetPasswordDto: ResetPasswordDto) {
+    return `This action updates a #${resetPasswordDto} admin`;
+  }
+
+  remove(id: string) {
     return `This action removes a #${id} admin`;
   }
 }

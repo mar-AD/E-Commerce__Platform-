@@ -1,26 +1,48 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  CreateUserDto,
+  LoginDto,
+  ResetPasswordDto,
+  UpdateUserEmailDto,
+  UpdateUserPasswordDto,
+} from '@app/common';
 
 @Injectable()
 export class UsersService {
+
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
   }
 
-  findAll() {
-    return `This action returns all users`;
+  login(loginRequest: LoginDto) {
+    return `This action logs in users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  updateUserPass(id: string, updatePasswordDto: UpdateUserPasswordDto) {
+    return `This action updates user password a #${id, updatePasswordDto}`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  updateUserEmail(id: string, updateEmailDto: UpdateUserEmailDto) {
+    return `This action updates user password a #${id, updateEmailDto}`;
   }
 
-  remove(id: number) {
+  logoutUser(refreshToken: string) {
+    return `This action updates a #${refreshToken} user`;
+  }
+
+  userRefreshToken(refreshToken: string) {
+    return `This action updates a #${refreshToken} user`;
+  }
+
+  userForgotPassword(email: string) {
+    return `This action updates a #${email} user`;
+  }
+
+  userResetPassword(resetPasswordDto: ResetPasswordDto) {
+    return `This action updates a #${resetPasswordDto} user`;
+  }
+
+  remove(id: string) {
     return `This action removes a #${id} user`;
   }
 }

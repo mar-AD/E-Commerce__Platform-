@@ -30,7 +30,7 @@ export class AdminsController implements AdminServiceController{
   }
 
   logoutAdmin(logoutDto: LogoutDto) {
-    return this.adminsService.logoutAdmin(logoutDto);
+    return this.adminsService.logoutAdmin(logoutDto.refreshToken);
   }
 
   adminRefreshToken(refreshTokenDto: RefreshTokenDto) {
