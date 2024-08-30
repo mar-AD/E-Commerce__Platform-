@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /build
+/db/auth-data
 
 # Logs
 logs

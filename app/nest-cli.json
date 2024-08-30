@@ -5,7 +5,7 @@
   "entryFile": "src/main",
   "compilerOptions": {
     "deleteOutDir": true,
-    "webpack": true,
+    "webpack": false,
     "tsConfigPath": "apps/apigateway/tsconfig.app.json"
   },
   "monorepo": true,

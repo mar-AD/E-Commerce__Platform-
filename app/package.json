@@ -6,7 +6,6 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -17,7 +16,16 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/apigateway/test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/apigateway/test/jest-e2e.json",
+    "build:apigateway": "nest build apigateway",
+    "build:auth": "nest build auth",
+    "build:users": "nest build users",
+    "build": "npm run build:apigateway && npm run build:auth",
+
+    "typeorm:auth": "npx typeorm -d ./dist/apps/auth/db/data-source.js",
+    "generate:migration:auth": "npm run typeorm:auth -- migration:generate apps/auth/src/db/migrations/initAuth",
+    "run:migration:auth": "npm run typeorm:auth -- migration:run",
+    "revert:migration:auth": "npm run typeorm:auth -- migration:revert"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.11.1",

@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateCol
 import { Permissions } from '@app/common';
 
 @Entity('roles')
-export class Role {
+export class RoleEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
