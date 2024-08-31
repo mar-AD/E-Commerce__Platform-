@@ -19,7 +19,6 @@
     "test:e2e": "jest --config ./apps/apigateway/test/jest-e2e.json",
     "build:apigateway": "nest build apigateway",
     "build:auth": "nest build auth",
-    "build:users": "nest build users",
     "build": "npm run build:apigateway && npm run build:auth",
 
     "typeorm:auth": "npx typeorm -d ./dist/apps/auth/db/data-source.js",
