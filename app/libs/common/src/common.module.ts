@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { CommonService } from './common.service';
+import { CommonService } from '@app/common/common.service';
+
 
 @Module({
   providers: [CommonService],
