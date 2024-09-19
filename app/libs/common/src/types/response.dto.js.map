@@ -1,0 +1,1 @@
+{"version":3,"file":"response.dto.js","sourceRoot":"","sources":["response.dto.ts"],"names":[],"mappings":";;;AAAA,MAAa,WAAW;IAKtB,YACE,OAAU,EACV,MAAc,EACd,OAAe;QAEf,IAAI,CAAC,OAAO,GAAG,OAAO,CAAC;QACvB,IAAI,CAAC,MAAM,GAAG,MAAM,CAAC;QACrB,IAAI,CAAC,OAAO,GAAG,OAAO,CAAC;IACzB,CAAC;CACF;AAdD,kCAcC"}

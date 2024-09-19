@@ -1,9 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, JoinColumn } from 'typeorm';
-import { User } from '../users/entities/user.entity';
-import { Admin } from '../admins/entities/admin.entity';
+import { UserEntity } from '../users/entities/user.entity';
+import { AdminEntity } from '../admins/entities/admin.entity';
 
 @Entity('refreshToken')
-export class RefreshToken {
+export class RefreshTokenEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -16,11 +16,11 @@ export class RefreshToken {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => UserEntity, { nullable: true })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 
-  @ManyToOne(() => Admin, { nullable: true })
+  @ManyToOne(() => AdminEntity, { nullable: true })
   @JoinColumn({ name: 'admin_id' })
-  admin: Admin;
+  admin: AdminEntity;
 }

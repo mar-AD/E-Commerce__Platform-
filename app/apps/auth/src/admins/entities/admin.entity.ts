@@ -6,16 +6,16 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from '../../roles/entities/role.entity';
+import { RoleEntity } from '../../roles/entities/role.entity';
 
 @Entity('admin')
-export class Admin {
+export class AdminEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Role)
+  @ManyToOne(() => RoleEntity)
   @JoinColumn({ name: 'user_id' })
-  role: Role;
+  role: RoleEntity;
 
   @Column()
   email: string;
