@@ -7,8 +7,8 @@ import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
-  url: process.env.POSTGRES_SERVICE_URI,
+  url: process.env.POSTGRES_AUTH_URI,
   entities: [AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity],
-  migrations: ['dist/apps/auth/src/db/migrations/*.js'],
+  migrations: ['src/db/migrations/*.ts'],
 }
 export const dataSource = new DataSource(dataSourceOptions);
