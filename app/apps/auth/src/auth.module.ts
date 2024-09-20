@@ -27,6 +27,7 @@ import { dataSourceOptions } from './db/data-source';
       // }),
       useFactory:() =>({
         ...dataSourceOptions,
+        synchronize: false,
         autoLoadEntities: true
       }),
       inject: [ConfigService],
