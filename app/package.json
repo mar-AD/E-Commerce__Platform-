@@ -20,10 +20,10 @@
     "build:apigateway": "nest build apigateway",
     "build:auth": "nest build auth",
     "build": "npm run build:apigateway && npm run build:auth",
-    "typeorm:auth": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --dataSource ./apps/auth/src/db/data-source.ts",
-    "generate:migration:auth": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate --dataSource ./apps/auth/src/db/data-source.ts ./apps/auth/src/db/migrations/initAuth",
-    "run:migration:auth": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run --dataSource ./apps/auth/src/db/data-source.ts",
-    "revert:migration:auth": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert --dataSource ./apps/auth/src/db/data-source.ts"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "generate:migration:auth": "npm run typeorm -- migration:generate ./apps/auth/src/db/migrations/initAuth -d ./apps/auth/src/db/data-source.ts",
+    "run:migration:auth": "npm run typeorm -- migration:run -d ./apps/auth/src/db/data-source.ts",
+    "revert:migration:auth": "npm run typeorm -- migration:revert -d ./apps/auth/src/db/data-source.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.11.1",

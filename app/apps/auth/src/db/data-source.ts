@@ -32,7 +32,6 @@ export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   url: url,
   entities: [AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity],
-    migrations: ['./apps/auth/src/db/migrations/*.ts'],
-  logging: true
+  migrations: ['./apps/auth/src/db/migrations/*.ts'],
 }
 export const dataSource = new DataSource(dataSourceOptions);

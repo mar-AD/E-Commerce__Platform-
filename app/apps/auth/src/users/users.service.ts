@@ -6,9 +6,16 @@ import {
   UpdateUserEmailDto,
   UpdateUserPasswordDto,
 } from '@app/common';
+import { Repository } from 'typeorm';
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
+
+  constructor(
+    private userRepository: Repository<UserEntity>,
+  ) {
+  }
 
   // create(createUserDto: CreateUserDto) {
   //   return 'This action adds a new user';

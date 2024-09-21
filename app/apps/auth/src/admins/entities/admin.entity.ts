@@ -14,7 +14,7 @@ export class AdminEntity {
   id: string;
 
   @ManyToOne(() => RoleEntity)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'role_id' })
   role: RoleEntity;
 
   @Column()
