@@ -19,6 +19,7 @@ import { AUTH_SERVICE } from './constants';
       options: {
         package: AUTH_PACKAGE_NAME,
         protoPath: join(__dirname, '../auth.proto'),
+        url: 'auth:50051',
       },
       },
     ]),

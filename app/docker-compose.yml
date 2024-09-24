@@ -23,7 +23,7 @@ services:
     depends_on:
       - auth-db
     ports:
-      - '50051:50051'
+      - '50052:50051'
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

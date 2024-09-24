@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
-  CreateUserDto, ForgotPasswordDto,
+  ForgotPasswordDto,
   LoginDto,
   LogoutDto,
   RefreshTokenDto, ResetPasswordDto,
@@ -9,10 +9,11 @@ import {
   UpdateUserPasswordDto,
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateUserDto } from '../../../../auth/src/users/dto/create-user.dto';
 
 
 @ApiTags('AuthUsers')
-@Controller('auth/user')
+@Controller('auth')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -26,12 +27,12 @@ export class UserController {
     return this.userService.login(loginRequest);
   }
 
-  @Patch('userPupdate/:id')
+  @Patch('userPassUpdate/:id')
   updateUserPassword(@Param('id') id: string, @Body() updatePasswordDto: UpdateUserPasswordDto) {
     return this.userService.updatePassword(id, updatePasswordDto);
   }
 
-  @Patch('userEupdate/:id')
+  @Patch('userEmailUpdate/:id')
   updateUserEmail(@Param('id') id: string, @Body() updateEmailDto: UpdateUserEmailDto) {
     return this.userService.updateEmail(id, updateEmailDto);
   }

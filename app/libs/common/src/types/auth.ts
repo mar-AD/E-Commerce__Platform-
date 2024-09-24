@@ -7,7 +7,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
-import { Timestamp } from 'google/protobuf/timestamp';
+import { Timestamp } from "google/protobuf/timestamp";
 
 export const protobufPackage = "auth";
 
@@ -109,7 +109,6 @@ export interface UpdateRoleDto {
 export interface User {
   id: string;
   email: string;
-  password: string;
   isActive: boolean;
   isDeleted: boolean;
   isEmailVerified: boolean;
@@ -122,7 +121,6 @@ export interface Admin {
   id: string;
   roleId: Role | undefined;
   email: string;
-  password: string;
   isActive: boolean;
   isDeleted: boolean;
   isEmailVerified: boolean;

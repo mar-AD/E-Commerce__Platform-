@@ -19,17 +19,17 @@ import { dataSourceOptions } from './db/data-source';
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      // useFactory: (configService: ConfigService) => ({
-      //   type: 'postgres',
-      //   url: configService.get('POSTGRES_AUTH_URI'),
-      //   // autoLoadEntities: true,
-      //   // synchronize: true,
-      // }),
-      useFactory:() =>({
-        ...dataSourceOptions,
-        synchronize: false,
-        autoLoadEntities: true
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url: configService.get('POSTGRES_AUTH_URI'),
+        autoLoadEntities: true,
+        synchronize: true,
       }),
+      // useFactory:() =>({
+      //   ...dataSourceOptions,
+      //   synchronize: false,
+      //   autoLoadEntities: true
+      // }),
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity]),
