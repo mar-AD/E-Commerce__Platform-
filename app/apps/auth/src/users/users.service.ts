@@ -32,6 +32,7 @@ export class UsersService {
             message: `User with email: ${email} already exists.`,
           });
         }
+
         return hashPassword(password).pipe(
           switchMap((hashedPass)=>{
             createUserDto.password = hashedPass;
@@ -39,10 +40,10 @@ export class UsersService {
             const newUser = this.userRepository.create(createUserDto)
             return from(this.userRepository.save(newUser)).pipe(
               map((createdUser) => this.mapUserResponse(createdUser)),
-              catchError((error) => {
+              catchError(() => {
                 throw new BadRequestException({
-                  status: error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-                  message: error.response || messages.USER.FAILED_TO_CREATE_USER,
+                  status: HttpStatus.INTERNAL_SERVER_ERROR,
+                  message: messages.USER.FAILED_TO_CREATE_USER,
                 });
               })
             )

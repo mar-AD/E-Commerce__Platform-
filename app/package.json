@@ -23,7 +23,10 @@
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "generate:migration:auth": "npm run typeorm -- migration:generate ./apps/auth/src/db/migrations/initAuth -d ./apps/auth/src/db/data-source.ts",
     "run:migration:auth": "npm run typeorm -- migration:run -d ./apps/auth/src/db/data-source.ts",
-    "revert:migration:auth": "npm run typeorm -- migration:revert -d ./apps/auth/src/db/data-source.ts"
+    "revert:migration:auth": "npm run typeorm -- migration:revert -d ./apps/auth/src/db/data-source.ts",
+    "test:auth": "jest --testPathPattern=apps/auth/src/users/users.service.spec.ts",
+    "test:api-gateway": "jest --testPathPattern=apps/api-gateway",
+    "test:unit": "jest --runInBand"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.11.1",
