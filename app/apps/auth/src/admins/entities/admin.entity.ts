@@ -15,7 +15,7 @@ export class AdminEntity {
 
   @ManyToOne(() => RoleEntity)
   @JoinColumn({ name: 'role_id' })
-  role: RoleEntity;
+  roleId: RoleEntity;
 
   @Column()
   email: string;
@@ -25,6 +25,9 @@ export class AdminEntity {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ default: false })
+  isDeleted: boolean;
 
   @Column({ default: false })
   isEmailVerified: boolean;
