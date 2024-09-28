@@ -8,33 +8,49 @@ import { AdminEntity } from './admins/entities/admin.entity';
 import { RoleEntity } from './roles/entities/role.entity';
 import { UserEntity } from './users/entities/user.entity';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
-import { dataSourceOptions } from './db/data-source';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { CommonModule, JwtStrategy } from '@app/common';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './apps/auth/.env'
+      envFilePath: [
+        './apps/auth/.env',
+        './.env'
+      ]
+    }),
+
+    CommonModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+      }),
+
+      inject: [ConfigService],
     }),
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      // useFactory: (configService: ConfigService) => ({
-      //   type: 'postgres',
-      //   url: configService.get('POSTGRES_AUTH_URI'),
-      //   // autoLoadEntities: true,
-      //   // synchronize: true,
-      // }),
-      useFactory:() =>({
-        ...dataSourceOptions,
-        autoLoadEntities: true
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url: configService.get('POSTGRES_AUTH_URI'),
+        autoLoadEntities: true,
+        synchronize: true,
       }),
+      // useFactory:() =>({
+      //   ...dataSourceOptions,
+      //   synchronize: false,
+      //   autoLoadEntities: true
+      // }),
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity]),
     UsersModule, AdminsModule, RolesModule
   ],
   controllers: [],
-  providers: [],
+  providers: [JwtStrategy],
 })
 export class AuthModule {}

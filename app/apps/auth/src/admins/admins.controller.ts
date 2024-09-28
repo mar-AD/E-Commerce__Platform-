@@ -2,24 +2,26 @@ import { Controller } from '@nestjs/common';
 import { AdminsService } from './admins.service';
 import {
   AdminServiceController,
-  AdminServiceControllerMethods, CreateAdminDto, FindOneDto, ForgotPasswordDto,
+  AdminServiceControllerMethods, FindOneDto, ForgotPasswordDto,
   LoginDto, LogoutDto, RefreshTokenDto, ResetPasswordDto,
   UpdateAdminEmailDto,
   UpdateAdminPasswordDto,
 } from '@app/common';
+import { CreateAdminDto } from './dto/create-admin.dto';
+import { LoginAdminDto } from './dto/login-admin.dto';
 
 @Controller()
 @AdminServiceControllerMethods()
-export class AdminsController /*implements AdminServiceController*/{
+export class AdminsController implements AdminServiceController{
   constructor(private readonly adminsService: AdminsService) {}
 
-  // createAdmin(createAdminDto: CreateAdminDto) {
-  //   return this.adminsService.create(createAdminDto);
-  // }
-  //
-  // adminLogin( loginDto : LoginDto) {
-  //   return this.adminsService.adminLogin(loginDto)
-  // }
+  createAdmin(createAdminDto: CreateAdminDto) {
+    return this.adminsService.create(createAdminDto);
+  }
+
+  adminLogin( loginDto : LoginAdminDto) {
+    return this.adminsService.adminLogin(loginDto)
+  }
   //
   // updateAdminEmail(updateAdminEmailDto: UpdateAdminEmailDto) {
   //   return this.adminsService.updateAdminEmail(updateAdminEmailDto.id, updateAdminEmailDto);

@@ -7,7 +7,7 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
-import { Timestamp } from 'google/protobuf/timestamp';
+import { Timestamp } from "google/protobuf/timestamp";
 
 export const protobufPackage = "auth";
 
@@ -76,7 +76,12 @@ export interface RefreshTokenDto {
 export interface CreateAdminDto {
   email: string;
   password: string;
-  roleId: Role | undefined;
+  role: string;
+}
+
+export interface UpdateAdminRoleDto {
+  id: string;
+  role: string;
 }
 
 export interface UpdateAdminEmailDto {
@@ -109,7 +114,6 @@ export interface UpdateRoleDto {
 export interface User {
   id: string;
   email: string;
-  password: string;
   isActive: boolean;
   isDeleted: boolean;
   isEmailVerified: boolean;
@@ -120,9 +124,8 @@ export interface User {
 /** admin response */
 export interface Admin {
   id: string;
-  roleId: Role | undefined;
+  roleId: string;
   email: string;
-  password: string;
   isActive: boolean;
   isDeleted: boolean;
   isEmailVerified: boolean;
@@ -145,6 +148,7 @@ export interface RefreshToken {
   userId: User | undefined;
   adminId: Admin | undefined;
   token: string;
+  revoked: boolean;
   expiresAt: Timestamp | undefined;
   createdAt: Timestamp | undefined;
 }
@@ -229,6 +233,8 @@ export interface AdminServiceClient {
 
   adminLogin(request: LoginDto): Observable<AuthResponse>;
 
+  updateAdminRole(request: UpdateAdminRoleDto): Observable<Admin>;
+
   updateAdminEmail(request: UpdateAdminEmailDto): Observable<Admin>;
 
   updateAdminPassword(request: UpdateAdminPasswordDto): Observable<Admin>;
@@ -251,6 +257,8 @@ export interface AdminServiceController {
 
   adminLogin(request: LoginDto): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
+  updateAdminRole(request: UpdateAdminRoleDto): Promise<Admin> | Observable<Admin> | Admin;
+
   updateAdminEmail(request: UpdateAdminEmailDto): Promise<Admin> | Observable<Admin> | Admin;
 
   updateAdminPassword(request: UpdateAdminPasswordDto): Promise<Admin> | Observable<Admin> | Admin;
@@ -271,6 +279,7 @@ export function AdminServiceControllerMethods() {
     const grpcMethods: string[] = [
       "createAdmin",
       "adminLogin",
+      "updateAdminRole",
       "updateAdminEmail",
       "updateAdminPassword",
       "logoutAdmin",

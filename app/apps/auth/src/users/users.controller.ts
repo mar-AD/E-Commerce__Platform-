@@ -1,22 +1,24 @@
 import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
-  CreateUserDto, FindOneDto, ForgotPasswordDto,
+  FindOneDto, ForgotPasswordDto,
   LoginDto, LogoutDto, RefreshTokenDto, ResetPasswordDto, UpdateUserEmailDto,
-  UpdateUserPasswordDto,
+  UpdateUserPasswordDto, User,
   UserServiceController,
   UserServiceControllerMethods,
 } from '@app/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { Observable } from 'rxjs';
 
 @Controller()
 @UserServiceControllerMethods()
-export class UsersController /*implements UserServiceController*/{
+export class UsersController implements UserServiceController{
   constructor(private readonly usersService: UsersService) {}
 
-  // createUser(createUserDto: CreateUserDto) {
-  //   return this.usersService.create(createUserDto);
-  // }
-  //
+  createUser(createUserDto: CreateUserDto): Observable<User> {
+    return this.usersService.create(createUserDto);
+  }
+
   // userLogin(loginRequest: LoginDto) {
   //   return this.usersService.login(loginRequest);
   // }

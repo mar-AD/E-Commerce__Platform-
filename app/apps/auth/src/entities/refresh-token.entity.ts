@@ -23,4 +23,7 @@ export class RefreshTokenEntity {
   @ManyToOne(() => AdminEntity, { nullable: true })
   @JoinColumn({ name: 'admin_id' })
   admin: AdminEntity;
+
+  @Column({default: false})
+  revoked: boolean
 }
