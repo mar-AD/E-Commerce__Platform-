@@ -1,25 +1,29 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import {
-  Admin, dateToTimestamp,
-  hashPassword,
-  LoginDto,
+  Admin, AuthResponse, dateToTimestamp,
+  hashPassword, JwtTokenService,
   messages,
   ResetPasswordDto, Role,
   UpdateAdminEmailDto,
-  UpdateAdminPasswordDto,
+  UpdateAdminPasswordDto, verifyPassword,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AdminEntity } from './entities/admin.entity';
 import { Repository } from 'typeorm';
 import { RoleEntity } from '../roles/entities/role.entity';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { catchError, from, map, Observable, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import { RefreshTokenEntity } from '../entities/refresh-token.entity';
+import { LoginAdminDto } from './dto/login-admin.dto';
+import { AuthConstants } from '../constants';
 
 @Injectable()
 export class AdminsService {
   constructor(
     @InjectRepository(AdminEntity) private readonly adminRepository: Repository<AdminEntity>,
     @InjectRepository(RoleEntity) private readonly roleRepository: Repository<RoleEntity>,
+    @InjectRepository(RefreshTokenEntity) private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
+    private readonly jwtTokenService: JwtTokenService
   ) {
   }
   create(createAdminDto: CreateAdminDto): Observable<Admin> {
@@ -64,8 +68,38 @@ export class AdminsService {
     )
   }
 
-  adminLogin(loginRequest: LoginDto) {
-    return `This action logs in users`;
+  adminLogin(loginRequest: LoginAdminDto): Observable<AuthResponse> {
+    const {email, password} = loginRequest;
+    return from(this.adminRepository.findOne({where: {email: email}})).pipe(
+      switchMap((thisAdmin) => {
+        if(!thisAdmin){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.ADMIN.INVALID_CREDENTIALS
+          })
+        }
+        return verifyPassword(password, thisAdmin.password).pipe(
+          switchMap((isMatch)=>{
+            if (!isMatch) {
+              throw new BadRequestException({
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: messages.PASSWORD.INVALID_PASSWORD,
+              });
+            }
+            const payload = {id: thisAdmin.id, type: AuthConstants.admin}
+            const accessToken = this.jwtTokenService.generateAccessToken(payload)
+            const refreshToken = this.jwtTokenService.generateRefreshToken(payload)
+            return of(
+              {
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+              },
+
+            );
+          })
+        )
+      })
+    )
   }
   //
   // updateAdminPassword(id: string, updatePasswordDto: UpdateAdminPasswordDto) {
