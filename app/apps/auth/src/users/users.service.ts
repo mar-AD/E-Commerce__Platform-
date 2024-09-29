@@ -1,17 +1,20 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
-  dateToTimestamp, hashPassword,
+  AuthResponse,
+  dateToTimestamp, hashPassword, JwtTokenService,
   LoginDto, messages,
   ResetPasswordDto,
   UpdateUserEmailDto,
-  UpdateUserPasswordDto, User,
+  UpdateUserPasswordDto, User, verifyPassword,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { catchError, from, map, Observable, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { ResponseDto } from '@app/common/types/response.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { AuthConstants } from '../constants';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +22,7 @@ export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private readonly jwtTokenService: JwtTokenService,
   ) {
   }
 
@@ -53,9 +57,36 @@ export class UsersService {
     )
   }
 
-  // login(loginRequest: LoginDto) {
-  //   return `This action logs in users`;
-  // }
+  login(loginRequest: LoginUserDto): Observable<AuthResponse> {
+    const {email, password} = loginRequest
+    return from(this.userRepository.findOne({where:{email: email}})).pipe(
+      switchMap((thisUser) =>{
+        if(!thisUser){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.USER.INVALID_CREDENTIALS
+          })
+        }
+
+        return verifyPassword(password, thisUser.password).pipe(
+          switchMap((isMatch)=>{
+            if(!isMatch){
+              throw new BadRequestException({
+                status: HttpStatus.BAD_REQUEST,
+                message: messages.PASSWORD.INVALID_PASSWORD
+              })
+            }
+            const accessToken = this.jwtTokenService.generateAccessToken({id: thisUser.id, type: AuthConstants.user})
+            const refreshToken = this.jwtTokenService.generateRefreshToken(({id: thisUser.id, type: AuthConstants.user}))
+            return of({
+              accessToken : accessToken,
+              refreshToken : refreshToken,
+            })
+          })
+        )
+    })
+    )
+  }
   //
   // updateUserPass(id: string, updatePasswordDto: UpdateUserPasswordDto) {
   //   return `This action updates user password a #${id, updatePasswordDto}`;
