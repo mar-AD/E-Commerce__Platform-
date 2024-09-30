@@ -3,7 +3,7 @@ import { AdminsService } from './admins.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AdminEntity } from './entities/admin.entity';
 import { Repository } from 'typeorm';
-import { CreateAdminDto } from '@app/common';
+import { CreateAdminDto, Permissions } from '@app/common';
 import { RoleEntity } from '../roles/entities/role.entity';
 
 describe('AdminsService', () => {
@@ -60,5 +60,13 @@ describe('AdminsService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       }
+
+    const mockRoleEntity: RoleEntity = {
+      id: '1h75g34',
+      name: 'false',
+      permissions: [Permissions.MANAGE_ROLES, Permissions.MANAGE_ORDERS],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
   })
 });
