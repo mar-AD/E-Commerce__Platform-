@@ -1,11 +1,11 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import {
-  Admin, AuthResponse, dateToTimestamp,
+  Admin, AuthResponse, dateToTimestamp, getExpiryDate,
   hashPassword, JwtTokenService,
   messages,
   ResetPasswordDto, Role,
   UpdateAdminEmailDto,
-  UpdateAdminPasswordDto, verifyPassword,
+  verifyPassword,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AdminEntity } from './entities/admin.entity';
@@ -16,6 +16,7 @@ import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { LoginAdminDto } from './dto/login-admin.dto';
 import { AuthConstants } from '../constants';
+import { UpdateAdminPasswordDto } from './dto/update-admin-password.dto';
 
 @Injectable()
 export class AdminsService {
@@ -86,26 +87,84 @@ export class AdminsService {
                 message: messages.PASSWORD.INVALID_PASSWORD,
               });
             }
-            const payload = {id: thisAdmin.id, type: AuthConstants.admin}
+            const payload = {
+              id: thisAdmin.id,
+              type: AuthConstants.admin
+            }
             const accessToken = this.jwtTokenService.generateAccessToken(payload)
             const refreshToken = this.jwtTokenService.generateRefreshToken(payload)
-            return of(
-              {
-                accessToken: accessToken,
-                refreshToken: refreshToken,
-              },
-
-            );
+            const saveRefToken = {
+              token: refreshToken,
+              expiresAt: getExpiryDate(15),
+              admin_id: thisAdmin.id
+            }
+            return from(this.refreshTokenRepository.save(saveRefToken)).pipe(
+              switchMap((refToken) => {
+                if(!refToken){
+                  throw new BadRequestException({
+                    status: HttpStatus.BAD_REQUEST,
+                    message: 'Failed to save refresh token'
+                  })
+                }
+                return of(
+                  {
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                  },
+                );
+              })
+            )
           })
         )
       })
     )
   }
-  //
-  // updateAdminPassword(id: string, updatePasswordDto: UpdateAdminPasswordDto) {
-  //   return `This action updates user password a #${updatePasswordDto}`;
-  // }
-  //
+
+  updateAdminPassword(id: string, updatePasswordDto: UpdateAdminPasswordDto):Observable<Admin> {
+    const { password, newPassword, confirmPassword } = updatePasswordDto;
+    return from(this.adminRepository.findOne({where: {id: id}})).pipe(
+      switchMap((thisAdmin) =>{
+        if(!thisAdmin){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.ADMIN.FAILED_TO_FETCH_ADMIN_FOR_UPDATE
+          })
+        }
+        return verifyPassword(password, thisAdmin.password).pipe(
+          switchMap((isMatch)=>{
+            if (!isMatch) {
+              throw new BadRequestException({
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: messages.PASSWORD.INVALID_PASSWORD,
+              });
+            }
+            if(newPassword !== confirmPassword){
+              throw new BadRequestException({
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: 'confirmPassword doesnt match newPassword',
+              });
+            }
+            return hashPassword(newPassword).pipe(
+              switchMap((hashedPassword)=>{
+                thisAdmin.password = hashedPassword
+
+                return from(this.adminRepository.save(thisAdmin)).pipe(
+                  map((updatedAdmin)=> this.mapAdminResponse(updatedAdmin)),
+                  catchError(()=>{
+                    throw new BadRequestException({
+                      status: HttpStatus.INTERNAL_SERVER_ERROR,
+                      message: messages.ADMIN.FAILED_TO_UPDATE_ADMIN
+                    })
+                  })
+                )
+              })
+            )
+          })
+        )
+      })
+    )
+  }
+
   // updateAdminEmail(id: string, updateEmailDto: UpdateAdminEmailDto) {
   //   return `This action updates user password a #${updateEmailDto}`;
   // }

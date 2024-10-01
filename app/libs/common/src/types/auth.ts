@@ -46,6 +46,15 @@ export interface ForgotPasswordDto {
 export interface ResetPasswordDto {
   token: string;
   newPassword: string;
+  confirmPassword: string;
+}
+
+export interface RequestEmailUpdateDto {
+  email: string;
+}
+
+export interface VerifyEmailCodeDto {
+  verificationCode: string;
 }
 
 /** user DTOs */
@@ -55,13 +64,14 @@ export interface CreateUserDto {
 }
 
 export interface UpdateUserEmailDto {
-  id: string;
   email: string;
 }
 
 export interface UpdateUserPasswordDto {
   id: string;
   password: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 export interface LogoutDto {
@@ -85,13 +95,13 @@ export interface UpdateAdminRoleDto {
 }
 
 export interface UpdateAdminEmailDto {
-  id: string;
   email: string;
 }
 
 export interface UpdateAdminPasswordDto {
-  id: string;
   password: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 /** role Dto */
@@ -164,6 +174,10 @@ export interface UserServiceClient {
 
   updateUserPassword(request: UpdateUserPasswordDto): Observable<User>;
 
+  requestUpdateUserEmail(request: RequestEmailUpdateDto): Observable<Empty>;
+
+  verifyEmailCode(request: VerifyEmailCodeDto): Observable<Empty>;
+
   updateUserEmail(request: UpdateUserEmailDto): Observable<User>;
 
   logoutUser(request: LogoutDto): Observable<Empty>;
@@ -186,6 +200,10 @@ export interface UserServiceController {
 
   updateUserPassword(request: UpdateUserPasswordDto): Promise<User> | Observable<User> | User;
 
+  requestUpdateUserEmail(request: RequestEmailUpdateDto): Promise<Empty> | Observable<Empty> | Empty;
+
+  verifyEmailCode (request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
+
   updateUserEmail(request: UpdateUserEmailDto): Promise<User> | Observable<User> | User;
 
   logoutUser(request: LogoutDto): Promise<Empty> | Observable<Empty> | Empty;
@@ -205,6 +223,8 @@ export function UserServiceControllerMethods() {
       "createUser",
       "userLogin",
       "updateUserPassword",
+      "requestUpdateUserEmail",
+      "verifyEmailCode",
       "updateUserEmail",
       "logoutUser",
       "userRefreshToken",
@@ -235,6 +255,10 @@ export interface AdminServiceClient {
 
   updateAdminRole(request: UpdateAdminRoleDto): Observable<Admin>;
 
+  requestUpdateAdminEmail(request: RequestEmailUpdateDto): Observable<Empty>;
+
+  verifyEmailCode(request: VerifyEmailCodeDto): Observable<Empty>;
+
   updateAdminEmail(request: UpdateAdminEmailDto): Observable<Admin>;
 
   updateAdminPassword(request: UpdateAdminPasswordDto): Observable<Admin>;
@@ -259,6 +283,10 @@ export interface AdminServiceController {
 
   updateAdminRole(request: UpdateAdminRoleDto): Promise<Admin> | Observable<Admin> | Admin;
 
+  requestUpdateAdminEmail(request: RequestEmailUpdateDto): Promise<Empty> | Observable<Empty> | Empty;
+
+  verifyEmailCode(request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
+
   updateAdminEmail(request: UpdateAdminEmailDto): Promise<Admin> | Observable<Admin> | Admin;
 
   updateAdminPassword(request: UpdateAdminPasswordDto): Promise<Admin> | Observable<Admin> | Admin;
@@ -280,6 +308,8 @@ export function AdminServiceControllerMethods() {
       "createAdmin",
       "adminLogin",
       "updateAdminRole",
+      "requestUpdateAdminEmail",
+      "verifyEmailCode",
       "updateAdminEmail",
       "updateAdminPassword",
       "logoutAdmin",

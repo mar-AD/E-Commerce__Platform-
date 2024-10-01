@@ -1,7 +1,7 @@
 import { BadRequestException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   AuthResponse,
-  dateToTimestamp, hashPassword, JwtTokenService,
+  dateToTimestamp, getExpiryDate, hashPassword, JwtTokenService,
   LoginDto, messages,
   ResetPasswordDto,
   UpdateUserEmailDto,
@@ -15,13 +15,14 @@ import { ResponseDto } from '@app/common/types/response.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { AuthConstants } from '../constants';
+import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 
 @Injectable()
 export class UsersService {
 
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(RefreshTokenEntity) private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     private readonly jwtTokenService: JwtTokenService,
   ) {
   }
@@ -76,15 +77,34 @@ export class UsersService {
                 message: messages.PASSWORD.INVALID_PASSWORD
               })
             }
-            const accessToken = this.jwtTokenService.generateAccessToken({id: thisUser.id, type: AuthConstants.user})
-            const refreshToken = this.jwtTokenService.generateRefreshToken(({id: thisUser.id, type: AuthConstants.user}))
-            return of({
-              accessToken : accessToken,
-              refreshToken : refreshToken,
-            })
+            const payload = {
+              id: thisUser.id,
+              type: AuthConstants.user
+            }
+            const accessToken = this.jwtTokenService.generateAccessToken(payload)
+            const refreshToken = this.jwtTokenService.generateRefreshToken((payload))
+            const saveRefToken = {
+              token: refreshToken,
+              expiresAt: getExpiryDate(15),
+              user_id: thisUser.id
+            }
+            return from(this.refreshTokenRepository.save(saveRefToken)).pipe(
+              switchMap((refToken)=>{
+                if(!refToken){
+                  throw new BadRequestException({
+                    status: HttpStatus.BAD_REQUEST,
+                    message: 'Failed to save refresh token'
+                  })
+                }
+                return of({
+                  accessToken : accessToken,
+                  refreshToken : refreshToken,
+                })
+              })
+            )
           })
         )
-    })
+      })
     )
   }
   //

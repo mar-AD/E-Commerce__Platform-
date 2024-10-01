@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Req } from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
@@ -9,6 +9,7 @@ import {
   UpdateAdminPasswordDto,
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 
 @ApiTags('AuthAdmins')
 @Controller('auth')
@@ -26,12 +27,14 @@ export class AdminController {
   }
 
   @Patch('adminPupdate/:id')
-  updateAdminPassword(@Param('id') id: string, @Body() updatePasswordDto: UpdateAdminPasswordDto) {
+  updateAdminPassword(@Req() req: Request, @Body() updatePasswordDto: UpdateAdminPasswordDto) {
+    const {id} = req['payload']
     return this.adminService.updatePassword(id, updatePasswordDto);
   }
 
   @Patch('adminEupdate/:id')
-  updateAdminEmail(@Param('id') id: string, @Body() updateEmailDto: UpdateAdminEmailDto) {
+  updateAdminEmail(@Req() req: Request, @Body() updateEmailDto: UpdateAdminEmailDto) {
+    const {id} = req['payload']
     return this.adminService.updateEmail(id, updateEmailDto);
   }
 
@@ -56,7 +59,8 @@ export class AdminController {
   }
 
   @Delete('admin/:id')
-  remove(@Param('id') id: string) {
+  remove(@Req() req: Request) {
+    const {id} = req['payload']
     return this.adminService.remove(id);
   }
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
   ForgotPasswordDto,
@@ -10,6 +10,7 @@ import {
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from '../../../../auth/src/users/dto/create-user.dto';
+import { Request } from 'express';
 
 
 @ApiTags('AuthUsers')
@@ -28,12 +29,14 @@ export class UserController {
   }
 
   @Patch('userPassUpdate/:id')
-  updateUserPassword(@Param('id') id: string, @Body() updatePasswordDto: UpdateUserPasswordDto) {
+  updateUserPassword(@Req() req: Request, @Body() updatePasswordDto: UpdateUserPasswordDto) {
+    const {id} = req['payload']
     return this.userService.updatePassword(id, updatePasswordDto);
   }
 
   @Patch('userEmailUpdate/:id')
-  updateUserEmail(@Param('id') id: string, @Body() updateEmailDto: UpdateUserEmailDto) {
+  updateUserEmail(@Req() req: Request, @Body() updateEmailDto: UpdateUserEmailDto) {
+    const {id} = req['payload']
     return this.userService.updateEmail(id, updateEmailDto);
   }
 
@@ -58,7 +61,8 @@ export class UserController {
   }
 
   @Delete('user/:id')
-  remove(@Param('id') id: string) {
+  remove(@Req() req: Request) {
+    const {id} = req['payload']
     return this.userService.remove(id);
   }
 }

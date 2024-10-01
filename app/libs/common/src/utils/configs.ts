@@ -2,7 +2,6 @@ import * as bcrypt from 'bcrypt'
 import { catchError, from, Observable, switchMap } from 'rxjs';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { messages } from '@app/common/utils/messages';
-import { JwtService, JwtSignOptions } from "@nestjs/jwt";
 
 //this for hashing password
 export const hashPassword = (password: string):Observable<string> => {
@@ -23,5 +22,12 @@ export const hashPassword = (password: string):Observable<string> => {
 //compare password
 export const verifyPassword = (password: string, currentPass: string):Observable<boolean> => {
   return from(bcrypt.compare(password, currentPass))
+}
+
+//get the refreshToken expiration date
+export const getExpiryDate = (days: number): Date =>{
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+  return date
 }
 
