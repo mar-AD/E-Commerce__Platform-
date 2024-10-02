@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, ValidationPipe } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
   ForgotPasswordDto,
@@ -19,44 +19,44 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
-  createUser(@Body() createUserDto: CreateUserDto) {
+  createUser(@Body(ValidationPipe) createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 
   @Post('user/login')
-  userLogin(@Body() loginRequest: LoginDto) {
+  userLogin(@Body(ValidationPipe) loginRequest: LoginDto) {
     return this.userService.login(loginRequest);
   }
 
-  @Patch('userPassUpdate/:id')
-  updateUserPassword(@Req() req: Request, @Body() updatePasswordDto: UpdateUserPasswordDto) {
-    const {id} = req['payload']
-    return this.userService.updatePassword(id, updatePasswordDto);
+  @Patch('userPassUpdate')
+  updateUserPassword(@Req() req: Request, @Body(ValidationPipe) updatePasswordDto: UpdateUserPasswordDto) {
+    updatePasswordDto.id = req['payload'].id
+    return this.userService.updatePassword(updatePasswordDto);
   }
 
-  @Patch('userEmailUpdate/:id')
-  updateUserEmail(@Req() req: Request, @Body() updateEmailDto: UpdateUserEmailDto) {
-    const {id} = req['payload']
-    return this.userService.updateEmail(id, updateEmailDto);
+  @Patch('userEmailUpdate')
+  updateUserEmail(@Req() req: Request, @Body(ValidationPipe) updateEmailDto: UpdateUserEmailDto) {
+    updateEmailDto.id = req['payload'].id
+    return this.userService.updateEmail(updateEmailDto);
   }
 
   @Post('user/logout')
-  logoutUser(@Body() logoutDto: LogoutDto) {
+  logoutUser(@Body(ValidationPipe) logoutDto: LogoutDto) {
     return this.userService.logout(logoutDto);
   }
 
   @Post('user/refresh-token')
-  userRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+  userRefreshToken(@Body(ValidationPipe) refreshTokenDto: RefreshTokenDto) {
     return this.userService.refreshToken(refreshTokenDto);
   }
 
   @Post('user/forgot-password')
-  userForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
+  userForgotPassword(@Body(ValidationPipe) forgotPassDto: ForgotPasswordDto) {
     return this.userService.forgotPassword(forgotPassDto);
   }
 
   @Post('user/reset-password')
-  userResetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+  userResetPassword(@Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
     return this.userService.resetPassword(resetPasswordDto);
   }
 

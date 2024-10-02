@@ -1,32 +1,33 @@
 import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
+  AuthResponse,
   FindOneDto, ForgotPasswordDto,
   LogoutDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto, UpdateUserEmailDto,
-  UpdateUserPasswordDto, User,
+  User,
   UserServiceController,
   UserServiceControllerMethods, VerifyEmailCodeDto,
 } from '@app/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Observable } from 'rxjs';
 import { LoginUserDto } from './dto/login-user.dto';
+import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
 
 @Controller()
 @UserServiceControllerMethods()
 export class UsersController implements UserServiceController{
   constructor(private readonly usersService: UsersService) {}
 
-  createUser(createUserDto: CreateUserDto): Observable<User> {
+  createUser(createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
-  userLogin(loginRequest: LoginUserDto) {
+  userLogin(loginRequest: LoginUserDto){
     return this.usersService.login(loginRequest);
   }
-  //
-  // updateUserPassword(updatePasswordDto: UpdateUserPasswordDto) {
-  //   return this.usersService.updateUserPass(updatePasswordDto.id, updatePasswordDto);
-  // }
+
+  updateUserPassword(updatePasswordDto: UpdateUserPasswordDto) {
+    return this.usersService.updateUserPass(updatePasswordDto);
+  }
 
   // requestUpdateUserEmail (requestUpdateUserEmail: RequestEmailUpdateDto){
   //   return this.usersService.requestUpdateEmail(requestUpdateUserEmail)

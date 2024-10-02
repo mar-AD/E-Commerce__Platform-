@@ -24,6 +24,10 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.adminLogin(loginDto)
   }
 
+  updateAdminPassword(updateAdminPassDto: UpdateAdminPasswordDto) {
+    return this.adminsService.updateAdminPassword(updateAdminPassDto);
+  }
+
   // requestUpdateAdminEmail (requestUpdateAdminEmail: RequestEmailUpdateDto){
   //   return this.adminsService.requestUpdateEmail(requestUpdateAdminEmail)
   // }
@@ -35,11 +39,6 @@ export class AdminsController implements AdminServiceController{
   // updateAdminEmail(updateAdminEmailDto: UpdateAdminEmailDto) {
   //   return this.adminsService.updateAdminEmail(updateAdminEmailDto.id, updateAdminEmailDto);
   // }
-
-  updateAdminPassword(id: string, updateAdminPassDto: UpdateAdminPasswordDto) {
-    return this.adminsService.updateAdminPassword(id ,updateAdminPassDto);
-  }
-
   // logoutAdmin(logoutDto: LogoutDto) {
   //   return this.adminsService.logoutAdmin(logoutDto.refreshToken);
   // }

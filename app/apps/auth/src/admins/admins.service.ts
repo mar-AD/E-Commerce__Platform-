@@ -120,9 +120,9 @@ export class AdminsService {
     )
   }
 
-  updateAdminPassword(id: string, updatePasswordDto: UpdateAdminPasswordDto):Observable<Admin> {
+  updateAdminPassword(updatePasswordDto: UpdateAdminPasswordDto):Observable<Admin> {
     const { password, newPassword, confirmPassword } = updatePasswordDto;
-    return from(this.adminRepository.findOne({where: {id: id}})).pipe(
+    return from(this.adminRepository.findOne({where: {id: updatePasswordDto.id}})).pipe(
       switchMap((thisAdmin) =>{
         if(!thisAdmin){
           throw new BadRequestException({
@@ -141,7 +141,7 @@ export class AdminsService {
             if(newPassword !== confirmPassword){
               throw new BadRequestException({
                 status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: 'confirmPassword doesnt match newPassword',
+                message: messages.PASSWORD.PASSWORDS_DO_NOT_MATCH,
               });
             }
             return hashPassword(newPassword).pipe(
@@ -153,7 +153,7 @@ export class AdminsService {
                   catchError(()=>{
                     throw new BadRequestException({
                       status: HttpStatus.INTERNAL_SERVER_ERROR,
-                      message: messages.ADMIN.FAILED_TO_UPDATE_ADMIN
+                      message: messages.PASSWORD.FAILED_TO_UPDATE_PASSWORD
                     })
                   })
                 )
@@ -198,7 +198,8 @@ export class AdminsService {
       isDeleted: admin.isDeleted,
       isEmailVerified: admin.isEmailVerified,
       createdAt: dateToTimestamp(admin.createdAt),
-      updatedAt: dateToTimestamp(admin.updatedAt)
+      updatedAt: dateToTimestamp(admin.updatedAt),
+      deletedAt: dateToTimestamp(admin.deletedAt),
     }
   }
 }

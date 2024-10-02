@@ -29,12 +29,12 @@ export class UserService implements OnModuleInit {
     return this.userService.userLogin(loginRequest);
   }
 
-  updatePassword(id: string, updatePasswordDto: UpdateUserPasswordDto) {
-    return this.userService.updateUserPassword({id, ...updatePasswordDto});
+  updatePassword(updatePasswordDto: UpdateUserPasswordDto) {
+    return this.userService.updateUserPassword(updatePasswordDto);
   }
 
-  updateEmail(id: string, updateEmailDto: UpdateUserEmailDto) {
-    return this.userService.updateUserEmail({id, ...updateEmailDto});
+  updateEmail(updateEmailDto: UpdateUserEmailDto) {
+    return this.userService.updateUserEmail(updateEmailDto);
   }
 
   logout(logoutDto: LogoutDto){

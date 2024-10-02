@@ -25,12 +25,12 @@ export class AdminService implements OnModuleInit{
     return this.adminService.adminLogin(loginRequest);
   }
 
-  updatePassword(id: string, updatePasswordDto: UpdateAdminPasswordDto) {
-    return this.adminService.updateAdminPassword({id, ...updatePasswordDto});
+  updatePassword(updatePasswordDto: UpdateAdminPasswordDto) {
+    return this.adminService.updateAdminPassword(updatePasswordDto);
   }
 
-  updateEmail(id: string, updateEmailDto: UpdateAdminEmailDto) {
-    return this.adminService.updateAdminEmail({id, ...updateEmailDto});
+  updateEmail(updateEmailDto: UpdateAdminEmailDto) {
+    return this.adminService.updateAdminEmail(updateEmailDto);
   }
 
   logout(logoutDto: LogoutDto){

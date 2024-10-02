@@ -5,7 +5,7 @@ import {
   LoginDto, messages,
   ResetPasswordDto,
   UpdateUserEmailDto,
-  UpdateUserPasswordDto, User, verifyPassword,
+  User, verifyPassword,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
@@ -16,6 +16,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
+import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -108,9 +109,50 @@ export class UsersService {
     )
   }
   //
-  // updateUserPass(id: string, updatePasswordDto: UpdateUserPasswordDto) {
-  //   return `This action updates user password a #${id, updatePasswordDto}`;
-  // }
+  updateUserPass(updatePasswordDto: UpdateUserPasswordDto):Observable<User> {
+    const {password, newPassword, confirmPassword} = updatePasswordDto
+    return from(this.userRepository.findOne({where:{id: updatePasswordDto.id}})).pipe(
+      switchMap((thisUser)=>{
+        if (!thisUser){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.USER.FAILED_TO_FETCH_USER_FOR_UPDATE
+          })
+        }
+        return verifyPassword(password, thisUser.password).pipe(
+          switchMap((isMatch)=>{
+            if (!isMatch){
+              throw new BadRequestException({
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: messages.PASSWORD.INVALID_PASSWORD
+              })
+            }
+            if (newPassword !== confirmPassword){
+              throw new BadRequestException({
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: 'New password and confirm password do not match.'
+              })
+            }
+            return hashPassword(newPassword).pipe(
+              switchMap((hashedPass)=> {
+                thisUser.password = hashedPass
+
+                return from(this.userRepository.save(thisUser)).pipe(
+                  map((updatedUser) => this.mapUserResponse(updatedUser)),
+                  catchError(() => {
+                    throw new BadRequestException({
+                      status: HttpStatus.INTERNAL_SERVER_ERROR,
+                      message: messages.USER.FAILED_TO_UPDATE_USER
+                    })
+                  })
+                )
+              })
+            )
+          })
+        )
+      })
+    )
+  }
   //
   // updateUserEmail(id: string, updateEmailDto: UpdateUserEmailDto) {
   //   return `This action updates user password a #${id, updateEmailDto}`;
@@ -144,7 +186,8 @@ export class UsersService {
       isEmailVerified: user.isEmailVerified,
       isDeleted: user.isDeleted,
       createdAt: dateToTimestamp(user.createdAt),
-      updatedAt: dateToTimestamp(user.updatedAt)
+      updatedAt: dateToTimestamp(user.updatedAt),
+      deletedAt: dateToTimestamp(user.deletedAt)
     }
   }
 }

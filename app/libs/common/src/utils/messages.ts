@@ -40,17 +40,12 @@ export const messages = {
     FAILED_SET_PASSWORD: "Failed to set admin password",
   },
   PASSWORD: {
-    PASSWORDS_DO_NOT_MATCH: "Passwords do not match",
+    PASSWORDS_DO_NOT_MATCH: "New password and confirm password do not match.",
     FAILED_TO_HASH_PASSWORD: "Failed to hash password",
     INVALID_PASSWORD: "Invalid password",
-    FAILED_TO_UPDATE_Password: "Failed to update password",
+    FAILED_TO_UPDATE_PASSWORD: "Failed to update password",
     PASSWORD_UPDATE_SUCCESSFULLY: "password updated successfully",
     PASSWORD_FIELD_COMPARISON: "password field comparison",
-    NEW_PASSWORD_REQUIRED: "New password is required for password update",
-    CURRENT_PASSWORD_REQUIRED:
-      "Current password is required for password update",
-    NEW_PASS_AND_CURRENT_PASS_NOT_THE_SAME:
-      "The new password must be different from the current password",
   },
   EMAIL: {
     FAILED_TO_SEND_EMAIL: "Failed to send email",

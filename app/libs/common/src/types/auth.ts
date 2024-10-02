@@ -57,6 +57,14 @@ export interface VerifyEmailCodeDto {
   verificationCode: string;
 }
 
+export interface LogoutDto {
+  refreshToken: string;
+}
+
+export interface RefreshTokenDto {
+  refreshToken: string;
+}
+
 /** user DTOs */
 export interface CreateUserDto {
   email: string;
@@ -64,6 +72,7 @@ export interface CreateUserDto {
 }
 
 export interface UpdateUserEmailDto {
+  id: string;
   email: string;
 }
 
@@ -72,14 +81,6 @@ export interface UpdateUserPasswordDto {
   password: string;
   newPassword: string;
   confirmPassword: string;
-}
-
-export interface LogoutDto {
-  refreshToken: string;
-}
-
-export interface RefreshTokenDto {
-  refreshToken: string;
 }
 
 /** admin DTOs */
@@ -95,10 +96,12 @@ export interface UpdateAdminRoleDto {
 }
 
 export interface UpdateAdminEmailDto {
+  id: string;
   email: string;
 }
 
 export interface UpdateAdminPasswordDto {
+  id: string;
   password: string;
   newPassword: string;
   confirmPassword: string;
@@ -129,6 +132,7 @@ export interface User {
   isEmailVerified: boolean;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
+  deletedAt: Timestamp | undefined;
 }
 
 /** admin response */
@@ -141,6 +145,7 @@ export interface Admin {
   isEmailVerified: boolean;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
+  deletedAt: Timestamp | undefined;
 }
 
 /** role response */
@@ -155,10 +160,20 @@ export interface Role {
 /** refreshToken response */
 export interface RefreshToken {
   id: string;
-  userId: User | undefined;
-  adminId: Admin | undefined;
+  userId: string;
+  adminId: string;
   token: string;
   revoked: boolean;
+  expiresAt: Timestamp | undefined;
+  createdAt: Timestamp | undefined;
+}
+
+/** EmailVerificationCode response */
+export interface EmailVerificationCode {
+  id: string;
+  adminId: string;
+  userId: string;
+  code: string;
   expiresAt: Timestamp | undefined;
   createdAt: Timestamp | undefined;
 }
@@ -202,7 +217,7 @@ export interface UserServiceController {
 
   requestUpdateUserEmail(request: RequestEmailUpdateDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  verifyEmailCode (request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
+  verifyEmailCode(request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
 
   updateUserEmail(request: UpdateUserEmailDto): Promise<User> | Observable<User> | User;
 

@@ -64,7 +64,7 @@ message ForgotPasswordDto {
   string email = 1;
 }
 
-message  ResetPasswordDto {
+message ResetPasswordDto {
   string token = 1;
   string newPassword = 2;
   string confirmPassword = 3;
@@ -78,6 +78,15 @@ message VerifyEmailCodeDto {
   string verificationCode = 1;
 }
 
+
+message LogoutDto {
+  string refreshToken = 1;
+}
+
+message RefreshTokenDto {
+  string refreshToken = 1;
+}
+
 //user DTOs
 message CreateUserDto {
   string email = 1;
@@ -85,7 +94,8 @@ message CreateUserDto {
 }
 
 message UpdateUserEmailDto {
-  string email = 1;
+  string id = 1;
+  string email = 2;
 }
 
 message UpdateUserPasswordDto {
@@ -95,13 +105,7 @@ message UpdateUserPasswordDto {
   string confirmPassword = 4;
 }
 
-message LogoutDto {
-  string refreshToken = 1;
-}
 
-message RefreshTokenDto {
-  string refreshToken = 1;
-}
 //admin DTOs
 message CreateAdminDto {
   string email = 1;
@@ -115,14 +119,17 @@ message UpdateAdminRoleDto {
 }
 
 message UpdateAdminEmailDto {
-  string email = 1;
+  string id = 1;
+  string email = 2;
 }
 
 message UpdateAdminPasswordDto {
+  string id = 1;
   string password = 2;
   string newPassword = 3;
   string confirmPassword = 4;
 }
+
 //role Dto
 message RolesResponse {
   repeated Role roles = 1;
@@ -147,6 +154,7 @@ message User {
   bool isEmailVerified = 5;
   google.protobuf.Timestamp createdAt = 6;
   google.protobuf.Timestamp updatedAt = 7;
+  google.protobuf.Timestamp deletedAt = 8;
 }
 
 // admin response
@@ -159,6 +167,7 @@ message Admin {
   bool isEmailVerified = 6;
   google.protobuf.Timestamp createdAt = 7;
   google.protobuf.Timestamp updatedAt = 8;
+  google.protobuf.Timestamp deletedAt = 9;
 }
 
 // role response
@@ -182,10 +191,20 @@ enum Permissions {
 //refreshToken response
 message RefreshToken {
   string id = 1;
-  User userId = 2;
-  Admin adminId = 3;
+  string userId = 2;
+  string adminId = 3;
   string token = 4;
   bool revoked = 5;
   google.protobuf.Timestamp expiresAt = 6;
   google.protobuf.Timestamp createdAt = 7;
+}
+
+//EmailVerificationCode response
+message EmailVerificationCode {
+  string id = 1;
+  string adminId = 2;
+  string userId = 3;
+  string code = 4;
+  google.protobuf.Timestamp expiresAt = 5;
+  google.protobuf.Timestamp createdAt = 6;
 }

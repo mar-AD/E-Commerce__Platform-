@@ -1,6 +1,6 @@
 import {
   Column,
-  CreateDateColumn,
+  CreateDateColumn, DeleteDateColumn,
   Entity, JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -37,4 +37,7 @@ export class AdminEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
