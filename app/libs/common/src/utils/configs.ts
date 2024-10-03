@@ -24,10 +24,22 @@ export const verifyPassword = (password: string, currentPass: string):Observable
   return from(bcrypt.compare(password, currentPass))
 }
 
-//get the refreshToken expiration date
-export const getExpiryDate = (days: number): Date =>{
+//set the expiration date (refreshToken / email code ...)
+export const getExpiryDate = (days: number = 0, hours: number = 0, minutes:number = 0): Date =>{
   const date = new Date()
-  date.setDate(date.getDate() + days)
+  date.setDate(date.getDate() + days);
+  date.setHours(date.getHours() + hours);
+  date.setMinutes(date.getMinutes() + minutes)
   return date
+}
+
+//generate update email code
+export const generateEmailCode = () => {
+  let code = '';
+  for (let i=0; i <= 6; i++){
+    const randomDigits = Math.floor(Math.random()*10)
+    code += randomDigits
+  }
+  return code;
 }
 

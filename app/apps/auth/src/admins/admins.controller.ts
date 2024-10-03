@@ -28,6 +28,9 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.updateAdminPassword(updateAdminPassDto);
   }
 
+  requestUpdateAdminEmail(requestEmailUpdateDto:RequestEmailUpdateDto){
+    return this.adminsService.RequestUpdateEmail(requestEmailUpdateDto)
+  }
   // requestUpdateAdminEmail (requestUpdateAdminEmail: RequestEmailUpdateDto){
   //   return this.adminsService.requestUpdateEmail(requestUpdateAdminEmail)
   // }

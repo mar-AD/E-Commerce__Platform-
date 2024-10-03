@@ -1,8 +1,8 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import {
-  Admin, AuthResponse, dateToTimestamp, getExpiryDate,
+  Admin, AuthResponse, dateToTimestamp, Empty, generateEmailCode, getExpiryDate,
   hashPassword, JwtTokenService,
-  messages,
+  messages, RequestEmailUpdateDto,
   ResetPasswordDto, Role,
   UpdateAdminEmailDto,
   verifyPassword,
@@ -17,6 +17,7 @@ import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { LoginAdminDto } from './dto/login-admin.dto';
 import { AuthConstants } from '../constants';
 import { UpdateAdminPasswordDto } from './dto/update-admin-password.dto';
+import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 
 @Injectable()
 export class AdminsService {
@@ -24,6 +25,7 @@ export class AdminsService {
     @InjectRepository(AdminEntity) private readonly adminRepository: Repository<AdminEntity>,
     @InjectRepository(RoleEntity) private readonly roleRepository: Repository<RoleEntity>,
     @InjectRepository(RefreshTokenEntity) private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
+    @InjectRepository(EmailVerificationCodeEntity) private readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
     private readonly jwtTokenService: JwtTokenService
   ) {
   }
@@ -160,6 +162,31 @@ export class AdminsService {
               })
             )
           })
+        )
+      })
+    )
+  }
+
+  RequestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto):Observable<Empty>{
+    return from(this.adminRepository.findOne({where:{id: requestEmailUpdateDto.id}})).pipe(
+      switchMap((thisAdmin) =>{
+        if (!thisAdmin){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.ADMIN.NOT_FOUND
+          })
+        }
+        requestEmailUpdateDto.email = thisAdmin.email
+        const code = generateEmailCode()
+        const expiredAt = getExpiryDate(0, 0, 5)
+        return from(this.emailVerificationCodeRepository.save({admin_id: requestEmailUpdateDto.id, code: code, expiresAt: expiredAt})).pipe(
+          map(()=>{ return {} }),
+          catchError((error) =>{
+            throw new BadRequestException({
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: error.message
+          })
+        })
         )
       })
     )

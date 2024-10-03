@@ -10,17 +10,17 @@ export class RefreshTokenEntity {
   @Column()
   token: string;
 
-  @Column()
+  @Column({type: 'timestamp'})
   expiresAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => UserEntity, { nullable: true })
+  @ManyToOne(() => UserEntity, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @ManyToOne(() => AdminEntity, { nullable: true })
+  @ManyToOne(() => AdminEntity, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'admin_id' })
   admin: AdminEntity;
 

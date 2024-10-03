@@ -71,11 +71,13 @@ message ResetPasswordDto {
 }
 
 message RequestEmailUpdateDto {
-  string email = 1;
+  string id = 1;
+  string email = 2;
 }
 
 message VerifyEmailCodeDto {
-  string verificationCode = 1;
+  string id = 1;
+  string verificationCode = 2;
 }
 
 

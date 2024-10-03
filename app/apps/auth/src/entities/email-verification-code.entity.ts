@@ -3,7 +3,7 @@ import { AdminEntity } from '../admins/entities/admin.entity';
 import { UserEntity } from '../users/entities/user.entity';
 
 @Entity('email_verification_codes')
-export class EmailVerificationCode {
+export class EmailVerificationCodeEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

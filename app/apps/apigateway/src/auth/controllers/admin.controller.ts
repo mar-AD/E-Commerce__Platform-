@@ -1,12 +1,12 @@
-import { Body, Controller, Delete, Param, Patch, Post, Req, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, ValidationPipe } from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
   LoginDto,
   LogoutDto,
-  RefreshTokenDto, ResetPasswordDto,
+  RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateAdminEmailDto,
-  UpdateAdminPasswordDto,
+  UpdateAdminPasswordDto, VerifyEmailCodeDto,
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -30,6 +30,18 @@ export class AdminController {
   updateAdminPassword(@Req() req: Request, @Body(ValidationPipe) updatePasswordDto: UpdateAdminPasswordDto) {
     updatePasswordDto.id = req['payload'].id;
     return this.adminService.updatePassword(updatePasswordDto);
+  }
+
+  @Post('admin/requestEmailUpdate')
+  RequestAdminEmailUpdate(@Req() req: Request, @Body() requestAdminEmailUpdate: RequestEmailUpdateDto) {
+    requestAdminEmailUpdate.id = req['payload'].id;
+    return this.adminService.RequestEmailUpdate(requestAdminEmailUpdate)
+  }
+
+  @Get('admin/verifyEmailCode')
+  verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
+    verifyEmailCodeDto.id = req['payload'].id;
+    return this.adminService.verifyEmailCode(verifyEmailCodeDto)
   }
 
   @Patch('adminEmailUpdate')

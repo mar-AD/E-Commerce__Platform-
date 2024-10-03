@@ -50,10 +50,12 @@ export interface ResetPasswordDto {
 }
 
 export interface RequestEmailUpdateDto {
+  id: string;
   email: string;
 }
 
 export interface VerifyEmailCodeDto {
+  id: string;
   verificationCode: string;
 }
 
