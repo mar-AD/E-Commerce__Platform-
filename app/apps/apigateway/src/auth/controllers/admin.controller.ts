@@ -6,7 +6,7 @@ import {
   LogoutDto,
   RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateAdminEmailDto,
-  UpdateAdminPasswordDto, VerifyEmailCodeDto,
+  UpdateAdminPasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -48,6 +48,11 @@ export class AdminController {
   updateAdminEmail(@Req() req: Request, @Body(ValidationPipe) updateEmailDto: UpdateAdminEmailDto) {
     updateEmailDto.id = req['payload'].id;
     return this.adminService.updateEmail(updateEmailDto);
+  }
+
+  @Patch('adminRoleUpdate/:id')
+  UpdateAdminRole(@Param('id') id: string, @Body(ValidationPipe) updateAdminRoleDto: UpdateAdminRoleDto) {
+    return this.adminService.updateRole(id, updateAdminRoleDto );
   }
 
   @Post('admin/logout')

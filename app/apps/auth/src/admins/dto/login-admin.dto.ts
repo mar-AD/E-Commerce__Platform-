@@ -7,7 +7,7 @@ export class LoginAdminDto {
   @IsEmail({}, { message: 'Invalid email address' })
   email: string;
 
-  @ApiProperty({ description: 'password', example: 'password123@' }))
+  @ApiProperty({ description: 'password', example: 'password123@' })
   @IsNotEmpty({ message: 'Password is required' })
   password: string;
 }

@@ -50,6 +50,8 @@ export const messages = {
   EMAIL: {
     FAILED_TO_SEND_EMAIL: "Failed to send email",
     EMAIL_SENT_SUCCESSFULLY: "Email sent successfully",
+    EMAIL_VERIFICATION_CODE_SENT_SUCCESSFULLY: "Email verification code has been successfully generated and sent.",
+    FAILED_TO_UPDATE_EMAIL: "Failed to update email",
   },
   ROLE: {
     FETCH_ALL_ROLES: "Fetch all roles ",

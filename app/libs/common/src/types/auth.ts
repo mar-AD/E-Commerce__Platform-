@@ -21,8 +21,16 @@ export enum Permissions {
   UNRECOGNIZED = -1,
 }
 
-/** common DTOs */
+export interface BaseResponse {
+  status: number;
+  message: string;
+}
+
+export interface None {
+}
+
 export interface Empty {
+  result: BaseResponse | undefined;
 }
 
 export interface LoginDto {
@@ -33,6 +41,7 @@ export interface LoginDto {
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
+  result: BaseResponse | undefined;
 }
 
 export interface FindOneDto {
@@ -112,6 +121,7 @@ export interface UpdateAdminPasswordDto {
 /** role Dto */
 export interface RolesResponse {
   roles: Role[];
+  result: BaseResponse | undefined;
 }
 
 export interface CreateRoleDto {
@@ -354,7 +364,7 @@ export const ADMIN_SERVICE_NAME = "AdminService";
 export interface RoleServiceClient {
   createRole(request: CreateRoleDto): Observable<Role>;
 
-  getAllRoles(request: Empty): Observable<RolesResponse>;
+  getAllRoles(request: None): Observable<RolesResponse>;
 
   getRoleById(request: FindOneDto): Observable<Role>;
 
@@ -368,7 +378,7 @@ export interface RoleServiceClient {
 export interface RoleServiceController {
   createRole(request: CreateRoleDto): Promise<Role> | Observable<Role> | Role;
 
-  getAllRoles(request: Empty): Promise<RolesResponse> | Observable<RolesResponse> | RolesResponse;
+  getAllRoles(request: None): Promise<RolesResponse> | Observable<RolesResponse> | RolesResponse;
 
   getRoleById(request: FindOneDto): Promise<Role> | Observable<Role> | Role;
 

@@ -2,9 +2,8 @@ import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   Admin, AuthResponse, dateToTimestamp, Empty, generateEmailCode, getExpiryDate,
   hashPassword, JwtTokenService,
-  messages, RequestEmailUpdateDto,
+  messages,
   ResetPasswordDto, Role,
-  UpdateAdminEmailDto,
   verifyPassword,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,6 +17,10 @@ import { LoginAdminDto } from './dto/login-admin.dto';
 import { AuthConstants } from '../constants';
 import { UpdateAdminPasswordDto } from './dto/update-admin-password.dto';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
+import { RequestEmailUpdateDto } from './dto/request-email-update.dto';
+import { VerifyEmailCodeDto } from './dto/verify-email-code.dto';
+import { UpdateAdminEmailDto } from './dto/update-admin-email.dto';
+import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
 
 @Injectable()
 export class AdminsService {
@@ -54,6 +57,9 @@ export class AdminsService {
 
                 const newAdmin = this.adminRepository.create(createAdminDto)
                 return from(this.adminRepository.save(newAdmin)).pipe(
+
+                  //SEND WELCOMING EMAIL TO THIS ADMIN -------------------------------------
+
                   map((createdAdmin) => this.mapAdminResponse(createdAdmin)),
                   catchError(() =>{
                     throw new BadRequestException({
@@ -112,6 +118,10 @@ export class AdminsService {
                   {
                     accessToken: accessToken,
                     refreshToken: refreshToken,
+                    result: {
+                      message :messages.ADMIN.ADMIN_LOGIN_SUCCESSFUL,
+                      status: HttpStatus.OK
+                    }
                   },
                 );
               })
@@ -167,7 +177,7 @@ export class AdminsService {
     )
   }
 
-  RequestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto):Observable<Empty>{
+  requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto):Observable<Empty>{
     return from(this.adminRepository.findOne({where:{id: requestEmailUpdateDto.id}})).pipe(
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
@@ -179,22 +189,111 @@ export class AdminsService {
         requestEmailUpdateDto.email = thisAdmin.email
         const code = generateEmailCode()
         const expiredAt = getExpiryDate(0, 0, 5)
-        return from(this.emailVerificationCodeRepository.save({admin_id: requestEmailUpdateDto.id, code: code, expiresAt: expiredAt})).pipe(
-          map(()=>{ return {} }),
+        return from(this.emailVerificationCodeRepository.save({admin: {id: requestEmailUpdateDto.id }, code: code, expiresAt: expiredAt})).pipe(
+
+          // SEND AN EMAIL THAT CONTAINS THIS CODE TO THIS ADMIN -----------------------------------------------
+
+          map(() => {
+            return {
+              result: {
+                message : messages.EMAIL.EMAIL_VERIFICATION_CODE_SENT_SUCCESSFULLY,
+                status: HttpStatus.OK
+              }
+            }
+          }),
           catchError((error) =>{
             throw new BadRequestException({
               status: HttpStatus.INTERNAL_SERVER_ERROR,
               message: error.message
+            })
           })
-        })
         )
       })
     )
   }
 
-  // updateAdminEmail(id: string, updateEmailDto: UpdateAdminEmailDto) {
-  //   return `This action updates user password a #${updateEmailDto}`;
-  // }
+  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto): Observable<Empty>{
+    return from(this.adminRepository.findOne({where: {id: verifyEmailCodeDto.id}})).pipe(
+      switchMap((thisAdmin) =>{
+        if (!thisAdmin){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.ADMIN.NOT_FOUND
+          })
+        }
+        return from(this.emailVerificationCodeRepository.findOne({where: {admin: { id: verifyEmailCodeDto.id }, code: verifyEmailCodeDto.verificationCode}})).pipe(
+          map((verificationCode)=>{
+            if (!verificationCode){
+              throw new BadRequestException({
+                status: HttpStatus.NOT_FOUND,
+                message: 'Verification code not found or invalid.'
+              })
+            }
+            return {
+              result:{
+                status: HttpStatus.OK,
+                message: 'The code was verified successfully'
+              }
+            }
+          }),
+          catchError((error)=>{
+            throw new BadRequestException({
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: error.message
+            })
+          })
+        )
+      })
+    )
+  }
+
+  updateAdminEmail(updateEmailDto: UpdateAdminEmailDto):Observable<Admin> {
+    return from(this.adminRepository.findOne({where: {id: updateEmailDto.id}})).pipe(
+      switchMap((thisAdmin) =>{
+        if (!thisAdmin){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.ADMIN.NOT_FOUND
+          })
+        }
+        thisAdmin.email = updateEmailDto.email
+
+        return from(this.adminRepository.save(thisAdmin)).pipe(
+          map((updatedAdmin) => this.mapAdminResponse(updatedAdmin)),
+          catchError((error)=>{
+            throw new BadRequestException({
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: messages.EMAIL.FAILED_TO_UPDATE_EMAIL
+            })
+          })
+        )
+      })
+    )
+  }
+
+  updateAdminRole(id:string, updateAdminRoleDto: UpdateAdminRoleDto):Observable<Admin>{
+    return from(this.adminRepository.findOne({where: { id }})).pipe(
+      switchMap((thisAdmin) =>{
+        if (!thisAdmin){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.ADMIN.NOT_FOUND
+          })
+        }
+        //4eda ankmlhaa------------------------------
+
+        return from(this.adminRepository.save(thisAdmin)).pipe(
+          map((updatedAdmin) => this.mapAdminResponse(updatedAdmin)),
+          catchError((error)=>{
+            throw new BadRequestException({
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: messages.EMAIL.FAILED_TO_UPDATE_EMAIL
+            })
+          })
+        )
+      })
+    )
+  }
   //
   // logoutAdmin(refreshToken: string) {
   //   return `This action updates a #${refreshToken} user`;

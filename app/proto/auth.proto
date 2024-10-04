@@ -38,13 +38,23 @@ service AdminService {
 //Roles
 service RoleService {
   rpc CreateRole (CreateRoleDto) returns (Role) {}
-  rpc GetAllRoles (Empty) returns (RolesResponse) {}
+  rpc GetAllRoles (None) returns (RolesResponse) {}
   rpc GetRoleById (FindOneDto) returns (Role) {}
   rpc UpdateRole (UpdateRoleDto) returns (Role) {}
   rpc DeleteRole (FindOneDto) returns (Empty) {}
 }
 //common DTOs
-message Empty {}
+
+message BaseResponse {
+  int32 status = 1;
+  string message = 2;
+}
+
+message None {}
+
+message Empty {
+  BaseResponse result = 1;
+}
 
 message LoginDto {
   string email = 1;
@@ -54,6 +64,7 @@ message LoginDto {
 message AuthResponse {
   string accessToken = 1;
   string refreshToken = 2;
+  BaseResponse result = 3;
 }
 
 message FindOneDto {
@@ -135,6 +146,7 @@ message UpdateAdminPasswordDto {
 //role Dto
 message RolesResponse {
   repeated Role roles = 1;
+  BaseResponse result = 2;
 }
 
 message CreateRoleDto {

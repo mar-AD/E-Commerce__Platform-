@@ -10,7 +10,7 @@ import {
   RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateAdminEmailDto,
-  UpdateAdminPasswordDto, VerifyEmailCodeDto,
+  UpdateAdminPasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,
 } from '@app/common';
 import { AUTH_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -46,6 +46,10 @@ export class AdminService implements OnModuleInit{
 
   updateEmail(updateEmailDto: UpdateAdminEmailDto) {
     return this.adminService.updateAdminEmail(updateEmailDto);
+  }
+
+  updateRole(id: string, updateAdminRoleDto: UpdateAdminRoleDto) {
+    return this.adminService.updateAdminRole({id, ...updateAdminRoleDto});
   }
 
   logout(logoutDto: LogoutDto){
