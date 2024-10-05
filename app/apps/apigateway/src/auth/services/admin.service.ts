@@ -1,9 +1,16 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   ADMIN_SERVICE_NAME,
-  AdminServiceClient, CreateAdminDto,
+  AdminServiceClient,
+  CreateAdminDto,
   ForgotPasswordDto,
-  LoginDto, LogoutDto, RefreshTokenDto, ResetPasswordDto, UpdateAdminEmailDto, UpdateAdminPasswordDto,
+  LoginDto,
+  LogoutDto,
+  RefreshTokenDto,
+  RequestEmailUpdateDto,
+  ResetPasswordDto,
+  UpdateAdminEmailDto,
+  UpdateAdminPasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,
 } from '@app/common';
 import { AUTH_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -25,12 +32,24 @@ export class AdminService implements OnModuleInit{
     return this.adminService.adminLogin(loginRequest);
   }
 
-  updatePassword(id: string, updatePasswordDto: UpdateAdminPasswordDto) {
-    return this.adminService.updateAdminPassword({id, ...updatePasswordDto});
+  updatePassword(updatePasswordDto: UpdateAdminPasswordDto) {
+    return this.adminService.updateAdminPassword(updatePasswordDto);
   }
 
-  updateEmail(id: string, updateEmailDto: UpdateAdminEmailDto) {
-    return this.adminService.updateAdminEmail({id, ...updateEmailDto});
+  RequestEmailUpdate(requestEmailUpdateDto:RequestEmailUpdateDto) {
+    return this.adminService.requestUpdateAdminEmail(requestEmailUpdateDto)
+  }
+
+  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto) {
+    return this.adminService.verifyEmailCode(verifyEmailCodeDto)
+  }
+
+  updateEmail(updateEmailDto: UpdateAdminEmailDto) {
+    return this.adminService.updateAdminEmail(updateEmailDto);
+  }
+
+  updateRole(id: string, updateAdminRoleDto: UpdateAdminRoleDto) {
+    return this.adminService.updateAdminRole({id, ...updateAdminRoleDto});
   }
 
   logout(logoutDto: LogoutDto){

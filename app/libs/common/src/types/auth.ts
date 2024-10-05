@@ -21,8 +21,16 @@ export enum Permissions {
   UNRECOGNIZED = -1,
 }
 
-/** common DTOs */
+export interface BaseResponse {
+  status: number;
+  message: string;
+}
+
+export interface None {
+}
+
 export interface Empty {
+  result: BaseResponse | undefined;
 }
 
 export interface LoginDto {
@@ -33,6 +41,7 @@ export interface LoginDto {
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
+  result: BaseResponse | undefined;
 }
 
 export interface FindOneDto {
@@ -46,22 +55,17 @@ export interface ForgotPasswordDto {
 export interface ResetPasswordDto {
   token: string;
   newPassword: string;
+  confirmPassword: string;
 }
 
-/** user DTOs */
-export interface CreateUserDto {
-  email: string;
-  password: string;
-}
-
-export interface UpdateUserEmailDto {
+export interface RequestEmailUpdateDto {
   id: string;
   email: string;
 }
 
-export interface UpdateUserPasswordDto {
+export interface VerifyEmailCodeDto {
   id: string;
-  password: string;
+  verificationCode: string;
 }
 
 export interface LogoutDto {
@@ -70,6 +74,24 @@ export interface LogoutDto {
 
 export interface RefreshTokenDto {
   refreshToken: string;
+}
+
+export interface UpdateEmailDto {
+  id: string;
+  email: string;
+}
+
+export interface UpdatePasswordDto {
+  id: string;
+  password: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+/** user DTOs */
+export interface CreateUserDto {
+  email: string;
+  password: string;
 }
 
 /** admin DTOs */
@@ -84,19 +106,10 @@ export interface UpdateAdminRoleDto {
   role: string;
 }
 
-export interface UpdateAdminEmailDto {
-  id: string;
-  email: string;
-}
-
-export interface UpdateAdminPasswordDto {
-  id: string;
-  password: string;
-}
-
 /** role Dto */
 export interface RolesResponse {
   roles: Role[];
+  result: BaseResponse | undefined;
 }
 
 export interface CreateRoleDto {
@@ -119,6 +132,7 @@ export interface User {
   isEmailVerified: boolean;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
+  deletedAt: Timestamp | undefined;
 }
 
 /** admin response */
@@ -131,6 +145,7 @@ export interface Admin {
   isEmailVerified: boolean;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
+  deletedAt: Timestamp | undefined;
 }
 
 /** role response */
@@ -145,10 +160,20 @@ export interface Role {
 /** refreshToken response */
 export interface RefreshToken {
   id: string;
-  userId: User | undefined;
-  adminId: Admin | undefined;
+  userId: string;
+  adminId: string;
   token: string;
   revoked: boolean;
+  expiresAt: Timestamp | undefined;
+  createdAt: Timestamp | undefined;
+}
+
+/** EmailVerificationCode response */
+export interface EmailVerificationCode {
+  id: string;
+  adminId: string;
+  userId: string;
+  code: string;
   expiresAt: Timestamp | undefined;
   createdAt: Timestamp | undefined;
 }
@@ -162,9 +187,13 @@ export interface UserServiceClient {
 
   userLogin(request: LoginDto): Observable<AuthResponse>;
 
-  updateUserPassword(request: UpdateUserPasswordDto): Observable<User>;
+  updateUserPassword(request: UpdatePasswordDto): Observable<User>;
 
-  updateUserEmail(request: UpdateUserEmailDto): Observable<User>;
+  requestUpdateUserEmail(request: RequestEmailUpdateDto): Observable<Empty>;
+
+  verifyEmailCode(request: VerifyEmailCodeDto): Observable<Empty>;
+
+  updateUserEmail(request: UpdateEmailDto): Observable<User>;
 
   logoutUser(request: LogoutDto): Observable<Empty>;
 
@@ -184,9 +213,13 @@ export interface UserServiceController {
 
   userLogin(request: LoginDto): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
-  updateUserPassword(request: UpdateUserPasswordDto): Promise<User> | Observable<User> | User;
+  updateUserPassword(request: UpdatePasswordDto): Promise<User> | Observable<User> | User;
 
-  updateUserEmail(request: UpdateUserEmailDto): Promise<User> | Observable<User> | User;
+  requestUpdateUserEmail(request: RequestEmailUpdateDto): Promise<Empty> | Observable<Empty> | Empty;
+
+  verifyEmailCode(request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
+
+  updateUserEmail(request: UpdateEmailDto): Promise<User> | Observable<User> | User;
 
   logoutUser(request: LogoutDto): Promise<Empty> | Observable<Empty> | Empty;
 
@@ -205,6 +238,8 @@ export function UserServiceControllerMethods() {
       "createUser",
       "userLogin",
       "updateUserPassword",
+      "requestUpdateUserEmail",
+      "verifyEmailCode",
       "updateUserEmail",
       "logoutUser",
       "userRefreshToken",
@@ -235,9 +270,13 @@ export interface AdminServiceClient {
 
   updateAdminRole(request: UpdateAdminRoleDto): Observable<Admin>;
 
-  updateAdminEmail(request: UpdateAdminEmailDto): Observable<Admin>;
+  requestUpdateAdminEmail(request: RequestEmailUpdateDto): Observable<Empty>;
 
-  updateAdminPassword(request: UpdateAdminPasswordDto): Observable<Admin>;
+  verifyEmailCode(request: VerifyEmailCodeDto): Observable<Empty>;
+
+  updateAdminEmail(request: UpdateEmailDto): Observable<Admin>;
+
+  updateAdminPassword(request: UpdatePasswordDto): Observable<Admin>;
 
   logoutAdmin(request: LogoutDto): Observable<Empty>;
 
@@ -259,9 +298,13 @@ export interface AdminServiceController {
 
   updateAdminRole(request: UpdateAdminRoleDto): Promise<Admin> | Observable<Admin> | Admin;
 
-  updateAdminEmail(request: UpdateAdminEmailDto): Promise<Admin> | Observable<Admin> | Admin;
+  requestUpdateAdminEmail(request: RequestEmailUpdateDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  updateAdminPassword(request: UpdateAdminPasswordDto): Promise<Admin> | Observable<Admin> | Admin;
+  verifyEmailCode(request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
+
+  updateAdminEmail(request: UpdateEmailDto): Promise<Admin> | Observable<Admin> | Admin;
+
+  updateAdminPassword(request: UpdatePasswordDto): Promise<Admin> | Observable<Admin> | Admin;
 
   logoutAdmin(request: LogoutDto): Promise<Empty> | Observable<Empty> | Empty;
 
@@ -280,6 +323,8 @@ export function AdminServiceControllerMethods() {
       "createAdmin",
       "adminLogin",
       "updateAdminRole",
+      "requestUpdateAdminEmail",
+      "verifyEmailCode",
       "updateAdminEmail",
       "updateAdminPassword",
       "logoutAdmin",
@@ -307,7 +352,7 @@ export const ADMIN_SERVICE_NAME = "AdminService";
 export interface RoleServiceClient {
   createRole(request: CreateRoleDto): Observable<Role>;
 
-  getAllRoles(request: Empty): Observable<RolesResponse>;
+  getAllRoles(request: None): Observable<RolesResponse>;
 
   getRoleById(request: FindOneDto): Observable<Role>;
 
@@ -321,7 +366,7 @@ export interface RoleServiceClient {
 export interface RoleServiceController {
   createRole(request: CreateRoleDto): Promise<Role> | Observable<Role> | Role;
 
-  getAllRoles(request: Empty): Promise<RolesResponse> | Observable<RolesResponse> | RolesResponse;
+  getAllRoles(request: None): Promise<RolesResponse> | Observable<RolesResponse> | RolesResponse;
 
   getRoleById(request: FindOneDto): Promise<Role> | Observable<Role> | Role;
 

@@ -8,8 +8,10 @@ import "google/protobuf/timestamp.proto";
 service UserService {
   rpc CreateUser (CreateUserDto) returns (User) {}
   rpc UserLogin (LoginDto) returns (AuthResponse) {}
-  rpc UpdateUserPassword (UpdateUserPasswordDto) returns (User) {}
-  rpc UpdateUserEmail (UpdateUserEmailDto) returns (User) {}
+  rpc UpdateUserPassword (UpdatePasswordDto) returns (User) {}
+  rpc RequestUpdateUserEmail (RequestEmailUpdateDto) returns (Empty) {}
+  rpc VerifyEmailCode (VerifyEmailCodeDto) returns (Empty) {}
+  rpc UpdateUserEmail (UpdateEmailDto) returns (User) {}
   rpc LogoutUser (LogoutDto) returns (Empty) {}
   rpc UserRefreshToken (RefreshTokenDto) returns (AuthResponse) {}
   rpc UserForgotPassword (ForgotPasswordDto) returns (Empty) {}
@@ -22,8 +24,10 @@ service AdminService {
   rpc CreateAdmin (CreateAdminDto) returns (Admin) {}
   rpc AdminLogin (LoginDto) returns (AuthResponse) {}
   rpc UpdateAdminRole (UpdateAdminRoleDto) returns (Admin) {}
-  rpc UpdateAdminEmail (UpdateAdminEmailDto) returns (Admin) {}
-  rpc UpdateAdminPassword (UpdateAdminPasswordDto) returns (Admin) {}
+  rpc RequestUpdateAdminEmail (RequestEmailUpdateDto) returns (Empty) {}
+  rpc VerifyEmailCode (VerifyEmailCodeDto) returns (Empty) {}
+  rpc UpdateAdminEmail (UpdateEmailDto) returns (Admin) {}
+  rpc UpdateAdminPassword (UpdatePasswordDto) returns (Admin) {}
   rpc LogoutAdmin (LogoutDto) returns (Empty) {}
   rpc AdminRefreshToken (RefreshTokenDto) returns (AuthResponse) {}
   rpc AdminForgotPassword (ForgotPasswordDto) returns (Empty) {}
@@ -34,13 +38,23 @@ service AdminService {
 //Roles
 service RoleService {
   rpc CreateRole (CreateRoleDto) returns (Role) {}
-  rpc GetAllRoles (Empty) returns (RolesResponse) {}
+  rpc GetAllRoles (None) returns (RolesResponse) {}
   rpc GetRoleById (FindOneDto) returns (Role) {}
   rpc UpdateRole (UpdateRoleDto) returns (Role) {}
   rpc DeleteRole (FindOneDto) returns (Empty) {}
 }
 //common DTOs
-message Empty {}
+
+message BaseResponse {
+  int32 status = 1;
+  string message = 2;
+}
+
+message None {}
+
+message Empty {
+  BaseResponse result = 1;
+}
 
 message LoginDto {
   string email = 1;
@@ -50,6 +64,7 @@ message LoginDto {
 message AuthResponse {
   string accessToken = 1;
   string refreshToken = 2;
+  BaseResponse result = 3;
 }
 
 message FindOneDto {
@@ -60,26 +75,22 @@ message ForgotPasswordDto {
   string email = 1;
 }
 
-message  ResetPasswordDto {
+message ResetPasswordDto {
   string token = 1;
   string newPassword = 2;
+  string confirmPassword = 3;
 }
 
-//user DTOs
-message CreateUserDto {
-  string email = 1;
-  string password = 2;
-}
-
-message UpdateUserEmailDto {
+message RequestEmailUpdateDto {
   string id = 1;
   string email = 2;
 }
 
-message UpdateUserPasswordDto {
+message VerifyEmailCodeDto {
   string id = 1;
-  string password = 2;
+  string verificationCode = 2;
 }
+
 
 message LogoutDto {
   string refreshToken = 1;
@@ -88,6 +99,27 @@ message LogoutDto {
 message RefreshTokenDto {
   string refreshToken = 1;
 }
+
+
+message UpdateEmailDto {
+  string id = 1;
+  string email = 2;
+}
+
+message UpdatePasswordDto {
+  string id = 1;
+  string password = 2;
+  string newPassword = 3;
+  string confirmPassword = 4;
+}
+
+
+//user DTOs
+message CreateUserDto {
+  string email = 1;
+  string password = 2;
+}
+
 //admin DTOs
 message CreateAdminDto {
   string email = 1;
@@ -100,18 +132,10 @@ message UpdateAdminRoleDto {
   string role =2;
 }
 
-message UpdateAdminEmailDto {
-  string id = 1;
-  string email = 2;
-}
-
-message UpdateAdminPasswordDto {
-  string id = 1;
-  string password = 2;
-}
 //role Dto
 message RolesResponse {
   repeated Role roles = 1;
+  BaseResponse result = 2;
 }
 
 message CreateRoleDto {
@@ -133,6 +157,7 @@ message User {
   bool isEmailVerified = 5;
   google.protobuf.Timestamp createdAt = 6;
   google.protobuf.Timestamp updatedAt = 7;
+  google.protobuf.Timestamp deletedAt = 8;
 }
 
 // admin response
@@ -145,6 +170,7 @@ message Admin {
   bool isEmailVerified = 6;
   google.protobuf.Timestamp createdAt = 7;
   google.protobuf.Timestamp updatedAt = 8;
+  google.protobuf.Timestamp deletedAt = 9;
 }
 
 // role response
@@ -168,10 +194,20 @@ enum Permissions {
 //refreshToken response
 message RefreshToken {
   string id = 1;
-  User userId = 2;
-  Admin adminId = 3;
+  string userId = 2;
+  string adminId = 3;
   string token = 4;
   bool revoked = 5;
   google.protobuf.Timestamp expiresAt = 6;
   google.protobuf.Timestamp createdAt = 7;
+}
+
+//EmailVerificationCode response
+message EmailVerificationCode {
+  string id = 1;
+  string adminId = 2;
+  string userId = 3;
+  string code = 4;
+  google.protobuf.Timestamp expiresAt = 5;
+  google.protobuf.Timestamp createdAt = 6;
 }

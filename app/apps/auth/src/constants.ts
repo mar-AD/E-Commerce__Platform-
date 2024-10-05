@@ -1,3 +1,4 @@
 export const AuthConstants = {
-  admin : 'ADMIN'
+  admin : 'ADMIN',
+  user : 'USER'
 }

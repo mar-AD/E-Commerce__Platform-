@@ -3,12 +3,12 @@ import { AdminsService } from './admins.service';
 import {
   AdminServiceController,
   AdminServiceControllerMethods, FindOneDto, ForgotPasswordDto,
-  LoginDto, LogoutDto, RefreshTokenDto, ResetPasswordDto,
-  UpdateAdminEmailDto,
-  UpdateAdminPasswordDto,
+  LogoutDto, RequestEmailUpdateDto, ResetPasswordDto,
+  VerifyEmailCodeDto,
 } from '@app/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { LoginAdminDto } from './dto/login-admin.dto';
+import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
+import { LoginDto, RefreshTokenDto, UpdateEmailDto, UpdatePasswordDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -19,22 +19,34 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.create(createAdminDto);
   }
 
-  adminLogin( loginDto : LoginAdminDto) {
+  adminLogin( loginDto : LoginDto) {
     return this.adminsService.adminLogin(loginDto)
   }
-  //
-  // updateAdminEmail(updateAdminEmailDto: UpdateAdminEmailDto) {
-  //   return this.adminsService.updateAdminEmail(updateAdminEmailDto.id, updateAdminEmailDto);
-  // }
-  //
-  // updateAdminPassword(updateAdminPassDto: UpdateAdminPasswordDto) {
-  //   return this.adminsService.updateAdminPassword(updateAdminPassDto.id ,updateAdminPassDto);
-  // }
-  //
-  // logoutAdmin(logoutDto: LogoutDto) {
-  //   return this.adminsService.logoutAdmin(logoutDto.refreshToken);
-  // }
-  //
+
+  updateAdminPassword(updateAdminPassDto: UpdatePasswordDto) {
+    return this.adminsService.updateAdminPassword(updateAdminPassDto);
+  }
+
+  requestUpdateAdminEmail(requestEmailUpdateDto:RequestEmailUpdateDto){
+    return this.adminsService.requestUpdateEmail(requestEmailUpdateDto)
+  }
+
+  verifyEmailCode (verifyEmailCodeDto: VerifyEmailCodeDto){
+    return this.adminsService.verifyEmailCode(verifyEmailCodeDto)
+  }
+
+  updateAdminEmail(updateAdminEmailDto: UpdateEmailDto) {
+    return this.adminsService.updateAdminEmail(updateAdminEmailDto);
+  }
+
+  updateAdminRole(updateAdminRoleDto: UpdateAdminRoleDto) {
+    return this.adminsService.updateAdminRole(updateAdminRoleDto.id, updateAdminRoleDto);
+  }
+
+  logoutAdmin(logoutDto: RefreshTokenDto) {
+    return this.adminsService.logoutAdmin(logoutDto);
+  }
+
   // adminRefreshToken(refreshTokenDto: RefreshTokenDto) {
   //   return this.adminsService.adminRefreshToken(refreshTokenDto.refreshToken);
   // }
