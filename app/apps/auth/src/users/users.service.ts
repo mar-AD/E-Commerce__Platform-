@@ -1,18 +1,18 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   AuthResponse,
-  dateToTimestamp, Empty, FindOneDto, generateEmailCode, getExpiryDate, hashPassword, JwtTokenService,
-  messages, RefreshTokenDto,
+  dateToTimestamp, Empty, generateEmailCode, getExpiryDate, hashPassword, JwtTokenService, LogoutDto,
+  messages,
   User, VerifyEmailCode, verifyPassword,
 } from '@app/common';
-import { MoreThan, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
-import { LoginDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
+import { LoginDto, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 
 @Injectable()
@@ -252,44 +252,37 @@ export class UsersService {
     )
   }
 
-  logoutUser(logoutDto: FindOneDto):Observable<Empty> {
-    const {id} = logoutDto
-    return from(this.userRepository.findOne({where: {id: id, isDeleted: false}})).pipe(
-      switchMap((thisAdmin) =>{
-        if (!thisAdmin){
+  logoutUser(logoutDto: RefreshTokenDto):Observable<Empty> {
+    const { refreshToken } = logoutDto
+    const {id} = this.jwtTokenService.decodeToken(refreshToken)
+    return from(this.refreshTokenRepository.findOne({where: {user: { id: id,  isDeleted: false }, token: refreshToken}})).pipe(
+      switchMap((refToken) =>{
+        if (!refToken){
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
-            message: messages.USER.NOT_FOUND
+            message: 'Token is not found or invalid'
           })
         }
-        return from(this.refreshTokenRepository.findOne({where: {admin:{id: thisAdmin.id}, revoked: false, expiresAt:MoreThan(new Date())}, order: {expiresAt: 'DESC'}})).pipe(
-          switchMap((refToken) =>{
-            if (!refToken){
-              throw new BadRequestException({
-                status: HttpStatus.NOT_FOUND,
-                message: 'Token is not found or invalid'
-              })
-            }
+        {
+          refToken.revoked = true;
 
-            refToken.revoked = true;
-            return from(this.refreshTokenRepository.save(refToken)).pipe(
-              map(() => {
-                return {
-                  result: {
-                    status: HttpStatus.OK,
-                    message: 'RefreshToken successfully revoked',
-                  },
-                };
-              }),
-              catchError((error) => {
-                throw new BadRequestException({
-                  status: HttpStatus.INTERNAL_SERVER_ERROR,
-                  message: error.message,
-                });
-              }),
-            );
-          })
-        )
+          return from(this.refreshTokenRepository.save(refToken)).pipe(
+            map(() => {
+              return {
+                result: {
+                  status: HttpStatus.OK,
+                  message: 'RefreshToken successfully revoked',
+                },
+              };
+            }),
+            catchError((error) => {
+              throw new BadRequestException({
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: error.message,
+              });
+            }),
+          );
+        }
       })
     )
   }

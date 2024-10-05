@@ -3,12 +3,12 @@ import { AdminsService } from './admins.service';
 import {
   AdminServiceController,
   AdminServiceControllerMethods, FindOneDto, ForgotPasswordDto,
-  LogoutDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
+  LogoutDto, RequestEmailUpdateDto, ResetPasswordDto,
   VerifyEmailCodeDto,
 } from '@app/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
-import { LoginDto, UpdateEmailDto, UpdatePasswordDto } from '@app/common/dtos';
+import { LoginDto, RefreshTokenDto, UpdateEmailDto, UpdatePasswordDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -43,7 +43,7 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.updateAdminRole(updateAdminRoleDto.id, updateAdminRoleDto);
   }
 
-  logoutAdmin(logoutDto: FindOneDto) {
+  logoutAdmin(logoutDto: RefreshTokenDto) {
     return this.adminsService.logoutAdmin(logoutDto);
   }
 

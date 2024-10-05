@@ -12,7 +12,7 @@ service UserService {
   rpc RequestUpdateUserEmail (RequestEmailUpdateDto) returns (Empty) {}
   rpc VerifyEmailCode (VerifyEmailCodeDto) returns (Empty) {}
   rpc UpdateUserEmail (UpdateEmailDto) returns (User) {}
-  rpc LogoutUser (FindOneDto) returns (Empty) {}
+  rpc LogoutUser (LogoutDto) returns (Empty) {}
   rpc UserRefreshToken (RefreshTokenDto) returns (AuthResponse) {}
   rpc UserForgotPassword (ForgotPasswordDto) returns (Empty) {}
   rpc UserResetPassword (ResetPasswordDto) returns (Empty) {}
@@ -28,7 +28,7 @@ service AdminService {
   rpc VerifyEmailCode (VerifyEmailCodeDto) returns (Empty) {}
   rpc UpdateAdminEmail (UpdateEmailDto) returns (Admin) {}
   rpc UpdateAdminPassword (UpdatePasswordDto) returns (Admin) {}
-  rpc LogoutAdmin (FindOneDto) returns (Empty) {}
+  rpc LogoutAdmin (LogoutDto) returns (Empty) {}
   rpc AdminRefreshToken (RefreshTokenDto) returns (AuthResponse) {}
   rpc AdminForgotPassword (ForgotPasswordDto) returns (Empty) {}
   rpc AdminResetPassword (ResetPasswordDto) returns (Empty) {}
@@ -89,6 +89,11 @@ message RequestEmailUpdateDto {
 message VerifyEmailCodeDto {
   string id = 1;
   string verificationCode = 2;
+}
+
+
+message LogoutDto {
+  string refreshToken = 1;
 }
 
 message RefreshTokenDto {

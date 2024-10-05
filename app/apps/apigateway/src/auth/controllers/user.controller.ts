@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, ValidationPipe } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
-  FindOneDto,
   ForgotPasswordDto,
   LoginDto,
+  LogoutDto,
   RefreshTokenDto, ResetPasswordDto,
   UpdateEmailDto,
   UpdatePasswordDto,
@@ -41,8 +41,7 @@ export class UserController {
   }
 
   @Post('user/logout')
-  logoutUser(@Req() req: Request, @Body(ValidationPipe) logoutDto: FindOneDto) {
-    logoutDto.id = req['payload'].id
+  logoutUser(@Body(ValidationPipe) logoutDto: LogoutDto) {
     return this.userService.logout(logoutDto);
   }
 

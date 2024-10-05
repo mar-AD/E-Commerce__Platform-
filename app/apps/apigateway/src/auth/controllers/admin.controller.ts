@@ -3,9 +3,10 @@ import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
   LoginDto,
+  LogoutDto,
   RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto,
-  UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto, FindOneDto,
+  UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -55,8 +56,7 @@ export class AdminController {
   }
 
   @Post('admin/logout')
-  logoutAdmin(@Req() req: Request, @Body(ValidationPipe) logoutDto: FindOneDto) {
-    logoutDto.id = req['payload'].id
+  logoutAdmin(@Body(ValidationPipe) logoutDto: LogoutDto) {
     return this.adminService.logout(logoutDto);
   }
 

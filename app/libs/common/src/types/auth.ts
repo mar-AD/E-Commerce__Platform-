@@ -68,6 +68,10 @@ export interface VerifyEmailCodeDto {
   verificationCode: string;
 }
 
+export interface LogoutDto {
+  refreshToken: string;
+}
+
 export interface RefreshTokenDto {
   refreshToken: string;
 }
@@ -191,7 +195,7 @@ export interface UserServiceClient {
 
   updateUserEmail(request: UpdateEmailDto): Observable<User>;
 
-  logoutUser(request: FindOneDto): Observable<Empty>;
+  logoutUser(request: LogoutDto): Observable<Empty>;
 
   userRefreshToken(request: RefreshTokenDto): Observable<AuthResponse>;
 
@@ -217,7 +221,7 @@ export interface UserServiceController {
 
   updateUserEmail(request: UpdateEmailDto): Promise<User> | Observable<User> | User;
 
-  logoutUser(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
+  logoutUser(request: LogoutDto): Promise<Empty> | Observable<Empty> | Empty;
 
   userRefreshToken(request: RefreshTokenDto): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
@@ -274,7 +278,7 @@ export interface AdminServiceClient {
 
   updateAdminPassword(request: UpdatePasswordDto): Observable<Admin>;
 
-  logoutAdmin(request: FindOneDto): Observable<Empty>;
+  logoutAdmin(request: LogoutDto): Observable<Empty>;
 
   adminRefreshToken(request: RefreshTokenDto): Observable<AuthResponse>;
 
@@ -302,7 +306,7 @@ export interface AdminServiceController {
 
   updateAdminPassword(request: UpdatePasswordDto): Promise<Admin> | Observable<Admin> | Admin;
 
-  logoutAdmin(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
+  logoutAdmin(request: LogoutDto): Promise<Empty> | Observable<Empty> | Empty;
 
   adminRefreshToken(request: RefreshTokenDto): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
