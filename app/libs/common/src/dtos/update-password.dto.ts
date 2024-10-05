@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Matches } from 'class-validator';
 
-export class UpdateAdminPasswordDto {
+export class UpdatePasswordDto {
   @ApiProperty({
-    description: 'Admin ID, assigned from the request payload'
+    description: 'An ID, assigned from the request payload'
   })
   @IsNotEmpty()
   @IsString()
@@ -11,7 +11,7 @@ export class UpdateAdminPasswordDto {
 
   @ApiProperty({
     example: 'passwordExample',
-    description: 'Current password of the admin.',
+    description: 'Current password.',
   })
   @IsNotEmpty()
   @IsString()
@@ -19,7 +19,7 @@ export class UpdateAdminPasswordDto {
 
   @ApiProperty({
     example: 'passwordExample',
-    description: 'New password of the admin.',
+    description: 'New password.',
   })
   @IsNotEmpty()
   @IsString()
@@ -31,7 +31,7 @@ export class UpdateAdminPasswordDto {
 
   @ApiProperty({
     example: 'passwordExample',
-    description: 'Confirmation of the new password of the admin.',
+    description: 'Confirmation of the new password.',
   })
   @IsNotEmpty()
   @IsString()

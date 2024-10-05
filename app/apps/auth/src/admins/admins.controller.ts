@@ -3,14 +3,12 @@ import { AdminsService } from './admins.service';
 import {
   AdminServiceController,
   AdminServiceControllerMethods, FindOneDto, ForgotPasswordDto,
-  LoginDto, LogoutDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
-  UpdateAdminEmailDto,
+  LogoutDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   VerifyEmailCodeDto,
 } from '@app/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { LoginAdminDto } from './dto/login-admin.dto';
-import { UpdateAdminPasswordDto } from './dto/update-admin-password.dto';
 import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
+import { LoginDto, UpdateEmailDto, UpdatePasswordDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -21,11 +19,11 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.create(createAdminDto);
   }
 
-  adminLogin( loginDto : LoginAdminDto) {
+  adminLogin( loginDto : LoginDto) {
     return this.adminsService.adminLogin(loginDto)
   }
 
-  updateAdminPassword(updateAdminPassDto: UpdateAdminPasswordDto) {
+  updateAdminPassword(updateAdminPassDto: UpdatePasswordDto) {
     return this.adminsService.updateAdminPassword(updateAdminPassDto);
   }
 
@@ -37,7 +35,7 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.verifyEmailCode(verifyEmailCodeDto)
   }
 
-  updateAdminEmail(updateAdminEmailDto: UpdateAdminEmailDto) {
+  updateAdminEmail(updateAdminEmailDto: UpdateEmailDto) {
     return this.adminsService.updateAdminEmail(updateAdminEmailDto);
   }
 
@@ -45,10 +43,10 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.updateAdminRole(updateAdminRoleDto.id, updateAdminRoleDto);
   }
 
-  // logoutAdmin(logoutDto: LogoutDto) {
-  //   return this.adminsService.logoutAdmin(logoutDto.refreshToken);
-  // }
-  //
+  logoutAdmin(logoutDto: FindOneDto) {
+    return this.adminsService.logoutAdmin(logoutDto);
+  }
+
   // adminRefreshToken(refreshTokenDto: RefreshTokenDto) {
   //   return this.adminsService.adminRefreshToken(refreshTokenDto.refreshToken);
   // }

@@ -8,11 +8,11 @@ import "google/protobuf/timestamp.proto";
 service UserService {
   rpc CreateUser (CreateUserDto) returns (User) {}
   rpc UserLogin (LoginDto) returns (AuthResponse) {}
-  rpc UpdateUserPassword (UpdateUserPasswordDto) returns (User) {}
+  rpc UpdateUserPassword (UpdatePasswordDto) returns (User) {}
   rpc RequestUpdateUserEmail (RequestEmailUpdateDto) returns (Empty) {}
   rpc VerifyEmailCode (VerifyEmailCodeDto) returns (Empty) {}
-  rpc UpdateUserEmail (UpdateUserEmailDto) returns (User) {}
-  rpc LogoutUser (LogoutDto) returns (Empty) {}
+  rpc UpdateUserEmail (UpdateEmailDto) returns (User) {}
+  rpc LogoutUser (FindOneDto) returns (Empty) {}
   rpc UserRefreshToken (RefreshTokenDto) returns (AuthResponse) {}
   rpc UserForgotPassword (ForgotPasswordDto) returns (Empty) {}
   rpc UserResetPassword (ResetPasswordDto) returns (Empty) {}
@@ -26,9 +26,9 @@ service AdminService {
   rpc UpdateAdminRole (UpdateAdminRoleDto) returns (Admin) {}
   rpc RequestUpdateAdminEmail (RequestEmailUpdateDto) returns (Empty) {}
   rpc VerifyEmailCode (VerifyEmailCodeDto) returns (Empty) {}
-  rpc UpdateAdminEmail (UpdateAdminEmailDto) returns (Admin) {}
-  rpc UpdateAdminPassword (UpdateAdminPasswordDto) returns (Admin) {}
-  rpc LogoutAdmin (LogoutDto) returns (Empty) {}
+  rpc UpdateAdminEmail (UpdateEmailDto) returns (Admin) {}
+  rpc UpdateAdminPassword (UpdatePasswordDto) returns (Admin) {}
+  rpc LogoutAdmin (FindOneDto) returns (Empty) {}
   rpc AdminRefreshToken (RefreshTokenDto) returns (AuthResponse) {}
   rpc AdminForgotPassword (ForgotPasswordDto) returns (Empty) {}
   rpc AdminResetPassword (ResetPasswordDto) returns (Empty) {}
@@ -91,33 +91,29 @@ message VerifyEmailCodeDto {
   string verificationCode = 2;
 }
 
-
-message LogoutDto {
-  string refreshToken = 1;
-}
-
 message RefreshTokenDto {
   string refreshToken = 1;
 }
 
-//user DTOs
-message CreateUserDto {
-  string email = 1;
-  string password = 2;
-}
 
-message UpdateUserEmailDto {
+message UpdateEmailDto {
   string id = 1;
   string email = 2;
 }
 
-message UpdateUserPasswordDto {
+message UpdatePasswordDto {
   string id = 1;
   string password = 2;
   string newPassword = 3;
   string confirmPassword = 4;
 }
 
+
+//user DTOs
+message CreateUserDto {
+  string email = 1;
+  string password = 2;
+}
 
 //admin DTOs
 message CreateAdminDto {
@@ -129,18 +125,6 @@ message CreateAdminDto {
 message UpdateAdminRoleDto {
   string id = 1;
   string role =2;
-}
-
-message UpdateAdminEmailDto {
-  string id = 1;
-  string email = 2;
-}
-
-message UpdateAdminPasswordDto {
-  string id = 1;
-  string password = 2;
-  string newPassword = 3;
-  string confirmPassword = 4;
 }
 
 //role Dto

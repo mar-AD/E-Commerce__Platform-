@@ -1,16 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
-  AuthResponse,
   FindOneDto, ForgotPasswordDto,
-  LogoutDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto, UpdateUserEmailDto,
-  User,
+  LogoutDto, RefreshTokenDto, RequestEmailUpdateDto,
   UserServiceController,
   UserServiceControllerMethods, VerifyEmailCodeDto,
 } from '@app/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
-import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
+import { LoginDto, UpdateEmailDto, UpdatePasswordDto } from '@app/common/dtos';
 
 @Controller()
 @UserServiceControllerMethods()
@@ -21,30 +18,30 @@ export class UsersController implements UserServiceController{
     return this.usersService.create(createUserDto);
   }
 
-  userLogin(loginRequest: LoginUserDto){
+  userLogin(loginRequest: LoginDto){
     return this.usersService.login(loginRequest);
   }
 
-  updateUserPassword(updatePasswordDto: UpdateUserPasswordDto) {
+  updateUserPassword(updatePasswordDto: UpdatePasswordDto) {
     return this.usersService.updateUserPass(updatePasswordDto);
   }
 
-  // requestUpdateUserEmail (requestUpdateUserEmail: RequestEmailUpdateDto){
-  //   return this.usersService.requestUpdateEmail(requestUpdateUserEmail)
-  // }
-  //
-  // verifyEmailCode (verifyEmailCodeDto: VerifyEmailCodeDto){
-  //   return this.usersService.verifyEmailCode(verifyEmailCodeDto)
-  // }
-  //
-  // updateUserEmail(updateEmailDto: UpdateUserEmailDto) {
-  //   return this.usersService.updateUserEmail(updateEmailDto.id, updateEmailDto);
-  // }
-  //
-  // logoutUser(logoutDto: LogoutDto) {
-  //   return this.usersService.logoutUser(logoutDto.refreshToken);
-  // }
-  //
+  requestUpdateUserEmail (requestUpdateUserEmail: RequestEmailUpdateDto){
+    return this.usersService.requestUpdateEmail(requestUpdateUserEmail)
+  }
+
+  verifyEmailCode (verifyEmailCodeDto: VerifyEmailCodeDto){
+    return this.usersService.verifyEmailCode(verifyEmailCodeDto)
+  }
+
+  updateUserEmail(updateEmailDto: UpdateEmailDto) {
+    return this.usersService.updateUserEmail(updateEmailDto);
+  }
+
+  logoutUser(logoutDto: FindOneDto) {
+    return this.usersService.logoutUser(logoutDto);
+  }
+
   // userRefreshToken(refreshTokenDto: RefreshTokenDto) {
   //   return this.usersService.userRefreshToken(refreshTokenDto.refreshToken);
   // }

@@ -43,3 +43,14 @@ export const generateEmailCode = () => {
   return code;
 }
 
+//verify the email code
+export const VerifyEmailCode = (expired: Date)=>{
+  let currentDate = new Date()
+  if(currentDate > expired){
+    throw new BadRequestException({
+      status: HttpStatus.GONE,
+      message: 'Verification code has expired.',
+    });
+  }
+}
+

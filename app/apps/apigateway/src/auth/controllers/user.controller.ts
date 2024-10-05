@@ -1,12 +1,12 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, ValidationPipe } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
+  FindOneDto,
   ForgotPasswordDto,
   LoginDto,
-  LogoutDto,
   RefreshTokenDto, ResetPasswordDto,
-  UpdateUserEmailDto,
-  UpdateUserPasswordDto,
+  UpdateEmailDto,
+  UpdatePasswordDto,
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from '../../../../auth/src/users/dto/create-user.dto';
@@ -29,19 +29,20 @@ export class UserController {
   }
 
   @Patch('userPassUpdate')
-  updateUserPassword(@Req() req: Request, @Body(ValidationPipe) updatePasswordDto: UpdateUserPasswordDto) {
+  updateUserPassword(@Req() req: Request, @Body(ValidationPipe) updatePasswordDto: UpdatePasswordDto) {
     updatePasswordDto.id = req['payload'].id
     return this.userService.updatePassword(updatePasswordDto);
   }
 
   @Patch('userEmailUpdate')
-  updateUserEmail(@Req() req: Request, @Body(ValidationPipe) updateEmailDto: UpdateUserEmailDto) {
+  updateUserEmail(@Req() req: Request, @Body(ValidationPipe) updateEmailDto: UpdateEmailDto) {
     updateEmailDto.id = req['payload'].id
     return this.userService.updateEmail(updateEmailDto);
   }
 
   @Post('user/logout')
-  logoutUser(@Body(ValidationPipe) logoutDto: LogoutDto) {
+  logoutUser(@Req() req: Request, @Body(ValidationPipe) logoutDto: FindOneDto) {
+    logoutDto.id = req['payload'].id
     return this.userService.logout(logoutDto);
   }
 

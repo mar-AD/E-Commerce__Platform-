@@ -1,22 +1,19 @@
-import { BadRequestException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   AuthResponse,
-  dateToTimestamp, getExpiryDate, hashPassword, JwtTokenService,
-  LoginDto, messages,
-  ResetPasswordDto,
-  UpdateUserEmailDto,
-  User, verifyPassword,
+  dateToTimestamp, Empty, FindOneDto, generateEmailCode, getExpiryDate, hashPassword, JwtTokenService,
+  messages, RefreshTokenDto,
+  User, VerifyEmailCode, verifyPassword,
 } from '@app/common';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
-import { ResponseDto } from '@app/common/types/response.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
-import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
+import { LoginDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
+import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 
 @Injectable()
 export class UsersService {
@@ -24,6 +21,7 @@ export class UsersService {
   constructor(
     @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(RefreshTokenEntity) private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
+    @InjectRepository(EmailVerificationCodeEntity) private readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
     private readonly jwtTokenService: JwtTokenService,
   ) {
   }
@@ -59,9 +57,9 @@ export class UsersService {
     )
   }
 
-  login(loginRequest: LoginUserDto): Observable<AuthResponse> {
+  login(loginRequest: LoginDto): Observable<AuthResponse> {
     const {email, password} = loginRequest
-    return from(this.userRepository.findOne({where:{email: email}})).pipe(
+    return from(this.userRepository.findOne({where:{email: email, isDeleted: false}})).pipe(
       switchMap((thisUser) =>{
         if(!thisUser){
           throw new BadRequestException({
@@ -87,7 +85,7 @@ export class UsersService {
             const saveRefToken = {
               token: refreshToken,
               expiresAt: getExpiryDate(15),
-              user_id: thisUser.id
+              user: thisUser
             }
             return from(this.refreshTokenRepository.save(saveRefToken)).pipe(
               switchMap((refToken)=>{
@@ -100,6 +98,10 @@ export class UsersService {
                 return of({
                   accessToken : accessToken,
                   refreshToken : refreshToken,
+                  result: {
+                    message :messages.USER.USER_LOGIN_SUCCESSFUL,
+                    status: HttpStatus.OK
+                  }
                 })
               })
             )
@@ -109,9 +111,9 @@ export class UsersService {
     )
   }
   //
-  updateUserPass(updatePasswordDto: UpdateUserPasswordDto):Observable<User> {
+  updateUserPass(updatePasswordDto: UpdatePasswordDto):Observable<User> {
     const {password, newPassword, confirmPassword} = updatePasswordDto
-    return from(this.userRepository.findOne({where:{id: updatePasswordDto.id}})).pipe(
+    return from(this.userRepository.findOne({where:{id: updatePasswordDto.id, isDeleted: false}})).pipe(
       switchMap((thisUser)=>{
         if (!thisUser){
           throw new BadRequestException({
@@ -130,7 +132,7 @@ export class UsersService {
             if (newPassword !== confirmPassword){
               throw new BadRequestException({
                 status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: 'New password and confirm password do not match.'
+                message: messages.PASSWORD.PASSWORDS_DO_NOT_MATCH
               })
             }
             return hashPassword(newPassword).pipe(
@@ -153,15 +155,145 @@ export class UsersService {
       })
     )
   }
-  //
-  // updateUserEmail(id: string, updateEmailDto: UpdateUserEmailDto) {
-  //   return `This action updates user password a #${id, updateEmailDto}`;
-  // }
-  //
-  // logoutUser(refreshToken: string) {
-  //   return `This action updates a #${refreshToken} user`;
-  // }
-  //
+
+  requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto):Observable<Empty>{
+    return from(this.userRepository.findOne({where:{id: requestEmailUpdateDto.id, isDeleted: false}})).pipe(
+      switchMap((thisUser) =>{
+        if (!thisUser){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.USER.NOT_FOUND
+          })
+        }
+        requestEmailUpdateDto.email = thisUser.email
+        const code = generateEmailCode()
+        const expiredAt = getExpiryDate(0, 0, 5)
+        return from(this.emailVerificationCodeRepository.save({user: {id: requestEmailUpdateDto.id }, code: code, expiresAt: expiredAt})).pipe(
+
+          // SEND AN EMAIL THAT CONTAINS THIS CODE TO THIS ADMIN -----------------------------------------------
+
+          map(() => {
+            return {
+              result: {
+                message : messages.EMAIL.EMAIL_VERIFICATION_CODE_SENT_SUCCESSFULLY,
+                status: HttpStatus.OK
+              }
+            }
+          }),
+          catchError((error) =>{
+            throw new BadRequestException({
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: error.message
+            })
+          })
+        )
+      })
+    )
+  }
+
+  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto): Observable<Empty>{
+    return from(this.userRepository.findOne({where: {id: verifyEmailCodeDto.id, isDeleted: false}})).pipe(
+      switchMap((thisUser) =>{
+        if (!thisUser){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.USER.NOT_FOUND
+          })
+        }
+        return from(this.emailVerificationCodeRepository.findOne({where: {user: { id: verifyEmailCodeDto.id }, code: verifyEmailCodeDto.verificationCode}})).pipe(
+          map((verificationCode)=>{
+            if (!verificationCode){
+              throw new BadRequestException({
+                status: HttpStatus.NOT_FOUND,
+                message: 'Verification code not found or invalid.'
+              })
+            }
+            VerifyEmailCode(verificationCode.expiresAt);
+
+            return {
+              result:{
+                status: HttpStatus.OK,
+                message: 'The code was verified successfully'
+              }
+            }
+          }),
+          catchError((error)=>{
+            throw new BadRequestException({
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: error.message
+            })
+          })
+        )
+      })
+    )
+  }
+
+  updateUserEmail(updateEmailDto: UpdateEmailDto):Observable<User> {
+    return from(this.userRepository.findOne({where: {id: updateEmailDto.id, isDeleted: false}})).pipe(
+      switchMap((thisUser) =>{
+        if (!thisUser){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.USER.NOT_FOUND
+          })
+        }
+        thisUser.email = updateEmailDto.email
+
+        return from(this.userRepository.save(thisUser)).pipe(
+          map((updatedUser) => this.mapUserResponse(updatedUser)),
+          catchError(()=>{
+            throw new BadRequestException({
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: messages.EMAIL.FAILED_TO_UPDATE_EMAIL
+            })
+          })
+        )
+      })
+    )
+  }
+
+  logoutUser(logoutDto: FindOneDto):Observable<Empty> {
+    const {id} = logoutDto
+    return from(this.userRepository.findOne({where: {id: id, isDeleted: false}})).pipe(
+      switchMap((thisAdmin) =>{
+        if (!thisAdmin){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messages.USER.NOT_FOUND
+          })
+        }
+        return from(this.refreshTokenRepository.findOne({where: {admin:{id: thisAdmin.id}, revoked: false, expiresAt:MoreThan(new Date())}, order: {expiresAt: 'DESC'}})).pipe(
+          switchMap((refToken) =>{
+            if (!refToken){
+              throw new BadRequestException({
+                status: HttpStatus.NOT_FOUND,
+                message: 'Token is not found or invalid'
+              })
+            }
+
+            refToken.revoked = true;
+            return from(this.refreshTokenRepository.save(refToken)).pipe(
+              map(() => {
+                return {
+                  result: {
+                    status: HttpStatus.OK,
+                    message: 'RefreshToken successfully revoked',
+                  },
+                };
+              }),
+              catchError((error) => {
+                throw new BadRequestException({
+                  status: HttpStatus.INTERNAL_SERVER_ERROR,
+                  message: error.message,
+                });
+              }),
+            );
+          })
+        )
+      })
+    )
+  }
+
   // userRefreshToken(refreshToken: string) {
   //   return `This action updates a #${refreshToken} user`;
   // }
