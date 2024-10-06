@@ -47,10 +47,10 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.logoutAdmin(logoutDto);
   }
 
-  // adminRefreshToken(refreshTokenDto: RefreshTokenDto) {
-  //   return this.adminsService.adminRefreshToken(refreshTokenDto.refreshToken);
-  // }
-  //
+  adminRefreshToken(refreshTokenDto: RefreshTokenDto) {
+    return this.adminsService.adminRefreshToken(refreshTokenDto);
+  }
+
   // adminForgotPassword(forgotPassDto: ForgotPasswordDto) {
   //   return this.adminsService.adminForgotPassword(forgotPassDto.email);
   // }

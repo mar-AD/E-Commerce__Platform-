@@ -14,21 +14,23 @@ import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { LoginDto, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
+import { BaseService } from '../auth.service';
 
 @Injectable()
-export class UsersService {
+export class UsersService extends BaseService<UserEntity>{
 
   constructor(
-    @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
-    @InjectRepository(RefreshTokenEntity) private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
-    @InjectRepository(EmailVerificationCodeEntity) private readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
-    private readonly jwtTokenService: JwtTokenService,
+    @InjectRepository(UserEntity) protected readonly repository: Repository<UserEntity>,
+    @InjectRepository(RefreshTokenEntity) protected readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
+    @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
+    protected readonly jwtTokenService: JwtTokenService,
   ) {
+    super(repository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService)
   }
 
   create(createUserDto: CreateUserDto) : Observable<User> {
     const { email, password } = createUserDto;
-    return from(this.userRepository.findOne({ where: { email } })).pipe(
+    return from(this.repository.findOne({ where: { email } })).pipe(
       switchMap((user)=>{
         if(user){
           throw new BadRequestException({
@@ -41,8 +43,8 @@ export class UsersService {
           switchMap((hashedPass)=>{
             createUserDto.password = hashedPass;
 
-            const newUser = this.userRepository.create(createUserDto)
-            return from(this.userRepository.save(newUser)).pipe(
+            const newUser = this.repository.create(createUserDto)
+            return from(this.repository.save(newUser)).pipe(
               map((createdUser) => this.mapUserResponse(createdUser)),
               catchError(() => {
                 throw new BadRequestException({
@@ -59,7 +61,7 @@ export class UsersService {
 
   login(loginRequest: LoginDto): Observable<AuthResponse> {
     const {email, password} = loginRequest
-    return from(this.userRepository.findOne({where:{email: email, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where:{email: email, isDeleted: false}})).pipe(
       switchMap((thisUser) =>{
         if(!thisUser){
           throw new BadRequestException({
@@ -113,7 +115,7 @@ export class UsersService {
   //
   updateUserPass(updatePasswordDto: UpdatePasswordDto):Observable<User> {
     const {password, newPassword, confirmPassword} = updatePasswordDto
-    return from(this.userRepository.findOne({where:{id: updatePasswordDto.id, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where:{id: updatePasswordDto.id, isDeleted: false}})).pipe(
       switchMap((thisUser)=>{
         if (!thisUser){
           throw new BadRequestException({
@@ -139,7 +141,7 @@ export class UsersService {
               switchMap((hashedPass)=> {
                 thisUser.password = hashedPass
 
-                return from(this.userRepository.save(thisUser)).pipe(
+                return from(this.repository.save(thisUser)).pipe(
                   map((updatedUser) => this.mapUserResponse(updatedUser)),
                   catchError(() => {
                     throw new BadRequestException({
@@ -157,7 +159,7 @@ export class UsersService {
   }
 
   requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto):Observable<Empty>{
-    return from(this.userRepository.findOne({where:{id: requestEmailUpdateDto.id, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where:{id: requestEmailUpdateDto.id, isDeleted: false}})).pipe(
       switchMap((thisUser) =>{
         if (!thisUser){
           throw new BadRequestException({
@@ -192,7 +194,7 @@ export class UsersService {
   }
 
   verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto): Observable<Empty>{
-    return from(this.userRepository.findOne({where: {id: verifyEmailCodeDto.id, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where: {id: verifyEmailCodeDto.id, isDeleted: false}})).pipe(
       switchMap((thisUser) =>{
         if (!thisUser){
           throw new BadRequestException({
@@ -229,7 +231,7 @@ export class UsersService {
   }
 
   updateUserEmail(updateEmailDto: UpdateEmailDto):Observable<User> {
-    return from(this.userRepository.findOne({where: {id: updateEmailDto.id, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where: {id: updateEmailDto.id, isDeleted: false}})).pipe(
       switchMap((thisUser) =>{
         if (!thisUser){
           throw new BadRequestException({
@@ -239,7 +241,7 @@ export class UsersService {
         }
         thisUser.email = updateEmailDto.email
 
-        return from(this.userRepository.save(thisUser)).pipe(
+        return from(this.repository.save(thisUser)).pipe(
           map((updatedUser) => this.mapUserResponse(updatedUser)),
           catchError(()=>{
             throw new BadRequestException({
@@ -287,10 +289,9 @@ export class UsersService {
     )
   }
 
-  // userRefreshToken(refreshToken: string) {
-  //   return `This action updates a #${refreshToken} user`;
-  // }
-  //
+  userRefreshToken(refreshTokenDto: RefreshTokenDto): Observable<AuthResponse> {
+    return this.refreshTokenAW(refreshTokenDto, AuthConstants.user)
+  }
   // userForgotPassword(email: string) {
   //   return `This action updates a #${email} user`;
   // }

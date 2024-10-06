@@ -67,5 +67,13 @@ export const messages = {
     FAILED_FETCH_ROLE_FOR_REMOVAL: "Failed to fetch role for removal",
     FAILED_REMOVE_ROLE: "Failed to remove role",
     FAILED_TO_CREATE_ROLE: "Failed to create role",
+  },
+  TOKEN: {
+    TOKEN_NOT_FOUND: "Token is not found or invalid",
+    TOKEN_GENERATED_SUCCESSFULLY: "Access token generated successfully",
+    REF_TOKEN_WILL_EXPIRE: "Refresh token is about to expire",
+    REF_TOKEN_HAS_EXPIRED: "Refresh token has expired",
+    REF_TOKEN_REVOKED_SUCCESSFULLY:"RefreshToken successfully revoked",
+    FAILED_TO_SAVE_REF_TOKEN: "Failed to save refresh token"
   }
 }

@@ -1,8 +1,8 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   Admin, AuthResponse, dateToTimestamp, Empty, FindOneDto, generateEmailCode, getExpiryDate,
-  hashPassword, JwtTokenService, LogoutDto,
-  messages, RefreshToken, VerifyEmailCode,
+  hashPassword, JwtTokenService,
+  messages, VerifyEmailCode,
   verifyPassword,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -21,16 +21,18 @@ import { VerifyEmailCodeDto } from '@app/common/dtos/verify-email-code.dto';
 import { UpdateEmailDto } from '@app/common/dtos/update-email.dto';
 import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
 import { RefreshTokenDto } from '@app/common/dtos';
+import { BaseService } from '../auth.service';
 
 @Injectable()
-export class AdminsService {
+export class AdminsService extends BaseService<AdminEntity>{
   constructor(
-    @InjectRepository(AdminEntity) private readonly adminRepository: Repository<AdminEntity>,
+    @InjectRepository(AdminEntity) protected readonly repository: Repository<AdminEntity>,
     @InjectRepository(RoleEntity) private readonly roleRepository: Repository<RoleEntity>,
-    @InjectRepository(RefreshTokenEntity) private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
-    @InjectRepository(EmailVerificationCodeEntity) private readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
-    private readonly jwtTokenService: JwtTokenService
+    @InjectRepository(RefreshTokenEntity) protected readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
+    @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
+    protected readonly jwtTokenService: JwtTokenService
   ) {
+    super(repository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService)
   }
   create(createAdminDto: CreateAdminDto): Observable<Admin> {
     const {role, email, password} = createAdminDto;
@@ -43,7 +45,7 @@ export class AdminsService {
           })
         }
         createAdminDto.role = thisRole.id
-        return from(this.adminRepository.findOne({where: {email: email}})).pipe(
+        return from(this.repository.findOne({where: {email: email}})).pipe(
           switchMap((admin) => {
             if(admin){
               throw new BadRequestException({
@@ -55,8 +57,8 @@ export class AdminsService {
               switchMap((hashedPass) => {
                 createAdminDto.password = hashedPass
 
-                const newAdmin = this.adminRepository.create(createAdminDto)
-                return from(this.adminRepository.save(newAdmin)).pipe(
+                const newAdmin = this.repository.create(createAdminDto)
+                return from(this.repository.save(newAdmin)).pipe(
 
                   //SEND WELCOMING EMAIL TO THIS ADMIN -------------------------------------
 
@@ -79,7 +81,7 @@ export class AdminsService {
 
   adminLogin(loginRequest: LoginDto): Observable<AuthResponse> {
     const {email, password} = loginRequest;
-    return from(this.adminRepository.findOne({where: {email: email, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where: {email: email, isDeleted: false}})).pipe(
       switchMap((thisAdmin) => {
         if(!thisAdmin){
           throw new BadRequestException({
@@ -111,7 +113,7 @@ export class AdminsService {
                 if(!refToken){
                   throw new BadRequestException({
                     status: HttpStatus.BAD_REQUEST,
-                    message: 'Failed to save refresh token'
+                    message: messages.TOKEN.FAILED_TO_SAVE_REF_TOKEN
                   })
                 }
                 return of(
@@ -134,7 +136,7 @@ export class AdminsService {
 
   updateAdminPassword(updatePasswordDto: UpdatePasswordDto):Observable<Admin> {
     const { password, newPassword, confirmPassword } = updatePasswordDto;
-    return from(this.adminRepository.findOne({where: {id: updatePasswordDto.id, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where: {id: updatePasswordDto.id, isDeleted: false}})).pipe(
       switchMap((thisAdmin) =>{
         if(!thisAdmin){
           throw new BadRequestException({
@@ -160,7 +162,7 @@ export class AdminsService {
               switchMap((hashedPassword)=>{
                 thisAdmin.password = hashedPassword
 
-                return from(this.adminRepository.save(thisAdmin)).pipe(
+                return from(this.repository.save(thisAdmin)).pipe(
                   map((updatedAdmin)=> this.mapAdminResponse(updatedAdmin)),
                   catchError(()=>{
                     throw new BadRequestException({
@@ -178,7 +180,7 @@ export class AdminsService {
   }
 
   requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto):Observable<Empty>{
-    return from(this.adminRepository.findOne({where:{id: requestEmailUpdateDto.id, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where:{id: requestEmailUpdateDto.id, isDeleted: false}})).pipe(
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
           throw new BadRequestException({
@@ -213,7 +215,7 @@ export class AdminsService {
   }
 
   verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto): Observable<Empty>{
-    return from(this.adminRepository.findOne({where: {id: verifyEmailCodeDto.id, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where: {id: verifyEmailCodeDto.id, isDeleted: false}})).pipe(
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
           throw new BadRequestException({
@@ -251,7 +253,7 @@ export class AdminsService {
   }
 
   updateAdminEmail(updateEmailDto: UpdateEmailDto):Observable<Admin> {
-    return from(this.adminRepository.findOne({where: {id: updateEmailDto.id, isDeleted: false}})).pipe(
+    return from(this.repository.findOne({where: {id: updateEmailDto.id, isDeleted: false}})).pipe(
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
           throw new BadRequestException({
@@ -261,7 +263,7 @@ export class AdminsService {
         }
         thisAdmin.email = updateEmailDto.email
 
-        return from(this.adminRepository.save(thisAdmin)).pipe(
+        return from(this.repository.save(thisAdmin)).pipe(
           map((updatedAdmin) => this.mapAdminResponse(updatedAdmin)),
           catchError(()=>{
             throw new BadRequestException({
@@ -275,7 +277,7 @@ export class AdminsService {
   }
 
   updateAdminRole(id:string, updateAdminRoleDto: UpdateAdminRoleDto):Observable<Admin>{
-    return from(this.adminRepository.findOne({where: { id: id, isDeleted: false }})).pipe(
+    return from(this.repository.findOne({where: { id: id, isDeleted: false }})).pipe(
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
           throw new BadRequestException({
@@ -293,7 +295,7 @@ export class AdminsService {
                 });
               }
               thisAdmin.roleId= newRole;
-              return from(this.adminRepository.save(thisAdmin)).pipe(
+              return from(this.repository.save(thisAdmin)).pipe(
                 map((updatedAdmin) => this.mapAdminResponse(updatedAdmin)),
                 catchError(() => {
                   throw new BadRequestException({
@@ -317,7 +319,7 @@ export class AdminsService {
         if (!refToken){
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
-            message: 'Token is not found or invalid'
+            message: messages.TOKEN.TOKEN_NOT_FOUND
           })
         }
         {
@@ -328,7 +330,7 @@ export class AdminsService {
               return {
                 result: {
                   status: HttpStatus.OK,
-                  message: 'RefreshToken successfully revoked',
+                  message: messages.TOKEN.REF_TOKEN_REVOKED_SUCCESSFULLY,
                 },
               };
             }),
@@ -344,10 +346,10 @@ export class AdminsService {
     )
   }
 
-  // adminRefreshToken(refreshToken: string) {
-  //   return `This action updates a #${refreshToken} admin`;
-  // }
-  //
+  adminRefreshToken(refreshTokenDto: RefreshTokenDto): Observable<AuthResponse> {
+    return this.refreshTokenAW(refreshTokenDto, AuthConstants.admin)
+  }
+
   // adminForgotPassword(email: string) {
   //   return `This action updates a #${email} admin`;
   // }

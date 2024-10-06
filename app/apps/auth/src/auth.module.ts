@@ -11,6 +11,7 @@ import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule, JwtStrategy } from '@app/common';
+import { BaseService } from './auth.service';
 
 @Module({
   imports: [
@@ -51,6 +52,6 @@ import { CommonModule, JwtStrategy } from '@app/common';
     UsersModule, AdminsModule, RolesModule
   ],
   controllers: [],
-  providers: [JwtStrategy],
+  providers: [JwtStrategy, BaseService],
 })
 export class AuthModule {}

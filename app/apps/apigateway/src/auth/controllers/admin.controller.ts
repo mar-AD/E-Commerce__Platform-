@@ -56,7 +56,7 @@ export class AdminController {
   }
 
   @Post('admin/logout')
-  logoutAdmin(@Body(ValidationPipe) logoutDto: LogoutDto) {
+  logoutAdmin(@Body(ValidationPipe) logoutDto: RefreshTokenDto) {
     return this.adminService.logout(logoutDto);
   }
 

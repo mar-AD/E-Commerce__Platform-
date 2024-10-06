@@ -3,7 +3,6 @@ import { UserService } from '../services/user.service';
 import {
   ForgotPasswordDto,
   LoginDto,
-  LogoutDto,
   RefreshTokenDto, ResetPasswordDto,
   UpdateEmailDto,
   UpdatePasswordDto,
@@ -41,7 +40,7 @@ export class UserController {
   }
 
   @Post('user/logout')
-  logoutUser(@Body(ValidationPipe) logoutDto: LogoutDto) {
+  logoutUser(@Body(ValidationPipe) logoutDto: RefreshTokenDto) {
     return this.userService.logout(logoutDto);
   }
 

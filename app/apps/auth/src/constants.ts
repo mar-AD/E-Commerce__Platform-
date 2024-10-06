@@ -1,4 +1,4 @@
-export const AuthConstants = {
-  admin : 'ADMIN',
-  user : 'USER'
+export enum AuthConstants {
+  admin = 'admin',
+  user = 'user'
 }

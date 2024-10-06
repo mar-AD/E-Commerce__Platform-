@@ -41,9 +41,9 @@ export class UsersController implements UserServiceController{
     return this.usersService.logoutUser(logoutDto);
   }
 
-  // userRefreshToken(refreshTokenDto: RefreshTokenDto) {
-  //   return this.usersService.userRefreshToken(refreshTokenDto.refreshToken);
-  // }
+  userRefreshToken(refreshTokenDto: RefreshTokenDto) {
+    return this.usersService.userRefreshToken(refreshTokenDto.refreshToken);
+  }
   //
   // userForgotPassword(forgotPassDto: ForgotPasswordDto ) {
   //   return this.usersService.userForgotPassword(forgotPassDto.email);
