@@ -24,7 +24,7 @@ import { RefreshTokenDto } from '@app/common/dtos';
 import { BaseService } from '../auth.service';
 
 @Injectable()
-export class AdminsService extends BaseService<AdminEntity>{
+export class AdminsService extends BaseService<AdminEntity, Admin>{
   constructor(
     @InjectRepository(AdminEntity) protected readonly repository: Repository<AdminEntity>,
     @InjectRepository(RoleEntity) private readonly roleRepository: Repository<RoleEntity>,
@@ -62,7 +62,7 @@ export class AdminsService extends BaseService<AdminEntity>{
 
                   //SEND WELCOMING EMAIL TO THIS ADMIN -------------------------------------
 
-                  map((createdAdmin) => this.mapAdminResponse(createdAdmin)),
+                  map((createdAdmin) => this.mapResponse(createdAdmin)),
                   catchError(() =>{
                     throw new BadRequestException({
                       status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -163,7 +163,7 @@ export class AdminsService extends BaseService<AdminEntity>{
                 thisAdmin.password = hashedPassword
 
                 return from(this.repository.save(thisAdmin)).pipe(
-                  map((updatedAdmin)=> this.mapAdminResponse(updatedAdmin)),
+                  map((updatedAdmin)=> this.mapResponse(updatedAdmin)),
                   catchError(()=>{
                     throw new BadRequestException({
                       status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -264,7 +264,7 @@ export class AdminsService extends BaseService<AdminEntity>{
         thisAdmin.email = updateEmailDto.email
 
         return from(this.repository.save(thisAdmin)).pipe(
-          map((updatedAdmin) => this.mapAdminResponse(updatedAdmin)),
+          map((updatedAdmin) => this.mapResponse(updatedAdmin)),
           catchError(()=>{
             throw new BadRequestException({
               status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -296,7 +296,7 @@ export class AdminsService extends BaseService<AdminEntity>{
               }
               thisAdmin.roleId= newRole;
               return from(this.repository.save(thisAdmin)).pipe(
-                map((updatedAdmin) => this.mapAdminResponse(updatedAdmin)),
+                map((updatedAdmin) => this.mapResponse(updatedAdmin)),
                 catchError(() => {
                   throw new BadRequestException({
                     status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -312,38 +312,7 @@ export class AdminsService extends BaseService<AdminEntity>{
   }
 
   logoutAdmin(logoutDto: RefreshTokenDto):Observable<Empty> {
-    const {refreshToken} = logoutDto
-    const {id} = this.jwtTokenService.decodeToken(refreshToken)
-    return from(this.refreshTokenRepository.findOne({where: {admin: { id: id,  isDeleted: false }, token: refreshToken, expiresAt: MoreThan(new Date())}})).pipe(
-      switchMap((refToken) =>{
-        if (!refToken){
-          throw new BadRequestException({
-            status: HttpStatus.NOT_FOUND,
-            message: messages.TOKEN.TOKEN_NOT_FOUND
-          })
-        }
-        {
-          refToken.revoked = true;
-
-          return from(this.refreshTokenRepository.save(refToken)).pipe(
-            map(() => {
-              return {
-                result: {
-                  status: HttpStatus.OK,
-                  message: messages.TOKEN.REF_TOKEN_REVOKED_SUCCESSFULLY,
-                },
-              };
-            }),
-            catchError((error) => {
-              throw new BadRequestException({
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: error.message,
-              });
-            }),
-          );
-        }
-      })
-    )
+    return this.logout( logoutDto, AuthConstants.admin)
   }
 
   adminRefreshToken(refreshTokenDto: RefreshTokenDto): Observable<AuthResponse> {
@@ -363,7 +332,7 @@ export class AdminsService extends BaseService<AdminEntity>{
   // }
 
 
-  mapAdminResponse(admin: AdminEntity): Admin {
+  mapResponse(admin: AdminEntity): Admin {
     return {
       id: admin.id,
       roleId: admin.roleId.id,

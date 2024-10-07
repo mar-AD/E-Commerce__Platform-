@@ -3,7 +3,6 @@ import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
   LoginDto,
-  LogoutDto,
   RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto,
   UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,

@@ -1,7 +1,7 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   AuthResponse,
-  dateToTimestamp, Empty, generateEmailCode, getExpiryDate, hashPassword, JwtTokenService, LogoutDto,
+  dateToTimestamp, Empty, generateEmailCode, getExpiryDate, hashPassword, JwtTokenService,
   messages,
   User, VerifyEmailCode, verifyPassword,
 } from '@app/common';
@@ -255,38 +255,7 @@ export class UsersService extends BaseService<UserEntity>{
   }
 
   logoutUser(logoutDto: RefreshTokenDto):Observable<Empty> {
-    const { refreshToken } = logoutDto
-    const {id} = this.jwtTokenService.decodeToken(refreshToken)
-    return from(this.refreshTokenRepository.findOne({where: {user: { id: id,  isDeleted: false }, token: refreshToken}})).pipe(
-      switchMap((refToken) =>{
-        if (!refToken){
-          throw new BadRequestException({
-            status: HttpStatus.NOT_FOUND,
-            message: 'Token is not found or invalid'
-          })
-        }
-        {
-          refToken.revoked = true;
-
-          return from(this.refreshTokenRepository.save(refToken)).pipe(
-            map(() => {
-              return {
-                result: {
-                  status: HttpStatus.OK,
-                  message: 'RefreshToken successfully revoked',
-                },
-              };
-            }),
-            catchError((error) => {
-              throw new BadRequestException({
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: error.message,
-              });
-            }),
-          );
-        }
-      })
-    )
+    return this.logout( logoutDto, AuthConstants.user)
   }
 
   userRefreshToken(refreshTokenDto: RefreshTokenDto): Observable<AuthResponse> {
