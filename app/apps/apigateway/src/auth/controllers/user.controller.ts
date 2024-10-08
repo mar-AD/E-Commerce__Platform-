@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, ValidationPipe } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
+  CreateUserDto,
   ForgotPasswordDto,
   LoginDto,
   RefreshTokenDto, ResetPasswordDto,
@@ -8,7 +9,6 @@ import {
   UpdatePasswordDto,
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from '../../../../auth/src/users/dto/create-user.dto';
 import { Request } from 'express';
 
 

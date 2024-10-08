@@ -1,28 +1,27 @@
 import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
-  FindOneDto, ForgotPasswordDto, RequestEmailUpdateDto,
+  CreateDto,
+  FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto,
   UserServiceController,
   UserServiceControllerMethods, VerifyEmailCodeDto,
 } from '@app/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { LoginDto, RefreshTokenDto, UpdateEmailDto, UpdatePasswordDto } from '@app/common/dtos';
 
 @Controller()
 @UserServiceControllerMethods()
 export class UsersController implements UserServiceController{
   constructor(private readonly usersService: UsersService) {}
 
-  createUser(createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  createUser(createUserDto: CreateDto) {
+    return this.usersService.createUser(createUserDto);
   }
 
   userLogin(loginRequest: LoginDto){
-    return this.usersService.login(loginRequest);
+    return this.usersService.userLogin(loginRequest);
   }
 
   updateUserPassword(updatePasswordDto: UpdatePasswordDto) {
-    return this.usersService.updateUserPass(updatePasswordDto);
+    return this.usersService.updateUserPassword(updatePasswordDto);
   }
 
   requestUpdateUserEmail (requestUpdateUserEmail: RequestEmailUpdateDto){
@@ -42,7 +41,7 @@ export class UsersController implements UserServiceController{
   }
 
   userRefreshToken(refreshTokenDto: RefreshTokenDto) {
-    return this.usersService.userRefreshToken(refreshTokenDto.refreshToken);
+    return this.usersService.userRefreshToken(refreshTokenDto);
   }
   //
   // userForgotPassword(forgotPassDto: ForgotPasswordDto ) {

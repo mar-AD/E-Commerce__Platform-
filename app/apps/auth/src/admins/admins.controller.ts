@@ -3,7 +3,7 @@ import { AdminsService } from './admins.service';
 import {
   AdminServiceController,
   AdminServiceControllerMethods, FindOneDto, ForgotPasswordDto,
-  LogoutDto, RequestEmailUpdateDto, ResetPasswordDto,
+  RequestEmailUpdateDto, ResetPasswordDto,
   VerifyEmailCodeDto,
 } from '@app/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
@@ -16,7 +16,7 @@ export class AdminsController implements AdminServiceController{
   constructor(private readonly adminsService: AdminsService) {}
 
   createAdmin(createAdminDto: CreateAdminDto) {
-    return this.adminsService.create(createAdminDto);
+    return this.adminsService.createAdmin(createAdminDto);
   }
 
   adminLogin( loginDto : LoginDto) {

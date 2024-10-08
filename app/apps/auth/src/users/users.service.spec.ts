@@ -3,11 +3,10 @@ import { UsersService } from './users.service';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
 import { lastValueFrom, of } from 'rxjs';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import * as configs from '@app/common'
-import { messages } from '@app/common';
+import { CreateDto, messages } from '@app/common';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -39,7 +38,7 @@ describe('UsersService', () => {
   })
 
   describe('create', () =>{
-    const createUserDto: CreateUserDto = {
+    const createUserDto: CreateDto = {
       email: 'email@gmail.com',
       password: 'pass'
     }
