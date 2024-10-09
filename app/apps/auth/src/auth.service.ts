@@ -5,16 +5,21 @@ import { MoreThan, Repository } from 'typeorm';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
 import {
-  AuthResponse, CreateDto,
+  AuthResponse,
+  CreateDto,
   Empty,
   generateEmailCode,
-  getExpiryDate, hashPassword,
+  getExpiryDate,
+  hashPassword,
   JwtTokenService,
   LoginDto,
   messages,
   RefreshTokenDto,
   RequestEmailUpdateDto,
-  UpdateEmailDto, UpdatePasswordDto, VerifyEmailCode, VerifyEmailCodeDto,
+  UpdateEmailDto,
+  UpdatePasswordDto,
+  VerifyEmailCode,
+  VerifyEmailCodeDto,
   verifyPassword,
 } from '@app/common';
 import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
@@ -34,20 +39,9 @@ export abstract class  BaseService<E> {
   create(createDto: CreateDto, type: AuthConstants) : Observable<E> {
     const {email, password } = createDto;
 
-    let repository: Repository<AdminEntity | UserEntity>;
-    let messageType: any;
+    const repository= this.getRepository(type);
+    const messageType = this.getMessageType(type);
 
-
-    if (type === AuthConstants.admin) {
-      repository = this.adminRepository;
-      messageType = messages.ADMIN
-
-    } else if (type === AuthConstants.user) {
-      repository = this.userRepository;
-      messageType = messages.USER
-    } else {
-      throw new BadRequestException('Invalid type');
-    }
     return from(repository.findOne({ where: { email } })).pipe(
       switchMap((existingEntity)=>{
         if(existingEntity){
@@ -84,25 +78,15 @@ export abstract class  BaseService<E> {
   login(loginRequest: LoginDto, type: AuthConstants): Observable<AuthResponse> {
     const {email, password} = loginRequest;
     // const repository = isAdmin ? this.adminRepository : this.userRepository;
-    let repository: Repository<UserEntity | AdminEntity>;
-    let messages: any
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type)
 
-    if (type === AuthConstants.admin) {
-      repository = this.adminRepository;
-      messages = messages.ADMIN
-
-    } else if (type === AuthConstants.user) {
-      repository = this.userRepository;
-      messages = messages.USER
-    } else {
-      throw new BadRequestException('Invalid type');
-    }
     return from(repository.findOne({where: {email: email, isDeleted: false}})).pipe(
       switchMap((thisEntity) => {
         if(!thisEntity){
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
-            message: messages.INVALID_CREDENTIALS
+            message: messageType.INVALID_CREDENTIALS
           })
         }
         return verifyPassword(password, thisEntity.password).pipe(
@@ -110,7 +94,7 @@ export abstract class  BaseService<E> {
             if (!isMatch) {
               throw new BadRequestException({
                 status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: messages.PASSWORD.INVALID_PASSWORD,
+                message: messageType.PASSWORD.INVALID_PASSWORD,
               });
             }
             const payload = {
@@ -129,7 +113,7 @@ export abstract class  BaseService<E> {
                 if(!refToken){
                   throw new BadRequestException({
                     status: HttpStatus.BAD_REQUEST,
-                    message: messages.TOKEN.FAILED_TO_SAVE_REF_TOKEN
+                    message: messageType.TOKEN.FAILED_TO_SAVE_REF_TOKEN
                   })
                 }
                 return of(
@@ -137,7 +121,7 @@ export abstract class  BaseService<E> {
                     accessToken: accessToken,
                     refreshToken: refreshToken,
                     result: {
-                      message :messages.LOGIN_SUCCESSFUL,
+                      message :messageType.LOGIN_SUCCESSFUL,
                       status: HttpStatus.OK
                     }
                   },
@@ -152,16 +136,8 @@ export abstract class  BaseService<E> {
 
   updatePassword(updatePasswordDto: UpdatePasswordDto, type: AuthConstants):Observable<E> {
     const { password, newPassword, confirmPassword } = updatePasswordDto;
-    let repository : Repository<AdminEntity | UserEntity>
-    let messageType: any
-
-    if(type === AuthConstants.admin) {
-      repository = this.adminRepository;
-      messageType = messages.ADMIN
-    } else if(type === AuthConstants.user) {
-      repository = this.userRepository;
-      messageType = messages.USER
-    }
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type)
 
     return from(repository.findOne({where: {id: updatePasswordDto.id, isDeleted: false}})).pipe(
       switchMap((thisAdmin) =>{
@@ -207,24 +183,23 @@ export abstract class  BaseService<E> {
   }
 
   requestUpEmail(requestEmailUpdateDto:RequestEmailUpdateDto, type: AuthConstants):Observable<Empty>{
-    let repository: Repository<UserEntity | AdminEntity>
-    let messageType: any;
     const code = generateEmailCode()
     const expiredAt = getExpiryDate(0, 0, 5)
-    const condition={
-      code: code,
-      expiresAt: expiredAt
-    }
+    // const condition={ code: code, expiresAt: expiredAt }
+    //
+    // if (type === AuthConstants.admin){
+    //   repository = this.adminRepository;
+    //   messageType = messages.ADMIN;
+    //   condition[AuthConstants.admin] = {id: requestEmailUpdateDto.id }
+    // }else if(type === AuthConstants.user){
+    //   repository = this.userRepository;
+    //   messageType = messages.USER;
+    //   condition[AuthConstants.user] = {id: requestEmailUpdateDto.id }
+    // }
+    const condition= this.getCondition(type,{ code: code, expiresAt: expiredAt }, {id: requestEmailUpdateDto.id });
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
 
-    if (type === AuthConstants.admin){
-      repository = this.adminRepository;
-      messageType = messages.ADMIN;
-      condition[AuthConstants.admin] = {id: requestEmailUpdateDto.id }
-    }else if(type === AuthConstants.user){
-      repository = this.userRepository;
-      messageType = messages.USER;
-      condition[AuthConstants.user] = {id: requestEmailUpdateDto.id }
-    }
     return from(repository.findOne({where:{id: requestEmailUpdateDto.id, isDeleted: false}})).pipe(
       switchMap((thisEntity) =>{
         if (!thisEntity){
@@ -259,19 +234,20 @@ export abstract class  BaseService<E> {
   }
 
   verifyCode(verifyEmailCodeDto: VerifyEmailCodeDto, type: AuthConstants): Observable<Empty>{
-    let repository: Repository<UserEntity | AdminEntity>;
-    let messageType: any;
-    const whereCondition = { code: verifyEmailCodeDto.verificationCode };
-
-    if (type === AuthConstants.admin){
-      repository = this.adminRepository;
-      messageType = messages.ADMIN;
-      whereCondition[AuthConstants.admin] = {id: verifyEmailCodeDto.id}
-    }else if(type === AuthConstants.user){
-      repository = this.userRepository;
-      messageType = messages.USER;
-      whereCondition[AuthConstants.user] = {id: verifyEmailCodeDto.id}
-    }
+    // const whereCondition = { code: verifyEmailCodeDto.verificationCode };
+    //
+    // if (type === AuthConstants.admin){
+    //   repository = this.adminRepository;
+    //   messageType = messages.ADMIN;
+    //   whereCondition[AuthConstants.admin] = {id: verifyEmailCodeDto.id}
+    // }else if(type === AuthConstants.user){
+    //   repository = this.userRepository;
+    //   messageType = messages.USER;
+    //   whereCondition[AuthConstants.user] = {id: verifyEmailCodeDto.id}
+    // }
+    const whereCondition = this.getCondition(type, { code: verifyEmailCodeDto.verificationCode }, {id: verifyEmailCodeDto.id})
+    const repository = this.getRepository(type)
+    const messageType = this.getMessageType(type)
 
     return from(repository.findOne({where: {id: verifyEmailCodeDto.id, isDeleted: false}})).pipe(
       switchMap((thisEntity) =>{
@@ -311,16 +287,9 @@ export abstract class  BaseService<E> {
   }
 
   updateEmail(updateEmailDto: UpdateEmailDto, type: AuthConstants):Observable<E> {
-    let repository: Repository<UserEntity | AdminEntity>;
-    let messageType: any;
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type)
 
-    if (type === AuthConstants.admin){
-      repository = this.adminRepository;
-      messageType = messages.ADMIN;
-    }else if(type === AuthConstants.user){
-      repository = this.userRepository;
-      messageType = messages.USER;
-    }
     return from(repository.findOne({where: {id: updateEmailDto.id, isDeleted: false}})).pipe(
       switchMap((thisEntity) =>{
         if (!thisEntity){
@@ -347,16 +316,15 @@ export abstract class  BaseService<E> {
   refreshTokenAW(refreshTokenDto: RefreshTokenDto, type: AuthConstants): Observable<AuthResponse> {
     const {refreshToken} = refreshTokenDto;
     const {id} = this.jwtTokenService.decodeToken(refreshToken);
-    const whereCondition = {
-      token: refreshToken,
-      revoked: false
-    }
+    // const whereCondition = { token: refreshToken, revoked: false }
+    //
+    // if (type === AuthConstants.user){
+    //   whereCondition[AuthConstants.user] = {id: id, isDeleted: false}
+    // }else if (type === AuthConstants.admin){
+    //   whereCondition[AuthConstants.admin] = {id: id, isDeleted: false}
+    // }
+    const whereCondition = this.getCondition(type, { token: refreshToken, revoked: false }, {id: id, isDeleted: false})
 
-    if (type === AuthConstants.user){
-      whereCondition[AuthConstants.user] = {id: id, isDeleted: false}
-    }else if (type === AuthConstants.admin){
-      whereCondition[AuthConstants.admin] = {id: id, isDeleted: false}
-    }
     return from(this.refreshTokenRepository.findOne({where: whereCondition})).pipe(
       switchMap((refToken) => {
         if (!refToken){
@@ -409,16 +377,15 @@ export abstract class  BaseService<E> {
     const {refreshToken} = logoutDto;
     const {id} = this.jwtTokenService.decodeToken(refreshToken);
 
-    const whereConditions = {
-      token: refreshToken,
-      expiresAt: MoreThan(new Date())
-    }
+    // const whereConditions = { token: refreshToken, expiresAt: MoreThan(new Date()) }
+    //
+    // if (type === AuthConstants.user){
+    //   whereConditions[AuthConstants.user] = {id: id, isDeleted: false}
+    // }else if (type === AuthConstants.admin){
+    //   whereConditions[AuthConstants.admin] = {id: id, isDeleted: false}
+    // }
 
-    if (type === AuthConstants.user){
-      whereConditions[AuthConstants.user] = {id: id, isDeleted: false}
-    }else if (type === AuthConstants.admin){
-      whereConditions[AuthConstants.admin] = {id: id, isDeleted: false}
-    }
+    const whereConditions = this.getCondition(type, { token: refreshToken, expiresAt: MoreThan(new Date()) }, {id: id, isDeleted: false})
 
     return from(this.refreshTokenRepository.findOne({where: whereConditions})).pipe(
       switchMap((refToken) =>{
@@ -451,6 +418,47 @@ export abstract class  BaseService<E> {
       })
     )
   }
+
+  protected getRepository(type: AuthConstants): Repository<AdminEntity | UserEntity> {
+    if (type === AuthConstants.admin) {
+      return this.adminRepository;
+    } else if (type === AuthConstants.user) {
+      return this.userRepository;
+    } else {
+      throw new BadRequestException({
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Invalid type provided.',
+      });
+    }
+  }
+
+  protected getMessageType(type: AuthConstants): any {
+    if (type === AuthConstants.admin) {
+      return messages.ADMIN;
+    } else if (type === AuthConstants.user) {
+      return messages.USER;
+    } else {
+      throw new BadRequestException({
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Invalid type provided.',
+      });
+    }
+  }
+
+  protected getCondition (type: AuthConstants, condition: Record<string, any>, value: Object): Record<string, any> {
+    if (type === AuthConstants.admin) {
+      condition[AuthConstants.admin] = value
+    }else if (type === AuthConstants.user) {
+      condition[AuthConstants.user] = value
+    }else{
+      throw new BadRequestException({
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Invalid type provided.',
+      });
+    }
+    return condition
+  }
+
 
   protected abstract mapResponse(entity: UserEntity | AdminEntity): E;
 }
