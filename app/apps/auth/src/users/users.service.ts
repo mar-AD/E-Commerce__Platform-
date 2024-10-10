@@ -18,6 +18,7 @@ import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 import { BaseService } from '../auth.service';
 import { AdminEntity } from '../admins/entities/admin.entity';
+import { FindOneDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
 
 @Injectable()
 export class UsersService extends BaseService<User>{
@@ -63,17 +64,18 @@ export class UsersService extends BaseService<User>{
   userRefreshToken(refreshTokenDto: RefreshTokenDto): Observable<AuthResponse> {
     return this.refreshTokenAW(refreshTokenDto, AuthConstants.user)
   }
-  // userForgotPassword(email: string) {
-  //   return `This action updates a #${email} user`;
-  // }
-  //
-  // userResetPassword(resetPasswordDto: ResetPasswordDto) {
-  //   return `This action updates a #${resetPasswordDto} user`;
-  // }
-  //
-  // remove(id: string) {
-  //   return `This action removes a #${id} user`;
-  // }
+
+  userForgotPassword(forgotPassDto: ForgotPasswordDto):Observable<Empty> {
+    return this.forgotPassword(forgotPassDto, AuthConstants.user)
+  }
+
+  userResetPassword(resetPasswordDto: ResetPasswordDto) {
+    return this.resetPassword(resetPasswordDto, AuthConstants.user);
+  }
+
+  deleteUser(findOneDto: FindOneDto): Observable<Empty> {
+    return this.remove(findOneDto, AuthConstants.user);
+  }
 
   mapResponse (user: UserEntity): User{
     return{

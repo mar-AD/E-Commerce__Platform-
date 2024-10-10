@@ -3,7 +3,7 @@ import {
   Admin,
   AuthResponse,
   dateToTimestamp,
-  Empty,
+  Empty, ForgotPasswordDto,
   JwtTokenService,
   LoginDto,
   messages, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto,
@@ -21,6 +21,7 @@ import { EmailVerificationCodeEntity } from '../entities/email-verification-code
 import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
 import { BaseService } from '../auth.service';
 import { UserEntity } from '../users/entities/user.entity';
+import { FindOneDto, ResetPasswordDto } from '@app/common/dtos';
 
 @Injectable()
 export class AdminsService extends BaseService<Admin>{
@@ -113,17 +114,17 @@ export class AdminsService extends BaseService<Admin>{
     return this.refreshTokenAW(refreshTokenDto, AuthConstants.admin)
   }
 
-  // adminForgotPassword(email: string) {
-  //   return `This action updates a #${email} admin`;
-  // }
-  //
-  // adminResetPassword(resetPasswordDto: ResetPasswordDto) {
-  //   return `This action updates a #${resetPasswordDto} admin`;
-  // }
-  //
-  // remove(id: string) {
-  //   return `This action removes a #${id} admin`;
-  // }
+  adminForgotPassword(forgotPassDto: ForgotPasswordDto): Observable<Empty> {
+    return this.forgotPassword(forgotPassDto, AuthConstants.admin)
+  }
+
+  adminResetPassword(resetPasswordDto: ResetPasswordDto): Observable<Empty> {
+    return this.resetPassword(resetPasswordDto, AuthConstants.admin)
+  }
+
+  deleteAdmin(findOneDto: FindOneDto): Observable<Empty> {
+    return this.remove(findOneDto, AuthConstants.admin);
+  }
 
 
   mapResponse(admin: AdminEntity): Admin {

@@ -6,25 +6,21 @@ import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
 import {
   AuthResponse,
-  CreateDto,
   Empty,
   generateEmailCode,
   getExpiryDate,
   hashPassword,
   JwtTokenService,
-  LoginDto,
   messages,
-  RefreshTokenDto,
-  RequestEmailUpdateDto,
-  UpdateEmailDto,
-  UpdatePasswordDto,
   VerifyEmailCode,
-  VerifyEmailCodeDto,
   verifyPassword,
 } from '@app/common';
 import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { AuthConstants } from './constants';
 import { AdminEntity } from './admins/entities/admin.entity';
+import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
+  ResetPasswordDto,
+  UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 
 @Injectable()
 export abstract class  BaseService<E> {
@@ -205,7 +201,7 @@ export abstract class  BaseService<E> {
         if (!thisEntity){
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
-            message: messageType.NOT_FOUND
+            message: messageType.FAILED_FETCH
           })
         }
         requestEmailUpdateDto.email = thisEntity.email
@@ -254,7 +250,7 @@ export abstract class  BaseService<E> {
         if (!thisEntity){
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
-            message: messageType.NOT_FOUND
+            message: messageType.FAILED_FETCH
           })
         }
         return from(this.emailVerificationCodeRepository.findOne({where: whereCondition})).pipe(
@@ -295,7 +291,7 @@ export abstract class  BaseService<E> {
         if (!thisEntity){
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
-            message: messageType.NOT_FOUND
+            message: messageType.FAILED_TO_FETCH_FOR_UPDATE
           })
         }
         thisEntity.email = updateEmailDto.email
@@ -419,6 +415,134 @@ export abstract class  BaseService<E> {
     )
   }
 
+  forgotPassword(forgotPassDto: ForgotPasswordDto, type: AuthConstants): Observable<Empty> {
+    const { email }=forgotPassDto;
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+    return from(repository.findOne({where: {email}})).pipe(
+      map((thisEntity) => {
+        if (!thisEntity){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messageType.NOT_FOUND
+          })
+        }
+        const payload = {
+          id: thisEntity.id,
+          type: type
+        };
+        this.jwtTokenService.generateAccessToken(payload);
+        // SEND EMAIL--WILL DO WHEN I CREATE THE EMAIL SERVICE ------------------------------
+        return {
+          result: {
+            status: HttpStatus.OK,
+            message: messages.EMAIL.RESET_PASS_EMAIL_SENT
+          }
+        }
+      })
+    )
+
+
+  }
+
+  resetPassword(resetPasswordDto: ResetPasswordDto, type: AuthConstants): Observable<Empty> {
+    const { token, newPassword, confirmPassword } = resetPasswordDto;
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+
+    const {id} = this.jwtTokenService.decodeToken(token)
+
+    return from(repository.findOne({where: {id: id}})).pipe(
+      switchMap((thisEntity) =>{
+        if (!thisEntity){
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messageType.FAILED_TO_FETCH_FOR_UPDATE
+          })
+        }
+        if(newPassword !== confirmPassword){
+          throw new BadRequestException({
+            status: HttpStatus.BAD_REQUEST,
+            message: messages.PASSWORD.PASSWORDS_DO_NOT_MATCH,
+          });
+        }
+        return hashPassword(newPassword).pipe(
+          switchMap((hashedPass) =>{
+            thisEntity.password = hashedPass
+
+            return from(repository.save(thisEntity)).pipe(
+              map(() => {
+                return {
+                  result: {
+                    status: HttpStatus.OK,
+                    message: messages.PASSWORD.PASSWORD_RESET_SUCCESSFULLY
+                  }
+                }
+              }),
+              catchError((error) => {
+                throw new BadRequestException({
+                  status: HttpStatus.INTERNAL_SERVER_ERROR,
+                  message: messages.PASSWORD.FAILED_TO_RESET_PASSWORD
+                })
+              })
+            )
+          })
+        )
+      })
+    )
+  }
+
+  remove(findOneDto: FindOneDto, type: AuthConstants): Observable<Empty> {
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+
+    return from(repository.findOne({where: {id: findOneDto.id}})).pipe(
+      switchMap((thisEntity) => {
+        if (!thisEntity) {
+          throw new BadRequestException({
+            status: HttpStatus.NOT_FOUND,
+            message: messageType.FAILED_FETCH_FOR_REMOVAL
+          })
+        }
+        thisEntity.isDeleted = true
+        return from(repository.save(thisEntity)).pipe(
+          switchMap(() =>{
+            return from(repository.softRemove(thisEntity)).pipe(
+              map(() => {
+                return {
+                  result: {
+                    status: HttpStatus.OK,
+                    message: messageType.REMOVED_SUCCESSFULLY
+                  }
+                }
+              }),
+              catchError((error) => {
+                throw new BadRequestException({
+                  status: HttpStatus.INTERNAL_SERVER_ERROR,
+                  message: messageType.FAILED_REMOVE
+                })
+              })
+            )
+          }),
+          catchError((error) => {
+            throw new BadRequestException({
+              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: messageType.FAILED_REMOVE
+            })
+          })
+        )
+      }),
+      catchError((error) => {
+        throw new BadRequestException({
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: messageType.FAILED_REMOVE
+        })
+      })
+    )
+  }
+
+
+
   protected getRepository(type: AuthConstants): Repository<AdminEntity | UserEntity> {
     if (type === AuthConstants.admin) {
       return this.adminRepository;
@@ -458,7 +582,6 @@ export abstract class  BaseService<E> {
     }
     return condition
   }
-
 
   protected abstract mapResponse(entity: UserEntity | AdminEntity): E;
 }

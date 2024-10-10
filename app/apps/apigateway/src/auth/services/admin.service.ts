@@ -9,7 +9,7 @@ import {
   RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto,
-  UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,
+  UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto, FindOneDto,
 } from '@app/common';
 import { AUTH_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -67,7 +67,7 @@ export class AdminService implements OnModuleInit{
     return this.adminService.adminResetPassword(resetPasswordDto)
   }
 
-  remove(id: string) {
-    return this.adminService.removeAdmin({ id });
+  remove(findOneDto: FindOneDto) {
+    return this.adminService.removeAdmin(findOneDto);
   }
 }

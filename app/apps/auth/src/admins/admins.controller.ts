@@ -2,13 +2,13 @@ import { Controller } from '@nestjs/common';
 import { AdminsService } from './admins.service';
 import {
   AdminServiceController,
-  AdminServiceControllerMethods, FindOneDto, ForgotPasswordDto,
-  RequestEmailUpdateDto, ResetPasswordDto,
+  AdminServiceControllerMethods,
+  RequestEmailUpdateDto,
   VerifyEmailCodeDto,
 } from '@app/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
-import { LoginDto, RefreshTokenDto, UpdateEmailDto, UpdatePasswordDto } from '@app/common/dtos';
+import { LoginDto, RefreshTokenDto, UpdateEmailDto, UpdatePasswordDto, ForgotPasswordDto, ResetPasswordDto, FindOneDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -51,15 +51,15 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.adminRefreshToken(refreshTokenDto);
   }
 
-  // adminForgotPassword(forgotPassDto: ForgotPasswordDto) {
-  //   return this.adminsService.adminForgotPassword(forgotPassDto.email);
-  // }
-  //
-  // adminResetPassword(resetPasswordDto: ResetPasswordDto) {
-  //   return this.adminsService.adminResetPassword(resetPasswordDto);
-  // }
-  //
-  // removeAdmin(findOneDto: FindOneDto) {
-  //   return this.adminsService.remove(findOneDto.id);
-  // }
+  adminForgotPassword(forgotPassDto: ForgotPasswordDto) {
+    return this.adminsService.adminForgotPassword(forgotPassDto);
+  }
+
+  adminResetPassword(resetPasswordDto: ResetPasswordDto) {
+    return this.adminsService.adminResetPassword(resetPasswordDto);
+  }
+
+  removeAdmin(findOneDto: FindOneDto) {
+    return this.adminsService.deleteAdmin(findOneDto);
+  }
 }

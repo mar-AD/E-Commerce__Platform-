@@ -2,10 +2,11 @@ import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
   CreateDto,
-  FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto,
+  LoginDto, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto,
   UserServiceController,
   UserServiceControllerMethods, VerifyEmailCodeDto,
 } from '@app/common';
+import { FindOneDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
 
 @Controller()
 @UserServiceControllerMethods()
@@ -43,16 +44,16 @@ export class UsersController implements UserServiceController{
   userRefreshToken(refreshTokenDto: RefreshTokenDto) {
     return this.usersService.userRefreshToken(refreshTokenDto);
   }
-  //
-  // userForgotPassword(forgotPassDto: ForgotPasswordDto ) {
-  //   return this.usersService.userForgotPassword(forgotPassDto.email);
-  // }
-  //
-  // userResetPassword(resetPasswordDto: ResetPasswordDto) {
-  //   return this.usersService.userResetPassword(resetPasswordDto);
-  // }
-  //
-  // removeUser(findOneDto: FindOneDto) {
-  //   return this.usersService.remove(findOneDto.id);
-  // }
+
+  userForgotPassword(forgotPassDto: ForgotPasswordDto ) {
+    return this.usersService.userForgotPassword(forgotPassDto);
+  }
+
+  userResetPassword(resetPasswordDto: ResetPasswordDto) {
+    return this.usersService.userResetPassword(resetPasswordDto);
+  }
+
+  removeUser(findOneDto: FindOneDto) {
+    return this.usersService.deleteUser(findOneDto);
+  }
 }
