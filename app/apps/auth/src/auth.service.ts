@@ -15,12 +15,13 @@ import {
   VerifyEmailCode,
   verifyPassword,
 } from '@app/common';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import { AuthConstants } from './constants';
 import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
+import { GlobalCronService } from '@app/common/services/global-cron.service';
 
 @Injectable()
 export abstract class  BaseService<E> {
@@ -508,6 +509,7 @@ export abstract class  BaseService<E> {
         return from(repository.save(thisEntity)).pipe(
           switchMap(() =>{
             return from(repository.softRemove(thisEntity)).pipe(
+
               map(() => {
                 return {
                   result: {

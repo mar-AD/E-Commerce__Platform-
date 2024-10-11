@@ -1,10 +1,10 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   Admin,
-  AuthResponse,
+  AuthResponse, CronService,
   dateToTimestamp,
   Empty, ForgotPasswordDto,
-  JwtTokenService,
+  JwtTokenService, LoggerService,
   LoginDto,
   messages, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto,
   UpdatePasswordDto, VerifyEmailCodeDto,
@@ -22,6 +22,7 @@ import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
 import { BaseService } from '../auth.service';
 import { UserEntity } from '../users/entities/user.entity';
 import { FindOneDto, ResetPasswordDto } from '@app/common/dtos';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class AdminsService extends BaseService<Admin>{
@@ -31,15 +32,19 @@ export class AdminsService extends BaseService<Admin>{
     @InjectRepository(RoleEntity) private readonly roleRepository: Repository<RoleEntity>,
     @InjectRepository(RefreshTokenEntity) protected readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
-    protected readonly jwtTokenService: JwtTokenService
+    protected readonly jwtTokenService: JwtTokenService,
+    private readonly cronService: CronService,
+    private readonly logger: LoggerService,
   ) {
     super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService)
   }
   createAdmin(createAdminDto: CreateAdminDto): Observable<Admin> {
     const {role} = createAdminDto;
+    this.logger.log('roleRepo: Entity is finding ...')
     return from(this.roleRepository.findOne({where: {name: role}})).pipe(
       switchMap((thisRole)=>{
         if(!thisRole){
+          this.logger.error('roleRepo: Entity is not found.')
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
             message: messages.ROLE.NOT_FOUND
@@ -72,36 +77,40 @@ export class AdminsService extends BaseService<Admin>{
   }
 
   updateAdminRole(id:string, updateAdminRoleDto: UpdateAdminRoleDto):Observable<Admin>{
+    this.logger.log('adminRepo: Entity is finding ...')
     return from(this.adminRepository.findOne({where: { id: id, isDeleted: false }})).pipe(
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
+          this.logger.error('adminRepo: Entity was not found.')
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
             message: messages.ADMIN.NOT_FOUND
           })
         }
-        {
-          return from(this.roleRepository.findOne({ where: { name: updateAdminRoleDto.role } })).pipe(
-            switchMap((newRole) => {
-              if (!newRole) {
+        this.logger.log('roleRepo: Entity is finding ...')
+        return from(this.roleRepository.findOne({ where: { name: updateAdminRoleDto.role } })).pipe(
+          switchMap((newRole) => {
+            if (!newRole) {
+              this.logger.error('roleRepo: Entity is finding ...')
+              throw new BadRequestException({
+                status: HttpStatus.NOT_FOUND,
+                message: messages.ROLE.NOT_FOUND,
+              });
+            }
+            thisAdmin.roleId= newRole;
+            this.logger.log('adminRepo: Entity is updating ...')
+            return from(this.adminRepository.save(thisAdmin)).pipe(
+              map((updatedAdmin) => this.mapResponse(updatedAdmin)),
+              catchError(() => {
+                this.logger.error('adminRepo: Entity could not update')
                 throw new BadRequestException({
-                  status: HttpStatus.NOT_FOUND,
-                  message: messages.ROLE.NOT_FOUND,
+                  status: HttpStatus.INTERNAL_SERVER_ERROR,
+                  message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
                 });
-              }
-              thisAdmin.roleId= newRole;
-              return from(this.adminRepository.save(thisAdmin)).pipe(
-                map((updatedAdmin) => this.mapResponse(updatedAdmin)),
-                catchError(() => {
-                  throw new BadRequestException({
-                    status: HttpStatus.INTERNAL_SERVER_ERROR,
-                    message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
-                  });
-                }),
-              );
-            }),
-          );
-        }
+              }),
+            );
+          }),
+        );
       })
     )
   }
@@ -126,6 +135,10 @@ export class AdminsService extends BaseService<Admin>{
     return this.remove(findOneDto, AuthConstants.admin);
   }
 
+  @Cron('0,0,*,*,*')
+  async hardDeleteAdmin(){
+    await this.cronService.CleanUpJob(this.adminRepository, 1)
+  }
 
   mapResponse(admin: AdminEntity): Admin {
     return {

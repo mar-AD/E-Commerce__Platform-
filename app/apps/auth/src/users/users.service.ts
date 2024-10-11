@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   AuthResponse, CreateDto,
   dateToTimestamp,
-  Empty,
+  Empty, CronService,
   JwtTokenService,
   LoginDto, RefreshTokenDto,
   RequestEmailUpdateDto, UpdateEmailDto,
@@ -19,6 +19,8 @@ import { EmailVerificationCodeEntity } from '../entities/email-verification-code
 import { BaseService } from '../auth.service';
 import { AdminEntity } from '../admins/entities/admin.entity';
 import { FindOneDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
+import { Cron } from '@nestjs/schedule';
+
 
 @Injectable()
 export class UsersService extends BaseService<User>{
@@ -29,6 +31,7 @@ export class UsersService extends BaseService<User>{
     @InjectRepository(RefreshTokenEntity) protected readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
     protected readonly jwtTokenService: JwtTokenService,
+    private readonly cronService: CronService
   ) {
     super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService)
   }
@@ -75,6 +78,11 @@ export class UsersService extends BaseService<User>{
 
   deleteUser(findOneDto: FindOneDto): Observable<Empty> {
     return this.remove(findOneDto, AuthConstants.user);
+  }
+
+  @Cron("0,0,*,*,*")
+  async hardDeleteUser (){
+    await this.cronService.CleanUpJob(this.userRepository, 1)
   }
 
   mapResponse (user: UserEntity): User{
