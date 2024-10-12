@@ -34,17 +34,17 @@ export class AdminsService extends BaseService<Admin>{
     @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
     protected readonly jwtTokenService: JwtTokenService,
     private readonly cronService: CronService,
-    private readonly logger: LoggerService,
+    protected readonly logger: LoggerService,
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger)
   }
   createAdmin(createAdminDto: CreateAdminDto): Observable<Admin> {
     const {role} = createAdminDto;
-    this.logger.log('roleRepo: Entity is finding ...')
+    this.logger.log('roleRepo: Searching for role in repository...');
     return from(this.roleRepository.findOne({where: {name: role}})).pipe(
       switchMap((thisRole)=>{
         if(!thisRole){
-          this.logger.error('roleRepo: Entity is not found.')
+          this.logger.error(`roleRepo: Role "${role}" not found`);
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
             message: messages.ROLE.NOT_FOUND
@@ -77,32 +77,32 @@ export class AdminsService extends BaseService<Admin>{
   }
 
   updateAdminRole(id:string, updateAdminRoleDto: UpdateAdminRoleDto):Observable<Admin>{
-    this.logger.log('adminRepo: Entity is finding ...')
+    this.logger.log(`adminRepo: Searching for admin entity with ID: ${id} ...`);
     return from(this.adminRepository.findOne({where: { id: id, isDeleted: false }})).pipe(
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
-          this.logger.error('adminRepo: Entity was not found.')
+          this.logger.error(`adminRepo: Admin entity with ID: ${id} was not found.`);
           throw new BadRequestException({
             status: HttpStatus.NOT_FOUND,
             message: messages.ADMIN.NOT_FOUND
           })
         }
-        this.logger.log('roleRepo: Entity is finding ...')
+        this.logger.log(`roleRepo: Searching for role entity with name: ${updateAdminRoleDto.role} ...`);
         return from(this.roleRepository.findOne({ where: { name: updateAdminRoleDto.role } })).pipe(
           switchMap((newRole) => {
             if (!newRole) {
-              this.logger.error('roleRepo: Entity is finding ...')
+              this.logger.error(`roleRepo: Role entity with name: ${updateAdminRoleDto.role} was not found.`);
               throw new BadRequestException({
                 status: HttpStatus.NOT_FOUND,
                 message: messages.ROLE.NOT_FOUND,
               });
             }
             thisAdmin.roleId= newRole;
-            this.logger.log('adminRepo: Entity is updating ...')
+            this.logger.log(`adminRepo: Updating admin entity with ID: ${thisAdmin.id} ...`);
             return from(this.adminRepository.save(thisAdmin)).pipe(
               map((updatedAdmin) => this.mapResponse(updatedAdmin)),
               catchError(() => {
-                this.logger.error('adminRepo: Entity could not update')
+                this.logger.error(`adminRepo: Failed to update admin entity with ID: ${thisAdmin.id}`);
                 throw new BadRequestException({
                   status: HttpStatus.INTERNAL_SERVER_ERROR,
                   message: messages.ROLE.FAILED_TO_UPDATE_ROLE,

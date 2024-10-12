@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import {
-  AuthResponse, CreateDto,
+  AuthResponse,
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  LoginDto, RefreshTokenDto,
-  RequestEmailUpdateDto, UpdateEmailDto,
-  UpdatePasswordDto,
-  User, VerifyEmailCodeDto,
+  User, LoggerService,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
@@ -18,7 +15,8 @@ import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 import { BaseService } from '../auth.service';
 import { AdminEntity } from '../admins/entities/admin.entity';
-import { FindOneDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
+import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
+  UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
 
 
@@ -27,13 +25,14 @@ export class UsersService extends BaseService<User>{
 
   constructor(
     @InjectRepository(UserEntity) protected readonly userRepository: Repository<UserEntity>,
-    @InjectRepository(UserEntity) protected readonly adminRepository: Repository<AdminEntity>,
+    @InjectRepository(AdminEntity) protected readonly adminRepository: Repository<AdminEntity>,
     @InjectRepository(RefreshTokenEntity) protected readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
     protected readonly jwtTokenService: JwtTokenService,
-    private readonly cronService: CronService
+    private readonly cronService: CronService,
+    protected readonly logger: LoggerService,
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger)
   }
 
   createUser(createUserDto: CreateDto) : Observable<User> {

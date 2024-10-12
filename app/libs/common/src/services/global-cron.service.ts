@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, LoggerService } from '@nestjs/common';
 import { LessThan, Repository } from 'typeorm';
 
 @Injectable()
 export class CronService {
-  constructor() {
+  constructor(
+    private readonly logger: LoggerService,
+  ) {
   }
 
   async CleanUpJob(entityRepository: Repository<any>, monthsOld: number){
+    this.logger.log(`Starting cleanup for entities older than ${monthsOld} months.`);
     const currentDate = new Date();
     currentDate.setMonth(currentDate.getMonth() -  monthsOld);
 
@@ -15,11 +18,11 @@ export class CronService {
     if (entitiesToDelete.length > 0) {
       await entityRepository.remove(entitiesToDelete);
       entitiesToDelete.map((entity)=> {
-        console.log(`${entity.id} older than ${monthsOld} months hard-deleted`);
+        this.logger.log(`${entity.id} older than ${monthsOld} months hard-deleted`);
       })
-      console.log(`Entities older than ${monthsOld} months hard-deleted`);
+      this.logger.log(`Entities older than ${monthsOld} months hard-deleted`);
     }else {
-      console.log(`No entities older than ${monthsOld} months found for deletion.`);
+      this.logger.log(`No entities older than ${monthsOld} months found for deletion.`);
     }
   }
 

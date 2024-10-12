@@ -1,12 +1,11 @@
 import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
-  CreateDto,
   LoginDto, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto,
   UserServiceController,
   UserServiceControllerMethods, VerifyEmailCodeDto,
 } from '@app/common';
-import { FindOneDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
+import { CreateDto, FindOneDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
 
 @Controller()
 @UserServiceControllerMethods()

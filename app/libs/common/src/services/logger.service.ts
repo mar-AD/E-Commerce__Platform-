@@ -6,19 +6,19 @@ export class LoggerService extends Logger{
     super();
   }
 
-  public log(message: string): void {
+  public log(message: any): void {
     super.log(message, 'LOG INFOS');
   }
 
-  public debug(message: string): void {
+  public debug(message: any): void {
     super.debug(message, 'DEBUG');
   }
 
-  public warn(message: string): void{
+  public warn(message: any): void{
     super.warn(message, 'WARN');
   }
 
-  public error(message: string): void{
+  public error(message: any): void{
     super.error(message,'ERROR')
     this.Trace()
   }
