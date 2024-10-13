@@ -79,7 +79,7 @@ export class UsersService extends BaseService<User>{
     return this.remove(findOneDto, AuthConstants.user);
   }
 
-  @Cron("0,0,*,*,*")
+  @Cron("0 0 * * *")
   async hardDeleteUser (){
     await this.cronService.CleanUpJob(this.userRepository, 1)
   }

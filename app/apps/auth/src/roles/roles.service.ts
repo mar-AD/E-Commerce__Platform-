@@ -2,7 +2,6 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Observable, of } from 'rxjs';
-import { ResponseDto } from '@app/common/types/response.dto';
 import { dateToTimestamp, Role } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from './entities/role.entity';
@@ -16,10 +15,10 @@ export class RolesService {
   ) {
   }
 
-  create(createRoleDto: CreateRoleDto): Observable<ResponseDto<Role>> {
+  create(createRoleDto: CreateRoleDto) {
     console.log('This action adds a new role');
-    const response = new ResponseDto(this.mapRoleResponse(createRoleDto), HttpStatus.CREATED, 'This action adds a new role');
-    return of(response)
+    // const response = new ResponseDto(this.mapRoleResponse(createRoleDto), HttpStatus.CREATED, 'This action adds a new role');
+    // return of(response)
   }
 
   findAll() {
@@ -49,6 +48,6 @@ export class RolesService {
       updatedAt: dateToTimestamp(role.updatedAt),
     }
   }
-}
+
 
 }

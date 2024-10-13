@@ -5,10 +5,21 @@ import { LoggerService } from '@app/common/services/logger.service';
 import { JwtStrategy } from '@app/common/utils';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from '@app/common/services/global-cron.service';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 
 @Module({
-  imports:[ScheduleModule.forRoot()],
+  imports:[
+    ScheduleModule.forRoot(),
+    JwtModule.registerAsync({
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+      }),
+
+      inject: [ConfigService],
+    }),
+  ],
   providers: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService],
   exports: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService],
 })

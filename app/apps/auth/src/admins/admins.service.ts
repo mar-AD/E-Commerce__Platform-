@@ -135,7 +135,7 @@ export class AdminsService extends BaseService<Admin>{
     return this.remove(findOneDto, AuthConstants.admin);
   }
 
-  @Cron('0,0,*,*,*')
+  @Cron('0 0 * * *')
   async hardDeleteAdmin(){
     await this.cronService.CleanUpJob(this.adminRepository, 1)
   }
