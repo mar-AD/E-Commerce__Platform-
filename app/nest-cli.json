@@ -18,7 +18,12 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/apigateway/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
+        "assets": [
+          {
+            "include": "proto/*.proto",
+            "outDir": "dist/apps/apigateway/proto"
+          }
+        ],
         "watchAssets": true
       }
     },
@@ -29,7 +34,12 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/auth/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
+        "assets": [
+          {
+            "include": "proto/*.proto",
+            "outDir": "dist/apps/auth/proto"
+          }
+        ],
         "watchAssets": true
       }
     },
