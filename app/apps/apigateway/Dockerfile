@@ -7,8 +7,8 @@ COPY package*.json .
 RUN npm install
 
 COPY . .
-RUN mkdir -p ./dist/proto
-COPY ./proto/*.proto ./dist/proto/
+#RUN mkdir -p ./dist/proto
+#COPY ./proto/*.proto ./dist/proto/
 
 EXPOSE 3000
 
