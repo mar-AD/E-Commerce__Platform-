@@ -3,10 +3,9 @@ import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
   LoginDto,
-  LogoutDto,
   RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto,
-  UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,
+  UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto, FindOneDto,
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -56,7 +55,7 @@ export class AdminController {
   }
 
   @Post('admin/logout')
-  logoutAdmin(@Body(ValidationPipe) logoutDto: LogoutDto) {
+  logoutAdmin(@Body(ValidationPipe) logoutDto: RefreshTokenDto) {
     return this.adminService.logout(logoutDto);
   }
 
@@ -70,15 +69,16 @@ export class AdminController {
     return this.adminService.forgotPassword(forgotPassDto);
   }
 
-  @Post('admin/reset-password')
-  adminResetPassword(@Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
+  @Post('admin/reset-password/token')
+  adminResetPassword(@Param('token') token: string, @Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
+    resetPasswordDto.token = token;
     return this.adminService.resetPassword(resetPasswordDto);
   }
 
-  @Delete('admin')
-  remove(@Req() req: Request) {
-    const {id} = req['payload']
-    return this.adminService.remove(id);
+  @Delete('admin/remove')
+  remove(@Req() req: Request, @Body(ValidationPipe) findOneDto: FindOneDto) {
+    findOneDto.id = req['payload'].id
+    return this.adminService.remove(findOneDto);
   }
 
 }

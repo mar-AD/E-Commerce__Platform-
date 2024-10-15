@@ -8,6 +8,7 @@ import { AdminEntity } from '../admins/entities/admin.entity';
 import { RoleEntity } from '../roles/entities/role.entity';
 import { UserEntity } from '../users/entities/user.entity';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
+import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 
 const {
   POSTGRES_USER,
@@ -31,7 +32,7 @@ const url = `postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_AUTH_
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   url: url,
-  entities: [AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity],
+  entities: [AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity],
   migrations: ['./apps/auth/src/db/migrations/*.ts'],
 }
 export const dataSource = new DataSource(dataSourceOptions);

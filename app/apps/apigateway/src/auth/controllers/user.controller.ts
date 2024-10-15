@@ -1,15 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, ValidationPipe } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
+  CreateUserDto, FindOneDto,
   ForgotPasswordDto,
   LoginDto,
-  LogoutDto,
   RefreshTokenDto, ResetPasswordDto,
   UpdateEmailDto,
   UpdatePasswordDto,
 } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from '../../../../auth/src/users/dto/create-user.dto';
 import { Request } from 'express';
 
 
@@ -41,7 +40,7 @@ export class UserController {
   }
 
   @Post('user/logout')
-  logoutUser(@Body(ValidationPipe) logoutDto: LogoutDto) {
+  logoutUser(@Body(ValidationPipe) logoutDto: RefreshTokenDto) {
     return this.userService.logout(logoutDto);
   }
 
@@ -55,14 +54,15 @@ export class UserController {
     return this.userService.forgotPassword(forgotPassDto);
   }
 
-  @Post('user/reset-password')
-  userResetPassword(@Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
+  @Post('user/reset-password/token')
+  userResetPassword(@Param('token') token: string, @Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
+    resetPasswordDto.token = token;
     return this.userService.resetPassword(resetPasswordDto);
   }
 
-  @Delete('user/:id')
-  remove(@Req() req: Request) {
-    const {id} = req['payload']
-    return this.userService.remove(id);
+  @Delete('user/remove')
+  remove(@Req() req: Request, @Body(ValidationPipe) findOneDto: FindOneDto) {
+    findOneDto.id = req['payload'].id
+    return this.userService.remove(findOneDto);
   }
 }

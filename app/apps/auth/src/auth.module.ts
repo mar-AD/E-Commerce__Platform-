@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { AdminsModule } from './admins/admins.module';
 import { RolesModule } from './roles/roles.module';
@@ -11,6 +11,11 @@ import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule, JwtStrategy } from '@app/common';
+import { BaseService } from './auth.service';
+import { AdminService } from '../../apigateway/src/auth/services/admin.service';
+import { RolesService } from './roles/roles.service';
+import { UsersService } from './users/users.service';
+import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
 
 @Module({
   imports: [
@@ -22,6 +27,9 @@ import { CommonModule, JwtStrategy } from '@app/common';
       ]
     }),
 
+    forwardRef(() => UsersModule),
+    forwardRef(() => AdminsModule),
+    forwardRef(() => RolesModule),
     CommonModule,
     PassportModule,
     JwtModule.registerAsync({
@@ -47,10 +55,10 @@ import { CommonModule, JwtStrategy } from '@app/common';
       // }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity]),
-    UsersModule, AdminsModule, RolesModule
+    TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
   ],
   controllers: [],
-  providers: [JwtStrategy],
+  providers: [],
+  exports:[]
 })
 export class AuthModule {}
