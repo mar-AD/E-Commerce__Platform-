@@ -21,7 +21,7 @@
         "assets": [
           {
             "include": "proto/*.proto",
-            "outDir": "dist/apps/apigateway/proto"
+            "outDir": "dist/apps/apigateway/proto/"
           }
         ],
         "watchAssets": true
@@ -37,7 +37,7 @@
         "assets": [
           {
             "include": "proto/*.proto",
-            "outDir": "dist/apps/auth/proto"
+            "outDir": "dist/apps/auth/proto/"
           }
         ],
         "watchAssets": true

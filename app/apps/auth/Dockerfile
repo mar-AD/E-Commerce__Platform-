@@ -8,10 +8,10 @@ RUN npm install
 
 COPY . .
 RUN mkdir -p ./dist/proto
-COPY ./proto/*.proto ./dist/proto/
+COPY ./proto/*.proto ./dist/auth/proto/
 
 EXPOSE 50051
 
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:dev auth"]
 
 #CMD ["npm", "run", "test"]

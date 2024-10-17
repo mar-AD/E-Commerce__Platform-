@@ -18,7 +18,7 @@ import { AUTH_SERVICE } from './constants';
       transport: Transport.GRPC,
       options: {
         package: AUTH_PACKAGE_NAME,
-        protoPath: join(__dirname, '../auth.proto'),
+        protoPath: join(__dirname, '../proto/auth.proto'),
         url: 'auth:50051',
       },
       },

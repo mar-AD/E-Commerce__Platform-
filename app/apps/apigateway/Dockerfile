@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 RUN mkdir -p ./dist/proto
-COPY ./proto/*.proto ./dist/proto/
+COPY ./proto/*.proto ./dist/apigateway/proto/
 
 EXPOSE 3000
 

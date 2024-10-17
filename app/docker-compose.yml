@@ -11,8 +11,8 @@ services:
       - auth
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules
-    command: npm run start:dev apigateway
+      - /usr/src/app/node_modules/
+#    command: tail -f /dev/null
 
   auth:
     build:
@@ -26,8 +26,8 @@ services:
       - '50052:50051'
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules
-    command: npm run start:dev auth
+      - /usr/src/app/node_modules/
+#    command: tail -f /dev/null
 
   auth-db:
     image: postgres
