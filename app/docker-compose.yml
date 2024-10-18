@@ -12,7 +12,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules/
-#    command: tail -f /dev/null
+#    command: node dist/apps/apigateway/main.js
 
   auth:
     build:
@@ -27,7 +27,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules/
-#    command: tail -f /dev/null
+#    command: node dist/apps/auth/main.js
 
   auth-db:
     image: postgres

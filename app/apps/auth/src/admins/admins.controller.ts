@@ -6,8 +6,8 @@ import {
   RequestEmailUpdateDto,
   VerifyEmailCodeDto,
 } from '@app/common';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
+import { CreateAdminDto } from '@app/common/dtos/create-admin.dto';
+import { UpdateAdminRoleDto } from '@app/common/dtos/update-admin-role.dto';
 import { LoginDto, RefreshTokenDto, UpdateEmailDto, UpdatePasswordDto, ForgotPasswordDto, ResetPasswordDto, FindOneDto } from '@app/common/dtos';
 
 @Controller()

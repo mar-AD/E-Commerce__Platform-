@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateAdminDto } from '../../../../apps/auth/src/admins/dto/create-admin.dto';
+import { CreateAdminDto } from './create-admin.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 

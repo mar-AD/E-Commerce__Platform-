@@ -7,11 +7,14 @@ COPY package*.json .
 RUN npm install
 
 COPY . .
-RUN mkdir -p ./dist/proto
-COPY ./proto/*.proto ./dist/auth/proto/
+
+#RUN npm run build
+#
+#RUN mkdir -p ./dist/apps/auth/proto
+#COPY ./proto/auth.proto ./dist/apps/auth/proto/
 
 EXPOSE 50051
 
-CMD ["npm", "run", "start:dev auth"]
+CMD ["npm", "run", "start:dev"]
 
 #CMD ["npm", "run", "test"]
