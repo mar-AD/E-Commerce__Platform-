@@ -1,4 +1,9 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   Admin,
   AuthResponse, CronService,
@@ -45,7 +50,7 @@ export class AdminsService extends BaseService<Admin>{
       switchMap((thisRole)=>{
         if(!thisRole){
           this.logger.error(`roleRepo: Role "${role}" not found`);
-          throw new BadRequestException({
+          throw new NotFoundException ({
             status: HttpStatus.NOT_FOUND,
             message: messages.ROLE.NOT_FOUND
           })
@@ -82,7 +87,7 @@ export class AdminsService extends BaseService<Admin>{
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
           this.logger.error(`adminRepo: Admin entity with ID: ${id} was not found.`);
-          throw new BadRequestException({
+          throw new NotFoundException({
             status: HttpStatus.NOT_FOUND,
             message: messages.ADMIN.NOT_FOUND
           })
@@ -92,7 +97,7 @@ export class AdminsService extends BaseService<Admin>{
           switchMap((newRole) => {
             if (!newRole) {
               this.logger.error(`roleRepo: Role entity with name: ${updateAdminRoleDto.role} was not found.`);
-              throw new BadRequestException({
+              throw new NotFoundException({
                 status: HttpStatus.NOT_FOUND,
                 message: messages.ROLE.NOT_FOUND,
               });
@@ -103,7 +108,7 @@ export class AdminsService extends BaseService<Admin>{
               map((updatedAdmin) => this.mapResponse(updatedAdmin)),
               catchError(() => {
                 this.logger.error(`adminRepo: Failed to update admin entity with ID: ${thisAdmin.id}`);
-                throw new BadRequestException({
+                throw new InternalServerErrorException({
                   status: HttpStatus.INTERNAL_SERVER_ERROR,
                   message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
                 });

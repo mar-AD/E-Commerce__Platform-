@@ -115,8 +115,8 @@ export interface CreateRoleDto {
 
 export interface UpdateRoleDto {
   id: string;
-  name: string;
-  permissions: Permissions[];
+  name?: string;
+  permissions?: Permissions[];
 }
 
 /** user response */

@@ -22,7 +22,7 @@ export class RolesController implements RoleServiceController{
   }
 
   getRoleById(findOneDto: FindOneDto) {
-    return this.rolesService.findOne(findOneDto.id);
+    return this.rolesService.findOne(findOneDto);
   }
 
   updateRole(updateRoleDto: UpdateRoleDto) {
@@ -30,6 +30,6 @@ export class RolesController implements RoleServiceController{
   }
 
   deleteRole(findOneDto: FindOneDto) {
-    return this.rolesService.remove(findOneDto.id);
+    return this.rolesService.remove(findOneDto);
   }
 }

@@ -139,7 +139,7 @@ message CreateRoleDto {
 
 message UpdateRoleDto {
   string id = 1;
-  string name = 2;
+  optional string name = 2;
   repeated Permissions permissions = 3;
 }
 // user response
