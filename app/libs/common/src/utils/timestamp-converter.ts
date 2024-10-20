@@ -7,9 +7,13 @@ export function timestampToDate(timestamp: Timestamp): Date {
 }
 
 
-export function dateToTimestamp(date: Date): Timestamp {
+export function dateToTimestamp(date: Date | null | undefined): Timestamp | null {
+  // Check if the date is null or undefined
+  if (!date) return null;
+
   const timestamp = new Timestamp();
   timestamp.setSeconds(Math.floor(date.getTime() / 1000));
   timestamp.setNanos((date.getTime() % 1000) * 1000000); // Convert milliseconds to nanoseconds
-  return timestamp;
+  console.log('mytimestamp',timestamp);
+  return timestamp; // Return the constructed Timestamp
 }

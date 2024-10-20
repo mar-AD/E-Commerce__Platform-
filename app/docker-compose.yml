@@ -11,8 +11,8 @@ services:
       - auth
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules/
-#    command: node dist/apps/apigateway/main.js
+      - /usr/src/app/node_modules
+    command: sh -c "echo 'Starting API Gateway'; npm run start:dev"
 
   auth:
     build:
@@ -26,8 +26,9 @@ services:
       - '50052:50051'
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules/
-#    command: node dist/apps/auth/main.js
+      - /usr/src/app/node_modules
+    command: sh -c "echo 'Starting Auth Service'; npm run start:dev"
+
 
   auth-db:
     image: postgres

@@ -13,7 +13,7 @@ export class RefreshTokenEntity {
   @Column({type: 'timestamp'})
   expiresAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @ManyToOne(() => UserEntity, { nullable: true, onDelete: 'CASCADE' })

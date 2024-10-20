@@ -94,6 +94,7 @@ export class UsersService extends BaseService<User>{
       createdAt: dateToTimestamp(user.createdAt),
       updatedAt: dateToTimestamp(user.updatedAt),
       deletedAt: dateToTimestamp(user.deletedAt)
+
     }
   }
 }

@@ -8,10 +8,7 @@ RUN npm install
 
 COPY . .
 
-#RUN npm run build
-#
-#RUN mkdir -p ./dist/apps/auth/proto
-#COPY ./proto/auth.proto ./dist/apps/auth/proto/
+RUN npm run build
 
 EXPOSE 50051
 

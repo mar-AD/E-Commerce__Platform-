@@ -8,10 +8,7 @@ RUN npm install
 
 COPY . .
 
-#RUN npm run build
-#
-#RUN mkdir -p ./dist/apps/apigateway/proto
-#COPY ./proto/auth.proto ./dist/apps/apigateway/proto/
+RUN npm run build
 
 EXPOSE 3000
 
