@@ -8,7 +8,9 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+#RUN npm run build
+#
+#RUN cp -r ./proto ./dist/proto
 
 EXPOSE 50051
 
