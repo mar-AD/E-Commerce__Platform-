@@ -12,7 +12,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    command: sh -c "echo 'Starting API Gateway'; npm run start:dev"
+    command: sh -c "echo 'Starting API Gateway'; npm run start:dev apigateway"
 
   auth:
     build:
@@ -27,7 +27,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    command: sh -c "echo 'Starting Auth Service'; npm run start:dev"
+    command: sh -c "echo 'Starting Auth Service'; npm run start:dev auth"
 
 
   auth-db:

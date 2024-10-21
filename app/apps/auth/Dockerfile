@@ -14,6 +14,6 @@ COPY . .
 
 EXPOSE 50051
 
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:dev auth"]
 
 #CMD ["npm", "run", "test"]
