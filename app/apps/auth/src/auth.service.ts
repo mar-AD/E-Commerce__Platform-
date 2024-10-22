@@ -88,7 +88,6 @@ export abstract class  BaseService<E> {
 
   login(loginRequest: LoginDto, type: AuthConstants): Observable<AuthResponse> {
     const {email, password} = loginRequest;
-    // const repository = isAdmin ? this.adminRepository : this.userRepository;
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type)
 
@@ -108,14 +107,14 @@ export abstract class  BaseService<E> {
           switchMap((isMatch)=>{
             if (!isMatch) {
               this.logger.error(`${type+'Repo'}: Password verification failed.`);
-              throw new BadRequestException({
+               throw new BadRequestException({
                 status: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: messageType.PASSWORD.INVALID_PASSWORD,
               });
             }
             const payload = {
               id: thisEntity.id,
-              type: AuthConstants.admin
+              type: type
             }
 
             this.logger.log(`${type+'Repo'}: Generating access and refresh tokens ...`);
@@ -124,7 +123,7 @@ export abstract class  BaseService<E> {
             const saveRefToken = {
               token: refreshToken,
               expiresAt: getExpiryDate(15),
-              admin: thisEntity
+              [type]: thisEntity
             }
 
             this.logger.log(`refreshTknRepo: Saving the refToken to the repo.`);
