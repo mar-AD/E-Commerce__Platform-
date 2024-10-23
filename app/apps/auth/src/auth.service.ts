@@ -27,6 +27,7 @@ import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
+import { GrpcInvalidArgumentException, GrpcNotFoundException } from 'nestjs-grpc-exceptions';
 
 @Injectable()
 export abstract class  BaseService<E> {
@@ -96,10 +97,9 @@ export abstract class  BaseService<E> {
       switchMap((thisEntity) => {
         if(!thisEntity){
           this.logger.error(`${type+'Repo'}: entity with email "${email}" is not exist.`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
-            message: messageType.INVALID_CREDENTIALS
-          })
+          throw new GrpcNotFoundException (
+            messageType.INVALID_CREDENTIALS
+          )
         }
 
         this.logger.log(`${type+'Repo'}: Verifying password ...`);
@@ -107,10 +107,9 @@ export abstract class  BaseService<E> {
           switchMap((isMatch)=>{
             if (!isMatch) {
               this.logger.error(`${type+'Repo'}: Password verification failed.`);
-               throw new BadRequestException({
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: messageType.PASSWORD.INVALID_PASSWORD,
-              });
+               throw new GrpcInvalidArgumentException(
+                messages.PASSWORD.INVALID_PASSWORD,
+              );
             }
             const payload = {
               id: thisEntity.id,
@@ -131,10 +130,9 @@ export abstract class  BaseService<E> {
               switchMap((refToken) => {
                 if(!refToken){
                   this.logger.error(`refreshTknRepo: Failed saving the refToken to the repo.`);
-                  throw new BadRequestException({
-                    status: HttpStatus.BAD_REQUEST,
-                    message: messageType.TOKEN.FAILED_TO_SAVE_REF_TOKEN
-                  })
+                  throw new GrpcInvalidArgumentException(
+                    messages.TOKEN.FAILED_TO_SAVE_REF_TOKEN
+                  )
                 }
 
                 this.logger.log(`${type+'Repo'}: ${type} logged in successfully`);

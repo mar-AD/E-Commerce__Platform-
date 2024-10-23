@@ -13,6 +13,15 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     command: sh -c "echo 'Starting API Gateway'; npm run start:dev apigateway"
+#    develop:
+#      watch:
+#        - action: sync
+#          path: ./apps/apigateway/src
+#          target: /usr/src/app/src
+#          ignore:
+#            - node_modules/
+#        - action: rebuild
+#          path: package.json
 
   auth:
     build:
@@ -28,6 +37,15 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     command: sh -c "echo 'Starting Auth Service'; npm run start:dev auth"
+#    develop:
+#      watch:
+#        - action: sync
+#          path: ./apps/auth/src
+#          target: /usr/src/app/src
+#          ignore:
+#            - node_modules/
+#        - action: rebuild
+#          path: package.json
 
 
   auth-db:
