@@ -27,7 +27,11 @@ import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
-import { GrpcInvalidArgumentException, GrpcNotFoundException } from 'nestjs-grpc-exceptions';
+import {
+  GrpcInternalException,
+  GrpcNotFoundException,
+  GrpcUnauthenticatedException,
+} from 'nestjs-grpc-exceptions';
 
 @Injectable()
 export abstract class  BaseService<E> {
@@ -107,7 +111,7 @@ export abstract class  BaseService<E> {
           switchMap((isMatch)=>{
             if (!isMatch) {
               this.logger.error(`${type+'Repo'}: Password verification failed.`);
-               throw new GrpcInvalidArgumentException(
+               throw new GrpcUnauthenticatedException(
                 messages.PASSWORD.INVALID_PASSWORD,
               );
             }
@@ -130,7 +134,7 @@ export abstract class  BaseService<E> {
               switchMap((refToken) => {
                 if(!refToken){
                   this.logger.error(`refreshTknRepo: Failed saving the refToken to the repo.`);
-                  throw new GrpcInvalidArgumentException(
+                  throw new GrpcInternalException(
                     messages.TOKEN.FAILED_TO_SAVE_REF_TOKEN
                   )
                 }
