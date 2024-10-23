@@ -11,7 +11,7 @@ async function bootstrap() {
       {
         transport: Transport.GRPC,
         options: {
-          protoPath: join(__dirname, '../auth.proto'),
+          protoPath: join(__dirname, '../proto/auth.proto'),
           package: AUTH_PACKAGE_NAME,
           url: '0.0.0.0:50051',
         },

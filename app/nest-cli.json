@@ -20,7 +20,7 @@
         "tsConfigPath": "apps/apigateway/tsconfig.app.json",
         "assets": [
           {
-            "include": "proto/*.proto",
+            "include": "proto/**/*.proto",
             "outDir": "dist/apps/apigateway/proto"
           }
         ],
@@ -36,7 +36,7 @@
         "tsConfigPath": "apps/auth/tsconfig.app.json",
         "assets": [
           {
-            "include": "proto/*.proto",
+            "include": "proto/**/*.proto",
             "outDir": "dist/apps/auth/proto"
           }
         ],

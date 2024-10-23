@@ -18,9 +18,9 @@ export class EmailVerificationCodeEntity {
   @Column()
   code: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @Column({type: 'timestamp'})
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   expiresAt: Date;
 }

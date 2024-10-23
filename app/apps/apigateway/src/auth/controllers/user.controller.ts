@@ -1,13 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Delete, Req, ValidationPipe, Get } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
-  CreateUserDto, FindOneDto,
+  CreateDto, FindOneDto,
   ForgotPasswordDto,
   LoginDto,
-  RefreshTokenDto, ResetPasswordDto,
+  RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto,
-  UpdatePasswordDto,
-} from '@app/common';
+  UpdatePasswordDto, VerifyEmailCodeDto,
+} from '@app/common/dtos' ;
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 
@@ -18,7 +18,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
-  createUser(@Body(ValidationPipe) createUserDto: CreateUserDto) {
+  createUser(@Body(ValidationPipe) createUserDto: CreateDto) {
     return this.userService.create(createUserDto);
   }
 
@@ -31,6 +31,18 @@ export class UserController {
   updateUserPassword(@Req() req: Request, @Body(ValidationPipe) updatePasswordDto: UpdatePasswordDto) {
     updatePasswordDto.id = req['payload'].id
     return this.userService.updatePassword(updatePasswordDto);
+  }
+
+  @Post('user/requestEmailUpdate')
+  RequestAdminEmailUpdate(@Req() req: Request, @Body() requestAdminEmailUpdate: RequestEmailUpdateDto) {
+    requestAdminEmailUpdate.id = req['payload'].id;
+    return this.userService.RequestEmailUpdate(requestAdminEmailUpdate)
+  }
+
+  @Get('user/verifyEmailCode')
+  verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
+    verifyEmailCodeDto.id = req['payload'].id;
+    return this.userService.verifyEmailCode(verifyEmailCodeDto)
   }
 
   @Patch('userEmailUpdate')

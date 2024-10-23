@@ -9,6 +9,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AUTH_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
 import { AUTH_SERVICE } from './constants';
+import { APP_FILTER } from '@nestjs/core';
+import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions';
 
 @Module({
   imports: [
@@ -18,13 +20,18 @@ import { AUTH_SERVICE } from './constants';
       transport: Transport.GRPC,
       options: {
         package: AUTH_PACKAGE_NAME,
-        protoPath: join(__dirname, '../auth.proto'),
+        protoPath: join(__dirname, '../proto/auth.proto'),
         url: 'auth:50051',
       },
       },
     ]),
   ],
   controllers: [UserController, AdminController, RolesController],
-  providers: [UserService, AdminService, RolesService],
+  providers: [UserService, AdminService, RolesService,
+    {
+      provide: APP_FILTER,
+      useClass: GrpcServerExceptionFilter,
+    },
+  ],
 })
 export class AuthModule {}

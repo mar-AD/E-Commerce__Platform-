@@ -27,6 +27,6 @@
       "google/protobuf/*": ["google/protobuf/*"]
     }
   },
-  "include": ["apps/**/*", "libs/**/*", "google/**/*"],
+  "include": ["apps/**/*", "libs/**/*", "google/**/*", "proto/**/*.proto" ],
   "exclude": ["node_modules", "dist"]
 }

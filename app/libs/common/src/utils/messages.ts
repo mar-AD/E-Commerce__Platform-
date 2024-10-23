@@ -1,6 +1,6 @@
 export const messages = {
   USER: {
-    FETCH_ALL: "Fetch all users ",
+    FETCH_ALL: "All users fetched successfully",
     FETCH_USER_BY_NAME: "Fetch user by userName ",
     FETCH_USER_BY_EMAIL: "Fetch user by email ",
     LOGIN_SUCCESSFUL: "User login successful",
@@ -20,7 +20,7 @@ export const messages = {
     FAILED_SET_PASSWORD: "Failed to set user password",
   },
   ADMIN: {
-    FETCH_ALL: "Fetch all admins ",
+    FETCH_ALL: "All admins fetched successfully",
     FETCH_ADMIN_BY_NAME: "Fetch admin by adminName ",
     FETCH_ADMIN_BY_EMAIL: "Fetch admin by email ",
     LOGIN_SUCCESSFUL: "Admin login successful",
@@ -57,12 +57,12 @@ export const messages = {
     RESET_PASS_EMAIL_SENT: "Password reset email sent successfully! Please use the link within one hour to reset your password.",
   },
   ROLE: {
-    FETCH_ALL_ROLES: "Fetch all roles ",
+    FETCH_ALL_ROLES: "All roles fetched successfully",
     FETCH_ROLE_BY_ROLE_NAME: "Fetch role by role name ",
     ROLE_CREATED_SUCCESSFULLY: "Role created successfully",
     ROLE_UPDATED_SUCCESSFULLY: "Role updated successfully",
     ROLE_REMOVED_SUCCESSFULLY: "The role was successfully deleted",
-    FAILED_TO_FETCH_ROLE: "Fail to fetch role ",
+    FAILED_TO_FETCH_ROLE: "Failed to fetch role ",
     FAILED_TO_FETCH_ROLE_FOR_UPDATE: "Failed to fetch role for update",
     FAILED_TO_UPDATE_ROLE: "Failed to update role ",
     NOT_FOUND: "This role does not exist",

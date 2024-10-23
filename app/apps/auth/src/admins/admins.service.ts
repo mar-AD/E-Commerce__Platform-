@@ -1,4 +1,9 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   Admin,
   AuthResponse, CronService,
@@ -13,12 +18,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AdminEntity } from './entities/admin.entity';
 import { Repository } from 'typeorm';
 import { RoleEntity } from '../roles/entities/role.entity';
-import { CreateAdminDto } from './dto/create-admin.dto';
+import { CreateAdminDto } from '@app/common/dtos/create-admin.dto';
 import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { AuthConstants } from '../constants';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
-import { UpdateAdminRoleDto } from './dto/update-admin-role.dto';
+import { UpdateAdminRoleDto } from '@app/common/dtos/update-admin-role.dto';
 import { BaseService } from '../auth.service';
 import { UserEntity } from '../users/entities/user.entity';
 import { FindOneDto, ResetPasswordDto } from '@app/common/dtos';
@@ -45,7 +50,7 @@ export class AdminsService extends BaseService<Admin>{
       switchMap((thisRole)=>{
         if(!thisRole){
           this.logger.error(`roleRepo: Role "${role}" not found`);
-          throw new BadRequestException({
+          throw new NotFoundException ({
             status: HttpStatus.NOT_FOUND,
             message: messages.ROLE.NOT_FOUND
           })
@@ -82,7 +87,7 @@ export class AdminsService extends BaseService<Admin>{
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
           this.logger.error(`adminRepo: Admin entity with ID: ${id} was not found.`);
-          throw new BadRequestException({
+          throw new NotFoundException({
             status: HttpStatus.NOT_FOUND,
             message: messages.ADMIN.NOT_FOUND
           })
@@ -92,7 +97,7 @@ export class AdminsService extends BaseService<Admin>{
           switchMap((newRole) => {
             if (!newRole) {
               this.logger.error(`roleRepo: Role entity with name: ${updateAdminRoleDto.role} was not found.`);
-              throw new BadRequestException({
+              throw new NotFoundException({
                 status: HttpStatus.NOT_FOUND,
                 message: messages.ROLE.NOT_FOUND,
               });
@@ -103,7 +108,7 @@ export class AdminsService extends BaseService<Admin>{
               map((updatedAdmin) => this.mapResponse(updatedAdmin)),
               catchError(() => {
                 this.logger.error(`adminRepo: Failed to update admin entity with ID: ${thisAdmin.id}`);
-                throw new BadRequestException({
+                throw new InternalServerErrorException({
                   status: HttpStatus.INTERNAL_SERVER_ERROR,
                   message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
                 });
