@@ -14,7 +14,7 @@ import {
   AuthResponse,
   Empty,
   generateEmailCode,
-  getExpiryDate, GrpcInternalException, GrpcNotFoundException, GrpcUnauthenticatedException,
+  getExpiryDate,
   hashPassword,
   JwtTokenService, LoggerService,
   messages,
@@ -27,11 +27,8 @@ import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
-// import {
-//   GrpcInternalException,
-//   GrpcNotFoundException,
-//   GrpcUnauthenticatedException,
-// } from 'nestjs-grpc-exceptions';
+import { GrpcInternalException, GrpcNotFoundException, GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
+
 
 @Injectable()
 export abstract class  BaseService<E> {
