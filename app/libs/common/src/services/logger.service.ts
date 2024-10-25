@@ -20,10 +20,10 @@ export class LoggerService extends Logger{
 
   public error(message: any): void{
     super.error(message,'ERROR')
-    this.Trace()
+    // this.Trace()
   }
 
-  public Trace(){
-    console.trace()
-  }
+  // public Trace(){
+  //   console.trace()
+  // }
 }

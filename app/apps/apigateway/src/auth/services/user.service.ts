@@ -7,7 +7,7 @@ import {
   USER_SERVICE_NAME,
   UserServiceClient, VerifyEmailCodeDto,
 } from '@app/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '../constants';
 
 
@@ -26,7 +26,20 @@ export class UserService implements OnModuleInit {
   }
 
   login(loginRequest: LoginDto) {
-    return this.userService.userLogin(loginRequest);
+    try {
+      return this.userService.userLogin(loginRequest);
+
+    } catch (error) {
+      // Ensure RpcException is thrown correctly
+      if (error instanceof RpcException) {
+        throw error; // Propagate RpcException
+      }
+      // For any other error, throw a new RpcException
+      throw new RpcException({
+        code: 500,
+        message: 'An unknown error occurred',
+      });
+    }
   }
 
   updatePassword(updatePasswordDto: UpdatePasswordDto) {

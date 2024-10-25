@@ -27,7 +27,11 @@ import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
-import { GrpcInternalException, GrpcNotFoundException, GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
+import { RpcException } from '@nestjs/microservices';
+// import { GrpcInternalException, GrpcNotFoundException, GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
+import { status } from '@grpc/grpc-js';
+import { GrpcInternalException, GrpcUnauthenticatedException } from 'nestjs-grpc-exceptions';
+
 
 
 @Injectable()
@@ -98,9 +102,7 @@ export abstract class  BaseService<E> {
       switchMap((thisEntity) => {
         if(!thisEntity){
           this.logger.error(`${type+'Repo'}: entity with email "${email}" is not exist.`);
-          throw new GrpcNotFoundException (
-            messageType.INVALID_CREDENTIALS
-          )
+          throw new RpcException({ code: status.NOT_FOUND, message: messageType.INVALID_CREDENTIALS});
         }
 
         this.logger.log(`${type+'Repo'}: Verifying password ...`);
@@ -108,9 +110,7 @@ export abstract class  BaseService<E> {
           switchMap((isMatch)=>{
             if (!isMatch) {
               this.logger.error(`${type+'Repo'}: Password verification failed.`);
-               throw new GrpcUnauthenticatedException(
-                messages.PASSWORD.INVALID_PASSWORD,
-              );
+              throw new RpcException({ code: status.UNAUTHENTICATED, message: messages.PASSWORD.INVALID_PASSWORD });
             }
             const payload = {
               id: thisEntity.id,
@@ -131,9 +131,7 @@ export abstract class  BaseService<E> {
               switchMap((refToken) => {
                 if(!refToken){
                   this.logger.error(`refreshTknRepo: Failed saving the refToken to the repo.`);
-                  throw new GrpcInternalException(
-                    messages.TOKEN.FAILED_TO_SAVE_REF_TOKEN
-                  )
+                  throw new RpcException({ code: status.INTERNAL, message: messages.TOKEN.FAILED_TO_SAVE_REF_TOKEN });
                 }
 
                 this.logger.log(`${type+'Repo'}: ${type} logged in successfully`);
