@@ -20,7 +20,7 @@ import { ConfigService } from '@nestjs/config';
       inject: [ConfigService],
     }),
   ],
-  providers: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService, GrpcExceptionFilter],
-  exports: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService, GrpcExceptionFilter],
+  providers: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService],
+  exports: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService],
 })
 export class CommonModule {}

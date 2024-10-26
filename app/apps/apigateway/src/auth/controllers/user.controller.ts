@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Delete, Req, ValidationPipe, Get } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Delete, Req, Get } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
   CreateDto, FindOneDto,
@@ -18,17 +18,17 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
-  createUser(@Body(ValidationPipe) createUserDto: CreateDto) {
+  createUser(@Body() createUserDto: CreateDto) {
     return this.userService.create(createUserDto);
   }
 
   @Post('user/login')
-  userLogin(@Body(ValidationPipe) loginRequest: LoginDto) {
+  userLogin(@Body() loginRequest: LoginDto) {
     return this.userService.login(loginRequest);
   }
 
   @Patch('userPassUpdate')
-  updateUserPassword(@Req() req: Request, @Body(ValidationPipe) updatePasswordDto: UpdatePasswordDto) {
+  updateUserPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
     updatePasswordDto.id = req['payload'].id
     return this.userService.updatePassword(updatePasswordDto);
   }
@@ -46,34 +46,34 @@ export class UserController {
   }
 
   @Patch('userEmailUpdate')
-  updateUserEmail(@Req() req: Request, @Body(ValidationPipe) updateEmailDto: UpdateEmailDto) {
+  updateUserEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
     updateEmailDto.id = req['payload'].id
     return this.userService.updateEmail(updateEmailDto);
   }
 
   @Post('user/logout')
-  logoutUser(@Body(ValidationPipe) logoutDto: RefreshTokenDto) {
+  logoutUser(@Body() logoutDto: RefreshTokenDto) {
     return this.userService.logout(logoutDto);
   }
 
   @Post('user/refresh-token')
-  userRefreshToken(@Body(ValidationPipe) refreshTokenDto: RefreshTokenDto) {
+  userRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.userService.refreshToken(refreshTokenDto);
   }
 
   @Post('user/forgot-password')
-  userForgotPassword(@Body(ValidationPipe) forgotPassDto: ForgotPasswordDto) {
+  userForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
     return this.userService.forgotPassword(forgotPassDto);
   }
 
   @Post('user/reset-password/token')
-  userResetPassword(@Param('token') token: string, @Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
+  userResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     resetPasswordDto.token = token;
     return this.userService.resetPassword(resetPasswordDto);
   }
 
   @Delete('user/remove')
-  remove(@Req() req: Request, @Body(ValidationPipe) findOneDto: FindOneDto) {
+  remove(@Req() req: Request, @Body() findOneDto: FindOneDto) {
     findOneDto.id = req['payload'].id
     return this.userService.remove(findOneDto);
   }

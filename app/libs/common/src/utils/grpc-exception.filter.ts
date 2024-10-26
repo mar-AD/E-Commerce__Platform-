@@ -9,7 +9,7 @@ import {
   ConflictException,
   UnauthorizedException,
   ForbiddenException,
-  ServiceUnavailableException,
+  ServiceUnavailableException
 } from '@nestjs/common';
 import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
 import { isObject } from 'class-validator';
@@ -63,28 +63,76 @@ export const GrpcToHttpExceptionMapping: GrpcToHttpExceptionMap = {
 };
 
 
+// @Catch()
+// export class GrpcExceptionFilter implements ExceptionFilter {
+//   catch(exception: any, host: ArgumentsHost) {
+//     const ctx = host.switchToHttp();
+//     const response = ctx.getResponse();
+//
+//     // Get the appropriate HTTP exception based on the gRPC status
+//     const grpcStatus = exception.code || grpc.status.UNKNOWN;
+//     const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;
+//
+//     const message = exception.details || exception.message.split(': ')[1] || 'An error occurred';
+//     // Create an instance of the HttpException and retrieve its status
+//     const httpException = new HttpExceptionClass(message);
+//     const status = httpException.getStatus ? httpException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+//
+//
+//     const responsePayload = {
+//       status,
+//       message: httpException.message,
+//       error: HttpExceptionClass.name,
+//     };
+//     console.log(`GrpcExceptionFilter response: ${JSON.stringify(responsePayload)}`);
+//     if (exception.getStatus() === 400) {
+//       const responseBody = exception.getResponse();
+//
+//       // Transform the response as needed
+//       response.status(exception.getStatus());
+//       response.send({
+//         status: exception.getStatus(),
+//         message: responseBody.message || responseBody,
+//         error: 'Bad Request',
+//       });
+//     } else{
+//       response.status(status).json(responsePayload);
+//     }
+//   }
+// }
+
 @Catch()
 export class GrpcExceptionFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 
-    // Get the appropriate HTTP exception based on the gRPC status
-    const grpcStatus = exception.code || grpc.status.UNKNOWN;
-    const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;
+    // Detect if exception is a BadRequestException (validation error)
+    if (exception instanceof BadRequestException) {
+      const responseBody = exception.getResponse();
 
-    const message = exception.details || exception.message.split(': ')[1] || 'An error occurred';
-    // Create an instance of the HttpException and retrieve its status
-    const httpException = new HttpExceptionClass(message);
-    const status = httpException.getStatus ? httpException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+      const message = Array.isArray(responseBody['message']) ? responseBody['message'].join(', ') : responseBody['message'];
 
-    const responsePayload = {
-      status,
-      message: httpException.message,
-      error: HttpExceptionClass.name,
-    };
-    console.log(`GrpcExceptionFilter response: ${JSON.stringify(responsePayload)}`);
+      // Extract validation message(s) and respond with INVALID_ARGUMENT status for gRPC
+      response.status(HttpStatus.BAD_REQUEST).json({
+        status: HttpStatus.BAD_REQUEST,
+        message: message,
+        error: 'Bad Request',
+      });
+    } else {
+      // Handle other gRPC error mappings
+      const grpcStatus = exception.code || grpc.status.UNKNOWN;
+      const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;
+      const message = exception.details || exception.message || 'An error occurred';
+      const httpException = new HttpExceptionClass(message);
+      const status = httpException.getStatus ? httpException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    response.status(status).json(responsePayload);
+      response.status(status).json({
+        status,
+        message: httpException.message,
+        error: HttpExceptionClass.name,
+      });
+    }
   }
 }
+

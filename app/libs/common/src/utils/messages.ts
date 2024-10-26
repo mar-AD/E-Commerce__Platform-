@@ -77,6 +77,9 @@ export const messages = {
     REF_TOKEN_WILL_EXPIRE: "Refresh token is about to expire",
     REF_TOKEN_HAS_EXPIRED: "Refresh token has expired",
     REF_TOKEN_REVOKED_SUCCESSFULLY:"RefreshToken successfully revoked",
-    FAILED_TO_SAVE_REF_TOKEN: "Failed to save refresh token"
+    FAILED_TO_SAVE_REF_TOKEN: "Failed to save refresh token",
+    FAILED_TO_GENERATE_REF_TOKEN: "Error generating refresh token",
+    FAILED_TO_GENERATE_ACC_TOKEN: "Error generating access token",
+    INVALID_OR_EXPIRED_TOKEN:"Invalid or expired token"
   }
 }

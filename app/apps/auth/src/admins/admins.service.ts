@@ -28,6 +28,8 @@ import { BaseService } from '../auth.service';
 import { UserEntity } from '../users/entities/user.entity';
 import { FindOneDto, ResetPasswordDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 @Injectable()
 export class AdminsService extends BaseService<Admin>{
@@ -50,8 +52,8 @@ export class AdminsService extends BaseService<Admin>{
       switchMap((thisRole)=>{
         if(!thisRole){
           this.logger.error(`roleRepo: Role "${role}" not found`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messages.ROLE.NOT_FOUND
           })
         }
@@ -87,8 +89,8 @@ export class AdminsService extends BaseService<Admin>{
       switchMap((thisAdmin) =>{
         if (!thisAdmin){
           this.logger.error(`adminRepo: Admin entity with ID: ${id} was not found.`);
-          throw new NotFoundException({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException({
+            code: status.NOT_FOUND,
             message: messages.ADMIN.NOT_FOUND
           })
         }
@@ -97,8 +99,8 @@ export class AdminsService extends BaseService<Admin>{
           switchMap((newRole) => {
             if (!newRole) {
               this.logger.error(`roleRepo: Role entity with name: ${updateAdminRoleDto.role} was not found.`);
-              throw new NotFoundException({
-                status: HttpStatus.NOT_FOUND,
+              throw new RpcException({
+                code: status.NOT_FOUND,
                 message: messages.ROLE.NOT_FOUND,
               });
             }
@@ -108,8 +110,8 @@ export class AdminsService extends BaseService<Admin>{
               map((updatedAdmin) => this.mapResponse(updatedAdmin)),
               catchError(() => {
                 this.logger.error(`adminRepo: Failed to update admin entity with ID: ${thisAdmin.id}`);
-                throw new InternalServerErrorException({
-                  status: HttpStatus.INTERNAL_SERVER_ERROR,
+                throw new RpcException({
+                  code: status.INTERNAL,
                   message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
                 });
               }),

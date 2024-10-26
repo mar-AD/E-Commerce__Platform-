@@ -1,7 +1,8 @@
 import * as bcrypt from 'bcrypt'
 import { catchError, from, Observable, switchMap } from 'rxjs';
-import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { messages } from '@app/common/utils/messages';
+import { RpcException } from '@nestjs/microservices';
+import {status} from '@grpc/grpc-js';
 
 //this for hashing password
 export const hashPassword = (password: string):Observable<string> => {
@@ -9,8 +10,8 @@ export const hashPassword = (password: string):Observable<string> => {
     switchMap((salt)=>
       from(bcrypt.hash(password, salt)).pipe(
         catchError((err)=>{
-          throw new BadRequestException({
-            status: err.status || HttpStatus.INTERNAL_SERVER_ERROR,
+          throw new RpcException({
+            code: err.status || status.INTERNAL,
             message: err.response || messages.PASSWORD.FAILED_TO_HASH_PASSWORD
           })
         })
@@ -47,8 +48,8 @@ export const generateEmailCode = () => {
 export const VerifyEmailCode = (expired: Date)=>{
   let currentDate = new Date()
   if(currentDate > expired){
-    throw new BadRequestException({
-      status: HttpStatus.GONE,
+    throw new RpcException({
+      code: status.NOT_FOUND,
       message: 'Verification code has expired.',
     });
   }
