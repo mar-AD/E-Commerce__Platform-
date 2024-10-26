@@ -1,6 +1,9 @@
 import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoggerService } from '@app/common/services/logger.service';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
+import { messages } from '@app/common/utils';
 
 interface JwtPayload {
   id: string;
@@ -23,7 +26,7 @@ export class JwtTokenService {
       return token;
     } catch (error) {
       this.logger.error(`Error generating access token: ${error}`);
-      throw new InternalServerErrorException('Error generating access token:', error);
+      throw new RpcException({code: status.INTERNAL ,message:messages.TOKEN.FAILED_TO_GENERATE_ACC_TOKEN, error });
     }
   }
 
@@ -35,7 +38,7 @@ export class JwtTokenService {
       return token;
     } catch (error) {
       this.logger.error(`Error generating refresh token: ${error}`);
-      throw new InternalServerErrorException('Error generating refresh token:', error);
+      throw new RpcException({code: status.INTERNAL ,message: messages.TOKEN.FAILED_TO_GENERATE_REF_TOKEN, error });
     }
   }
 
@@ -47,7 +50,7 @@ export class JwtTokenService {
       return decoded;
     } catch (error) {
       this.logger.error(`Invalid or expired token:${error}`);
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new RpcException({code: status.UNAUTHENTICATED ,message: messages.TOKEN.INVALID_OR_EXPIRED_TOKEN});
     }
   }
 }

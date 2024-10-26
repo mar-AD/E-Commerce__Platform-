@@ -7,7 +7,7 @@ import {
   USER_SERVICE_NAME,
   UserServiceClient, VerifyEmailCodeDto,
 } from '@app/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '../constants';
 
 
@@ -26,7 +26,7 @@ export class UserService implements OnModuleInit {
   }
 
   login(loginRequest: LoginDto) {
-    return this.userService.userLogin(loginRequest);
+      return this.userService.userLogin(loginRequest);
   }
 
   updatePassword(updatePasswordDto: UpdatePasswordDto) {

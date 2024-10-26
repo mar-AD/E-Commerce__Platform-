@@ -27,7 +27,10 @@ import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
-import { GrpcInvalidArgumentException, GrpcNotFoundException } from 'nestjs-grpc-exceptions';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
+
+
 
 @Injectable()
 export abstract class  BaseService<E> {
@@ -51,8 +54,8 @@ export abstract class  BaseService<E> {
       switchMap((existingEntity)=>{
         if(existingEntity){
           this.logger.error(`${type+'Repo'}: entity with email "${email}" already exists.`);
-          throw new BadRequestException({
-            status: HttpStatus.BAD_REQUEST,
+          throw new RpcException({
+            code: status.NOT_FOUND,
             message: `${type} with email: ${email} already exists.`,
           });
         }
@@ -75,8 +78,8 @@ export abstract class  BaseService<E> {
 
               catchError((err) => {
                 this.logger.error(`${type+'Repo'}: Failed to create and save the entity with email "${email}". Error: ${err.message}`);
-                throw new InternalServerErrorException({
-                  status: HttpStatus.INTERNAL_SERVER_ERROR,
+                throw new RpcException({
+                  code: status.INTERNAL,
                   message: messageType.FAILED_TO_CREATE,
                 });
               })
@@ -97,9 +100,7 @@ export abstract class  BaseService<E> {
       switchMap((thisEntity) => {
         if(!thisEntity){
           this.logger.error(`${type+'Repo'}: entity with email "${email}" is not exist.`);
-          throw new GrpcNotFoundException (
-            messageType.INVALID_CREDENTIALS
-          )
+          throw new RpcException({ code: status.NOT_FOUND, message: messageType.INVALID_CREDENTIALS});
         }
 
         this.logger.log(`${type+'Repo'}: Verifying password ...`);
@@ -107,9 +108,7 @@ export abstract class  BaseService<E> {
           switchMap((isMatch)=>{
             if (!isMatch) {
               this.logger.error(`${type+'Repo'}: Password verification failed.`);
-               throw new GrpcInvalidArgumentException(
-                messages.PASSWORD.INVALID_PASSWORD,
-              );
+              throw new RpcException({ code: status.UNAUTHENTICATED, message: messages.PASSWORD.INVALID_PASSWORD });
             }
             const payload = {
               id: thisEntity.id,
@@ -130,9 +129,7 @@ export abstract class  BaseService<E> {
               switchMap((refToken) => {
                 if(!refToken){
                   this.logger.error(`refreshTknRepo: Failed saving the refToken to the repo.`);
-                  throw new GrpcInvalidArgumentException(
-                    messages.TOKEN.FAILED_TO_SAVE_REF_TOKEN
-                  )
+                  throw new RpcException({ code: status.INTERNAL, message: messages.TOKEN.FAILED_TO_SAVE_REF_TOKEN });
                 }
 
                 this.logger.log(`${type+'Repo'}: ${type} logged in successfully`);
@@ -141,8 +138,8 @@ export abstract class  BaseService<E> {
                     accessToken: accessToken,
                     refreshToken: refreshToken,
                     result: {
+                      status: HttpStatus.OK,
                       message :messageType.LOGIN_SUCCESSFUL,
-                      status: HttpStatus.OK
                     }
                   },
                 );
@@ -164,8 +161,8 @@ export abstract class  BaseService<E> {
       switchMap((thisAdmin) =>{
         if(!thisAdmin){
           this.logger.error(`${type+'Repo'}: entity with ID "${updatePasswordDto.id}" doesn't exist.`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messageType.FAILED_TO_FETCH_FOR_UPDATE
           })
         }
@@ -174,15 +171,15 @@ export abstract class  BaseService<E> {
           switchMap((isMatch)=>{
             if (!isMatch) {
               this.logger.error(`${type+'Repo'}: Password verification failed.`);
-              throw new BadRequestException({
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
+              throw new RpcException({
+                code: status.UNAUTHENTICATED,
                 message: messages.PASSWORD.INVALID_PASSWORD,
               });
             }
             if(newPassword !== confirmPassword){
               this.logger.error(`${type+'Repo'}: New Password and conform password do not match.`);
-              throw new BadRequestException({
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
+              throw new RpcException({
+                code: status.INVALID_ARGUMENT,
                 message: messages.PASSWORD.PASSWORDS_DO_NOT_MATCH,
               });
             }
@@ -196,8 +193,8 @@ export abstract class  BaseService<E> {
                   map((updatedAdmin)=> this.mapResponse(updatedAdmin)),
                   catchError((err)=>{
                     this.logger.error(`${type+'Repo'}: Failed to update the entity. Error: ${err.message}`)
-                    throw new InternalServerErrorException({
-                      status: HttpStatus.INTERNAL_SERVER_ERROR,
+                    throw new RpcException({
+                      code: status.INTERNAL,
                       message: messages.PASSWORD.FAILED_TO_UPDATE_PASSWORD
                     })
                   })
@@ -224,8 +221,8 @@ export abstract class  BaseService<E> {
       switchMap((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: Entity not found with id: ${requestEmailUpdateDto.id}`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messageType.FAILED_FETCH,
           });
         }
@@ -240,15 +237,15 @@ export abstract class  BaseService<E> {
             this.logger.log(`${type + 'Repo'}: Email verification code sent successfully for email: ${thisEntity.email}`);
             return {
               result: {
-                message: messages.EMAIL.EMAIL_VERIFICATION_CODE_SENT_SUCCESSFULLY,
                 status: HttpStatus.OK,
+                message: messages.EMAIL.EMAIL_VERIFICATION_CODE_SENT_SUCCESSFULLY,
               },
             };
           }),
           catchError((error) => {
             this.logger.error(`${type + 'Repo'}: Failed to send email verification code. Error: ${error.message}`);
-            throw new InternalServerErrorException({
-              status: HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new RpcException({
+              code: status.INTERNAL,
               message: error.message,
             });
           })
@@ -269,8 +266,8 @@ export abstract class  BaseService<E> {
       switchMap((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: Entity not found with id: ${verifyEmailCodeDto.id}`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messageType.FAILED_FETCH,
           });
         }
@@ -281,7 +278,7 @@ export abstract class  BaseService<E> {
             if (!verificationCode) {
               this.logger.error(`Verification code not found or invalid for id: ${verifyEmailCodeDto.id}`);
               throw new NotFoundException ({
-                status: HttpStatus.NOT_FOUND,
+                code: status.NOT_FOUND,
                 message: 'Verification code not found or invalid.',
               });
             }
@@ -299,8 +296,8 @@ export abstract class  BaseService<E> {
           }),
           catchError((error) => {
             this.logger.error(`Error verifying code for id: ${verifyEmailCodeDto.id}. Error: ${error.message}`);
-            throw new InternalServerErrorException({
-              status: HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new RpcException({
+              code: status.INTERNAL,
               message: error.message,
             });
           })
@@ -319,8 +316,8 @@ export abstract class  BaseService<E> {
       switchMap((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: Entity not found with id: ${updateEmailDto.id}.`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messageType.FAILED_TO_FETCH_FOR_UPDATE,
           });
         }
@@ -336,7 +333,7 @@ export abstract class  BaseService<E> {
           catchError((error) => {
             this.logger.error(`${type + 'Repo'}: Failed to update email for id: ${updateEmailDto.id}. Error: ${error.message}`);
             throw new InternalServerErrorException({
-              status: HttpStatus.INTERNAL_SERVER_ERROR,
+              code: status.INTERNAL,
               message: messages.EMAIL.FAILED_TO_UPDATE_EMAIL,
             });
           })
@@ -358,8 +355,8 @@ export abstract class  BaseService<E> {
       switchMap((refToken) => {
         if (!refToken) {
           this.logger.error(`${type + 'Repo'}: Refresh token not found or revoked for id: ${id}.`);
-          throw new NotFoundException  ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException  ({
+            code: status.NOT_FOUND,
             message: messages.TOKEN.TOKEN_NOT_FOUND
           });
         }
@@ -376,8 +373,8 @@ export abstract class  BaseService<E> {
           return from(this.refreshTokenRepository.save(refToken)).pipe(
             switchMap(() => {
               this.logger.error(`${type + 'Repo'}: Refresh token expired for id: ${id}.`);
-              throw new BadRequestException({
-                status: HttpStatus.UNAUTHORIZED,
+              throw new RpcException({
+                code: status.UNAUTHENTICATED,
                 message: messages.TOKEN.REF_TOKEN_HAS_EXPIRED
               });
             })
@@ -389,7 +386,7 @@ export abstract class  BaseService<E> {
             switchMap(() => {
               this.logger.error(`${type + 'Repo'}: Refresh token will expire soon for id: ${id}.`);
               throw new BadRequestException({
-                status: HttpStatus.UNAUTHORIZED,
+                code: status.UNAUTHENTICATED,
                 message: messages.TOKEN.REF_TOKEN_WILL_EXPIRE
               });
             })
@@ -403,8 +400,8 @@ export abstract class  BaseService<E> {
           refreshToken: refreshToken,
           accessToken: newAccessToken,
           result: {
+            status: HttpStatus.OK,
             message: messages.TOKEN.TOKEN_GENERATED_SUCCESSFULLY,
-            status: HttpStatus.OK
           }
         });
       })
@@ -424,8 +421,8 @@ export abstract class  BaseService<E> {
       switchMap((refToken) => {
         if (!refToken) {
           this.logger.error(`${type + 'Repo'}: Refresh token not found for id: ${id}.`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messages.TOKEN.TOKEN_NOT_FOUND
           });
         }
@@ -445,8 +442,8 @@ export abstract class  BaseService<E> {
           }),
           catchError((error) => {
             this.logger.error(`${type + 'Repo'}: Error while revoking refresh token for id: ${id}. Error: ${error.message}`);
-            throw new InternalServerErrorException({
-              status: HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new RpcException({
+              code: status.INTERNAL,
               message: error.message,
             });
           }),
@@ -466,8 +463,8 @@ export abstract class  BaseService<E> {
       map((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: User not found for email: ${email}.`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messageType.NOT_FOUND
           });
         }
@@ -504,16 +501,16 @@ export abstract class  BaseService<E> {
       switchMap((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: User not found for ID: ${id}.`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messageType.FAILED_TO_FETCH_FOR_UPDATE
           });
         }
 
         if (newPassword !== confirmPassword) {
           this.logger.warn(`${type + 'Repo'}: Passwords do not match for user ID: ${id}.`);
-          throw new BadRequestException({
-            status: HttpStatus.BAD_REQUEST,
+          throw new RpcException({
+            code: status.INVALID_ARGUMENT,
             message: messages.PASSWORD.PASSWORDS_DO_NOT_MATCH,
           });
         }
@@ -534,8 +531,8 @@ export abstract class  BaseService<E> {
               }),
               catchError((error) => {
                 this.logger.error(`${type + 'Repo'}: Failed to reset password for user ID: ${id}. Error: ${error.message}`);
-                throw new InternalServerErrorException({
-                  status: HttpStatus.INTERNAL_SERVER_ERROR,
+                throw new RpcException({
+                  code: status.INTERNAL,
                   message: messages.PASSWORD.FAILED_TO_RESET_PASSWORD
                 });
               })
@@ -556,8 +553,8 @@ export abstract class  BaseService<E> {
       switchMap((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: Entity not found for ID: ${findOneDto.id}.`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messageType.FAILED_FETCH_FOR_REMOVAL
           });
         }
@@ -577,8 +574,8 @@ export abstract class  BaseService<E> {
               }),
               catchError((error) => {
                 this.logger.error(`${type + 'Repo'}: Failed to remove entity with ID: ${findOneDto.id}. Error: ${error.message}`);
-                throw new InternalServerErrorException({
-                  status: HttpStatus.INTERNAL_SERVER_ERROR,
+                throw new RpcException({
+                  code: status.INTERNAL,
                   message: messageType.FAILED_REMOVE
                 });
               })
@@ -586,8 +583,8 @@ export abstract class  BaseService<E> {
           }),
           catchError((error) => {
             this.logger.error(`${type + 'Repo'}: Failed to save entity with ID: ${findOneDto.id}. Error: ${error.message}`);
-            throw new InternalServerErrorException({
-              status: HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new RpcException({
+              code: status.INTERNAL,
               message: messageType.FAILED_REMOVE
             });
           })
@@ -595,8 +592,8 @@ export abstract class  BaseService<E> {
       }),
       catchError((error) => {
         this.logger.error(`${type + 'Repo'}: Failed to find entity for removal. Error: ${error.message}`);
-        throw new BadRequestException({
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        throw new RpcException({
+          code: status.INTERNAL,
           message: messageType.FAILED_REMOVE
         });
       })
@@ -612,8 +609,8 @@ export abstract class  BaseService<E> {
     } else if (type === AuthConstants.user) {
       return this.userRepository;
     } else {
-      throw new BadRequestException({
-        status: HttpStatus.BAD_REQUEST,
+      throw new RpcException({
+        code: status.INTERNAL,
         message: 'Invalid type provided.',
       });
     }
@@ -626,8 +623,8 @@ export abstract class  BaseService<E> {
     } else if (type === AuthConstants.user) {
       return messages.USER;
     } else {
-      throw new BadRequestException({
-        status: HttpStatus.BAD_REQUEST,
+      throw new RpcException({
+        code: status.INTERNAL,
         message: 'Invalid type provided.',
       });
     }
@@ -640,8 +637,8 @@ export abstract class  BaseService<E> {
     } else if (type === AuthConstants.user) {
       condition[AuthConstants.user] = value;
     } else {
-      throw new BadRequestException({
-        status: HttpStatus.BAD_REQUEST,
+      throw new RpcException({
+        code: status.INTERNAL,
         message: 'Invalid type provided.',
       });
     }

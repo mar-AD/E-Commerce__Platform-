@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import {
   CreateRoleDto,
@@ -19,6 +13,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from './entities/role.entity';
 import { Repository } from 'typeorm';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 @Injectable()
 export class RolesService {
@@ -37,8 +33,8 @@ export class RolesService {
         if (thisRole){
           this.logger.error(`roleRepo: Role with name "${name}" already exists.`)
 
-          throw new BadRequestException({
-            status: HttpStatus.BAD_REQUEST,
+          throw new RpcException({
+            code: status.ALREADY_EXISTS,
             message: 'Role with this name already exist'
           })
         }
@@ -52,8 +48,8 @@ export class RolesService {
           }),
           catchError((err) => {
             this.logger.error(`roleRepo: Failed to create and save the entity with name "${name}". Error: ${err.message}`);
-            throw new InternalServerErrorException({
-              status: HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new RpcException({
+              code: status.INTERNAL,
               message: messages.ROLE.FAILED_TO_CREATE_ROLE,
             });
           })
@@ -61,8 +57,8 @@ export class RolesService {
       }),
       catchError((err) => {
         this.logger.error(`roleRepo: Failed to process role creation. Error: ${err.message}`);
-        throw new InternalServerErrorException({
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        throw new RpcException({
+          code: status.INTERNAL,
           message: messages.ROLE.FAILED_TO_CREATE_ROLE,
         });
       }),
@@ -77,15 +73,15 @@ export class RolesService {
         return {
           roles: roles.map(role => this.mapRoleResponse(role)),
           result: {
-            status: HttpStatus.OK,
+            status: status.OK,
             message: messages.ROLE.FETCH_ALL_ROLES,
           }
         }
       }),
       catchError((err)=>{
         this.logger.error(`roleRepo: ${messages.ROLE.FAILED_FETCH_ROLES}: ${err.message}`);
-        throw new InternalServerErrorException({
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        throw new RpcException({
+          code: status.INTERNAL,
           message: messages.ROLE.FAILED_FETCH_ROLES,
         });
       })
@@ -99,8 +95,8 @@ export class RolesService {
       map((thisRole) => {
         if (!thisRole){
           this.logger.error(`roleRepo: No role with id "${id}" found.`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messages.ROLE.NOT_FOUND
           })
         }
@@ -109,8 +105,8 @@ export class RolesService {
       }),
       catchError((err)=>{
         this.logger.error(`roleRepo: ${messages.ROLE.FAILED_TO_FETCH_ROLE}: ${err.message}`);
-        throw new InternalServerErrorException({
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        throw new RpcException({
+          code: status.INTERNAL,
           message: messages.ROLE.FAILED_TO_FETCH_ROLE,
         });
       })
@@ -123,8 +119,8 @@ export class RolesService {
       switchMap((thisRole)=>{
         if (!thisRole){
           this.logger.error(`roleRepo: No role with id "${id}" found.`);
-          throw new NotFoundException ({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException ({
+            code: status.NOT_FOUND,
             message: messages.ROLE.FAILED_TO_FETCH_ROLE_FOR_UPDATE
           })
         }
@@ -142,8 +138,8 @@ export class RolesService {
           }),
           catchError((err)=>{
             this.logger.error(`roleRepo: ${messages.ROLE.FAILED_TO_UPDATE_ROLE}: ${err.message}`);
-            throw new InternalServerErrorException({
-              status: HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new RpcException({
+              code: status.INTERNAL,
               message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
             });
           })
@@ -151,8 +147,8 @@ export class RolesService {
       }),
       catchError((err)=>{
         this.logger.error(`roleRepo: ${messages.ROLE.FAILED_TO_UPDATE_ROLE}: ${err.message}`);
-        throw new InternalServerErrorException({
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        throw new RpcException({
+          code: status.INTERNAL,
           message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
         });
       })
@@ -166,8 +162,8 @@ export class RolesService {
       switchMap((thisRole) => {
         if (!thisRole) {
           this.logger.error(`roleRepo: No role with id "${findOneDto.id}" found.`);
-          throw new NotFoundException({
-            status: HttpStatus.NOT_FOUND,
+          throw new RpcException({
+            code: status.NOT_FOUND,
             message: messages.ROLE.FAILED_FETCH_ROLE_FOR_REMOVAL,
           });
         }
@@ -178,15 +174,15 @@ export class RolesService {
             this.logger.log(`roleRepo: ${messages.ROLE.ROLE_REMOVED_SUCCESSFULLY}`);
             return {
               result: {
-                status: HttpStatus.OK,
+                status: status.OK,
                 message: messages.ROLE.ROLE_REMOVED_SUCCESSFULLY
               }
             }
           }),
           catchError((err) => {
             this.logger.error(`roleRepo: ${messages.ROLE.FAILED_REMOVE_ROLE}: ${err.message}`);
-            throw new InternalServerErrorException({
-              status: HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new RpcException({
+              code: status.INTERNAL,
               message: messages.ROLE.FAILED_REMOVE_ROLE,
             });
           })
@@ -194,8 +190,8 @@ export class RolesService {
       }),
       catchError((err) => {
         this.logger.error(`roleRepo: ${messages.ROLE.FAILED_REMOVE_ROLE}: ${err.message}`);
-        throw new InternalServerErrorException({
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        throw new RpcException({
+          code: status.INTERNAL,
           message: messages.ROLE.FAILED_REMOVE_ROLE,
         });
       })
@@ -203,7 +199,7 @@ export class RolesService {
   }
 
 
-  //we need this so we can follow the schema keys
+  //map RoleEntity to the role schema for consistency with the expected response format
   mapRoleResponse(role:RoleEntity): Role {
     return {
       id: role.id,

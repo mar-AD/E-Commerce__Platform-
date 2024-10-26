@@ -16,6 +16,7 @@ import { AdminService } from '../../apigateway/src/auth/services/admin.service';
 import { RolesService } from './roles/roles.service';
 import { UsersService } from './users/users.service';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
+import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports: [

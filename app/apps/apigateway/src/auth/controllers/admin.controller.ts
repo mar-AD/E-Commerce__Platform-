@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
@@ -16,17 +16,17 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('admin/register')
-  createAdmin(@Body(ValidationPipe) createAdminDto: CreateAdminDto) {
+  createAdmin(@Body() createAdminDto: CreateAdminDto) {
     return this.adminService.create(createAdminDto);
   }
 
   @Post('admin/login')
-  adminLogin(@Body(ValidationPipe) loginRequest: LoginDto) {
+  adminLogin(@Body() loginRequest: LoginDto) {
     return this.adminService.login(loginRequest);
   }
 
   @Patch('adminPassUpdate')
-  updateAdminPassword(@Req() req: Request, @Body(ValidationPipe) updatePasswordDto: UpdatePasswordDto) {
+  updateAdminPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
     updatePasswordDto.id = req['payload'].id;
     return this.adminService.updatePassword(updatePasswordDto);
   }
@@ -44,39 +44,39 @@ export class AdminController {
   }
 
   @Patch('adminEmailUpdate')
-  updateAdminEmail(@Req() req: Request, @Body(ValidationPipe) updateEmailDto: UpdateEmailDto) {
+  updateAdminEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
     updateEmailDto.id = req['payload'].id;
     return this.adminService.updateEmail(updateEmailDto);
   }
 
   @Patch('adminRoleUpdate/:id')
-  UpdateAdminRole(@Param('id') id: string, @Body(ValidationPipe) updateAdminRoleDto: UpdateAdminRoleDto) {
+  UpdateAdminRole(@Param('id') id: string, @Body() updateAdminRoleDto: UpdateAdminRoleDto) {
     return this.adminService.updateRole(id, updateAdminRoleDto );
   }
 
   @Post('admin/logout')
-  logoutAdmin(@Body(ValidationPipe) logoutDto: RefreshTokenDto) {
+  logoutAdmin(@Body() logoutDto: RefreshTokenDto) {
     return this.adminService.logout(logoutDto);
   }
 
   @Post('admin/refresh-token')
-  adminRefreshToken(@Body(ValidationPipe) refreshTokenDto: RefreshTokenDto) {
+  adminRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.adminService.refreshToken(refreshTokenDto);
   }
 
   @Post('admin/forgot-password')
-  adminForgotPassword(@Body(ValidationPipe) forgotPassDto: ForgotPasswordDto) {
+  adminForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
     return this.adminService.forgotPassword(forgotPassDto);
   }
 
   @Post('admin/reset-password/token')
-  adminResetPassword(@Param('token') token: string, @Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
+  adminResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     resetPasswordDto.token = token;
     return this.adminService.resetPassword(resetPasswordDto);
   }
 
   @Delete('admin/remove')
-  remove(@Req() req: Request, @Body(ValidationPipe) findOneDto: FindOneDto) {
+  remove(@Req() req: Request, @Body() findOneDto: FindOneDto) {
     findOneDto.id = req['payload'].id
     return this.adminService.remove(findOneDto);
   }

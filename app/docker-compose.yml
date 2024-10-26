@@ -49,7 +49,7 @@ services:
 
 
   auth-db:
-    image: postgres
+    image: postgres:16
     env_file:
       - ./apps/auth/.env
     ports:
