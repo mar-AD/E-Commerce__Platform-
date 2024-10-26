@@ -1,5 +1,3 @@
-// src/common/grpc-exception.filter.ts
-
 import * as grpc from '@grpc/grpc-js';
 import {
   HttpException,
@@ -14,13 +12,14 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
+import { isObject } from 'class-validator';
 
 // Custom function to check if a value is an object
-const isObject = (value: unknown): value is Record<string, unknown> => {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-};
+// const isObject = (value: unknown): value is Record<string, unknown> => {
+//   return value !== null && typeof value === 'object' && !Array.isArray(value);
+// };
 
-// Function to create the HTTP exception body
+// to create the HTTP exception body
 const createHttpExceptionBody = (message: object | string, error?: string, status?: number) => {
   if (!message) {
     return { status, error };
@@ -28,7 +27,7 @@ const createHttpExceptionBody = (message: object | string, error?: string, statu
   return isObject(message) ? message : { status, error, message };
 };
 
-// Function to create a custom HTTP exception
+//  to create a custom HTTP exception
 const createHttpException = (status: number, defaultError: string = '') => {
   class CustomHttpException extends HttpException {
     public constructor(message?: string | object | any, error = defaultError) {
@@ -43,7 +42,6 @@ type GrpcToHttpExceptionMap = {
   [key: number]: new (...args: any[]) => HttpException | null;
 };
 
-// Explicitly type the mapping variable
 export const GrpcToHttpExceptionMapping: GrpcToHttpExceptionMap = {
   [grpc.status.OK]: null,
   [grpc.status.CANCELLED]: createHttpException(499, 'Client Closed Request'),
@@ -64,7 +62,6 @@ export const GrpcToHttpExceptionMapping: GrpcToHttpExceptionMap = {
   [grpc.status.DATA_LOSS]: InternalServerErrorException,
 };
 
-// Exporting a custom exception filter if you want to handle it globally
 
 @Catch()
 export class GrpcExceptionFilter implements ExceptionFilter {
@@ -81,17 +78,13 @@ export class GrpcExceptionFilter implements ExceptionFilter {
     const httpException = new HttpExceptionClass(message);
     const status = httpException.getStatus ? httpException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    // Send the response with the appropriate error message and status code
     const responsePayload = {
       status,
       message: httpException.message,
       error: HttpExceptionClass.name,
     };
-
-    // Log the response payload
     console.log(`GrpcExceptionFilter response: ${JSON.stringify(responsePayload)}`);
 
-    // Send the response
     response.status(status).json(responsePayload);
   }
 }

@@ -26,20 +26,7 @@ export class UserService implements OnModuleInit {
   }
 
   login(loginRequest: LoginDto) {
-    try {
       return this.userService.userLogin(loginRequest);
-
-    } catch (error) {
-      // Ensure RpcException is thrown correctly
-      if (error instanceof RpcException) {
-        throw error; // Propagate RpcException
-      }
-      // For any other error, throw a new RpcException
-      throw new RpcException({
-        code: 500,
-        message: 'An unknown error occurred',
-      });
-    }
   }
 
   updatePassword(updatePasswordDto: UpdatePasswordDto) {

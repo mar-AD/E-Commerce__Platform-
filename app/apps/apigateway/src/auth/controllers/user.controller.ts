@@ -8,7 +8,7 @@ import {
   UpdateEmailDto,
   UpdatePasswordDto, VerifyEmailCodeDto,
 } from '@app/common/dtos' ;
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 
 
@@ -23,8 +23,6 @@ export class UserController {
   }
 
   @Post('user/login')
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
   userLogin(@Body(ValidationPipe) loginRequest: LoginDto) {
     return this.userService.login(loginRequest);
   }
