@@ -1,12 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import {
-  CreateRoleDto,
-  FindOneDto,
   RoleServiceController,
   RoleServiceControllerMethods,
-  UpdateRoleDto,
 } from '@app/common';
+import { CreateRoleDto, FindOneDto, UpdateRoleDto } from '@app/common/dtos';
 
 @Controller()
 @RoleServiceControllerMethods()

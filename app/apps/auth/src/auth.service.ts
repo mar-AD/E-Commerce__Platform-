@@ -55,7 +55,7 @@ export abstract class  BaseService<E> {
         if(existingEntity){
           this.logger.error(`${type+'Repo'}: entity with email "${email}" already exists.`);
           throw new RpcException({
-            code: status.NOT_FOUND,
+            code: status.ALREADY_EXISTS,
             message: `${type} with email: ${email} already exists.`,
           });
         }

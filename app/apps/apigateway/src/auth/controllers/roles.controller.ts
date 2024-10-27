@@ -8,28 +8,28 @@ import { CreateRoleDto, FindOneDto, UpdateRoleDto } from '@app/common/dtos';
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  @Post('roles/register')
-  createRole(createRoleDto: CreateRoleDto) {
+  @Post('register')
+  createRole(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
   }
 
-  @Get('roles')
+  @Get()
   getAllRoles() {
     return this.rolesService.findAll();
   }
 
-  @Get('roles/:id')
+  @Get('/:id')
   getRoleById(@Param('id') id: string, @Body() findOnsDto: FindOneDto) {
     findOnsDto.id = id;
     return this.rolesService.findOne(findOnsDto);
   }
 
-  @Patch('roles/:id')
+  @Patch('/:id')
   updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.rolesService.update(id, updateRoleDto );
   }
 
-  @Delete('roles/:id')
+  @Delete('/:id')
   deleteRole(@Param('id') id: string, @Body() findOnsDto: FindOneDto) {
     findOnsDto.id = id;
     return this.rolesService.remove(findOnsDto);

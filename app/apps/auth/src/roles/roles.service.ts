@@ -1,20 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import {
-  CreateRoleDto,
   dateToTimestamp, Empty,
-  FindOneDto,
   LoggerService,
   messages,
   Role,
   RolesResponse,
-  UpdateRoleDto,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from './entities/role.entity';
 import { Repository } from 'typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { CreateRoleDto, FindOneDto, UpdateRoleDto } from '@app/common/dtos';
 
 @Injectable()
 export class RolesService {
@@ -54,13 +52,6 @@ export class RolesService {
             });
           })
         )
-      }),
-      catchError((err) => {
-        this.logger.error(`roleRepo: Failed to process role creation. Error: ${err.message}`);
-        throw new RpcException({
-          code: status.INTERNAL,
-          message: messages.ROLE.FAILED_TO_CREATE_ROLE,
-        });
       }),
     )
   }
@@ -144,13 +135,6 @@ export class RolesService {
             });
           })
         )
-      }),
-      catchError((err)=>{
-        this.logger.error(`roleRepo: ${messages.ROLE.FAILED_TO_UPDATE_ROLE}: ${err.message}`);
-        throw new RpcException({
-          code: status.INTERNAL,
-          message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
-        });
       })
     )
   }
@@ -187,13 +171,6 @@ export class RolesService {
             });
           })
         );
-      }),
-      catchError((err) => {
-        this.logger.error(`roleRepo: ${messages.ROLE.FAILED_REMOVE_ROLE}: ${err.message}`);
-        throw new RpcException({
-          code: status.INTERNAL,
-          message: messages.ROLE.FAILED_REMOVE_ROLE,
-        });
       })
     );
   }
