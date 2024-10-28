@@ -3,13 +3,6 @@ import { IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class UpdatePasswordDto {
   @ApiProperty({
-    description: 'An ID, assigned from the request payload'
-  })
-  @IsNotEmpty()
-  @IsString()
-  id: string;
-
-  @ApiProperty({
     example: 'passwordExample',
     description: 'Current password.',
   })

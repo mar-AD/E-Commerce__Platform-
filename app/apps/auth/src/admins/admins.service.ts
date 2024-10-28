@@ -1,17 +1,14 @@
 import {
-  HttpStatus,
   Injectable,
-  InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   Admin,
   AuthResponse, CronService,
   dateToTimestamp,
-  Empty, ForgotPasswordDto,
+  Empty, FindOneDto, ForgotPasswordDto, hashPassword,
   JwtTokenService, LoggerService,
   LoginDto,
-  messages, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto,
+  messages, RefreshTokenDto, RequestEmailUpdateDto, TokenDto, UpdateEmailDto,
   UpdatePasswordDto, VerifyEmailCodeDto,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,7 +23,7 @@ import { EmailVerificationCodeEntity } from '../entities/email-verification-code
 import { UpdateAdminRoleDto } from '@app/common/dtos/update-admin-role.dto';
 import { BaseService } from '../auth.service';
 import { UserEntity } from '../users/entities/user.entity';
-import { FindOneDto, ResetPasswordDto } from '@app/common/dtos';
+import { ResetPasswordDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
@@ -46,44 +43,86 @@ export class AdminsService extends BaseService<Admin>{
     super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger)
   }
   createAdmin(createAdminDto: CreateAdminDto): Observable<Admin> {
-    const {role} = createAdminDto;
+    const { role, email, password } = createAdminDto;
     this.logger.log('roleRepo: Searching for role in repository...');
-    return from(this.roleRepository.findOne({where: {name: role}})).pipe(
-      switchMap((thisRole)=>{
-        if(!thisRole){
+
+    return from(this.roleRepository.findOne({ where: { name: role } })).pipe(
+      switchMap((thisRole) => {
+        if (!thisRole) {
           this.logger.error(`roleRepo: Role "${role}" not found`);
-          throw new RpcException ({
+          throw new RpcException({
             code: status.NOT_FOUND,
-            message: messages.ROLE.NOT_FOUND
-          })
+            message: messages.ROLE.NOT_FOUND,
+          });
         }
-        createAdminDto.role = thisRole.id
-        return this.create(createAdminDto, AuthConstants.admin)
+        const adminDto = {
+          email,
+          password,
+          roleId: thisRole
+        };
+
+        return from(this.adminRepository.findOne({ where: { email } })).pipe(
+          switchMap((existingEntity) => {
+            if (existingEntity) {
+              this.logger.error(`adminRepo: entity with email "${email}" already exists.`);
+              throw new RpcException({
+                code: status.ALREADY_EXISTS,
+                message: `Admin with email: ${email} already exists.`,
+              });
+            }
+
+            this.logger.log(`adminRepo: Hashing the password for the new entity...`);
+            return hashPassword(password).pipe(
+              switchMap((hashedPass) => {
+                adminDto.password = hashedPass;
+                this.logger.log(`adminRepo: proceeding to create Entity...`);
+
+                const newEntity = this.adminRepository.create(adminDto);
+                this.logger.log(`adminRepo: Saving the new entity to the repository...`);
+
+                return from(this.adminRepository.save(newEntity)).pipe(
+                  map((createdUser) => {
+                    this.logger.log(`adminRepo: Entity successfully created with email "${email}".`);
+                    return this.mapResponse(createdUser);
+                  }),
+                  catchError((err) => {
+                    this.logger.error(`adminRepo: Failed to create and save the entity with email "${email}". Error: ${err.message}`);
+                    throw new RpcException({
+                      code: status.INTERNAL,
+                      message: messages.ADMIN.FAILED_TO_CREATE,
+                    });
+                  })
+                );
+              })
+            );
+          })
+        );
       })
-    )
+    );
   }
 
   adminLogin(loginRequest: LoginDto): Observable<AuthResponse> {
    return this.login(loginRequest, AuthConstants.admin)
   }
 
-  updateAdminPassword(updatePasswordDto: UpdatePasswordDto):Observable<Admin> {
-    return this.updatePassword(updatePasswordDto, AuthConstants.admin)
+  updateAdminPassword(updatePasswordDto: UpdatePasswordDto, findOneDto: FindOneDto):Observable<Admin> {
+    return this.updatePassword(findOneDto, updatePasswordDto, AuthConstants.admin)
   }
 
-  requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto):Observable<Empty>{
-    return this.requestUpEmail(requestEmailUpdateDto, AuthConstants.admin)
+  requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto, findOneDto:FindOneDto):Observable<Empty>{
+    return this.requestUpEmail(findOneDto, requestEmailUpdateDto, AuthConstants.admin)
   }
 
-  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto): Observable<Empty>{
-    return this.verifyCode(verifyEmailCodeDto, AuthConstants.admin)
+  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto, findOneDto: FindOneDto): Observable<Empty>{
+    return this.verifyCode(findOneDto, verifyEmailCodeDto, AuthConstants.admin)
   }
 
-  updateAdminEmail(updateEmailDto: UpdateEmailDto):Observable<Admin> {
-    return this.updateEmail(updateEmailDto, AuthConstants.admin)
+  updateAdminEmail(updateEmailDto: UpdateEmailDto, findOneDto: FindOneDto):Observable<Admin> {
+    return this.updateEmail(findOneDto, updateEmailDto, AuthConstants.admin)
   }
 
-  updateAdminRole(id:string, updateAdminRoleDto: UpdateAdminRoleDto):Observable<Admin>{
+  updateAdminRole(updateAdminRoleDto: UpdateAdminRoleDto, findOneDto: FindOneDto):Observable<Admin>{
+    const {id} = findOneDto
     this.logger.log(`adminRepo: Searching for admin entity with ID: ${id} ...`);
     return from(this.adminRepository.findOne({where: { id: id, isDeleted: false }})).pipe(
       switchMap((thisAdmin) =>{
@@ -134,8 +173,8 @@ export class AdminsService extends BaseService<Admin>{
     return this.forgotPassword(forgotPassDto, AuthConstants.admin)
   }
 
-  adminResetPassword(resetPasswordDto: ResetPasswordDto): Observable<Empty> {
-    return this.resetPassword(resetPasswordDto, AuthConstants.admin)
+  adminResetPassword(resetPasswordDto: ResetPasswordDto, tokenDto: TokenDto): Observable<Empty> {
+    return this.resetPassword(tokenDto, resetPasswordDto, AuthConstants.admin)
   }
 
   deleteAdmin(findOneDto: FindOneDto): Observable<Empty> {

@@ -62,49 +62,13 @@ export const GrpcToHttpExceptionMapping: GrpcToHttpExceptionMap = {
   [grpc.status.DATA_LOSS]: InternalServerErrorException,
 };
 
-
-// @Catch()
-// export class GrpcExceptionFilter implements ExceptionFilter {
-//   catch(exception: any, host: ArgumentsHost) {
-//     const ctx = host.switchToHttp();
-//     const response = ctx.getResponse();
-//
-//     // Get the appropriate HTTP exception based on the gRPC status
-//     const grpcStatus = exception.code || grpc.status.UNKNOWN;
-//     const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;
-//
-//     const message = exception.details || exception.message.split(': ')[1] || 'An error occurred';
-//     // Create an instance of the HttpException and retrieve its status
-//     const httpException = new HttpExceptionClass(message);
-//     const status = httpException.getStatus ? httpException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-//
-//
-//     const responsePayload = {
-//       status,
-//       message: httpException.message,
-//       error: HttpExceptionClass.name,
-//     };
-//     console.log(`GrpcExceptionFilter response: ${JSON.stringify(responsePayload)}`);
-//     if (exception.getStatus() === 400) {
-//       const responseBody = exception.getResponse();
-//
-//       // Transform the response as needed
-//       response.status(exception.getStatus());
-//       response.send({
-//         status: exception.getStatus(),
-//         message: responseBody.message || responseBody,
-//         error: 'Bad Request',
-//       });
-//     } else{
-//       response.status(status).json(responsePayload);
-//     }
-//   }
-// }
-
 @Catch()
 export class GrpcExceptionFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
+    // Extracts the HTTP context from the ArgumentsHost, allowing access to the incoming request and response objects
     const ctx = host.switchToHttp();
+
+    // Retrieves the HTTP response object, which will be used to send back the error details to the client
     const response = ctx.getResponse();
 
     // Detect if exception is a BadRequestException (validation error)

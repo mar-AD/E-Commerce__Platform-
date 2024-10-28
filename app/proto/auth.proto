@@ -82,12 +82,10 @@ message ResetPasswordDto {
 }
 
 message RequestEmailUpdateDto {
-  string id = 1;
   string email = 2;
 }
 
 message VerifyEmailCodeDto {
-  string id = 1;
   string verificationCode = 2;
 }
 
@@ -96,12 +94,10 @@ message RefreshTokenDto {
 }
 
 message UpdateEmailDto {
-  string id = 1;
   string email = 2;
 }
 
 message UpdatePasswordDto {
-  string id = 1;
   string password = 2;
   string newPassword = 3;
   string confirmPassword = 4;
@@ -122,7 +118,6 @@ message CreateAdminDto {
 }
 
 message UpdateAdminRoleDto {
-  string id = 1;
   string role =2;
 }
 
@@ -138,7 +133,6 @@ message CreateRoleDto {
 }
 
 message UpdateRoleDto {
-  string id = 1;
   optional string name = 2;
   repeated Permissions permissions = 3;
 }

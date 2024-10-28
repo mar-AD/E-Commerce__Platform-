@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import {
-  dateToTimestamp, Empty,
+  dateToTimestamp, Empty, FindOneDto,
   LoggerService,
   messages,
   Role,
@@ -12,7 +12,7 @@ import { RoleEntity } from './entities/role.entity';
 import { Repository } from 'typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { CreateRoleDto, FindOneDto, UpdateRoleDto } from '@app/common/dtos';
+import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
 
 @Injectable()
 export class RolesService {
@@ -104,7 +104,8 @@ export class RolesService {
     )
   }
 
-  update(id: string, updateRoleDto: UpdateRoleDto): Observable<Role> {
+  update(findOnsDto: FindOneDto, updateRoleDto: UpdateRoleDto): Observable<Role> {
+    const {id} = findOnsDto
     this.logger.log('roleRepo: Searching for the role in repository...');
     return from(this.roleRepository.findOne({where: {id}})).pipe(
       switchMap((thisRole)=>{

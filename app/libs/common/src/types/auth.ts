@@ -52,19 +52,21 @@ export interface ForgotPasswordDto {
   email: string;
 }
 
-export interface ResetPasswordDto {
+
+export interface TokenDto {
   token: string;
+}
+
+export interface ResetPasswordDto {
   newPassword: string;
   confirmPassword: string;
 }
 
 export interface RequestEmailUpdateDto {
-  id: string;
   email: string;
 }
 
 export interface VerifyEmailCodeDto {
-  id: string;
   verificationCode: string;
 }
 
@@ -73,12 +75,10 @@ export interface RefreshTokenDto {
 }
 
 export interface UpdateEmailDto {
-  id: string;
   email: string;
 }
 
 export interface UpdatePasswordDto {
-  id: string;
   password: string;
   newPassword: string;
   confirmPassword: string;
@@ -98,7 +98,6 @@ export interface CreateAdminDto {
 }
 
 export interface UpdateAdminRoleDto {
-  id: string;
   role: string;
 }
 
@@ -114,7 +113,6 @@ export interface CreateRoleDto {
 }
 
 export interface UpdateRoleDto {
-  id: string;
   name?: string;
   permissions?: Permissions[];
 }
@@ -183,13 +181,13 @@ export interface UserServiceClient {
 
   userLogin(request: LoginDto): Observable<AuthResponse>;
 
-  updateUserPassword(request: UpdatePasswordDto): Observable<User>;
+  updateUserPassword(request: UpdatePasswordDto, request1: FindOneDto): Observable<User>;
 
-  requestUpdateUserEmail(request: RequestEmailUpdateDto): Observable<Empty>;
+  requestUpdateUserEmail(request: RequestEmailUpdateDto, request1: FindOneDto): Observable<Empty>;
 
-  verifyEmailCode(request: VerifyEmailCodeDto): Observable<Empty>;
+  verifyEmailCode(request: VerifyEmailCodeDto, request1: FindOneDto): Observable<Empty>;
 
-  updateUserEmail(request: UpdateEmailDto): Observable<User>;
+  updateUserEmail(request: UpdateEmailDto, request1: FindOneDto): Observable<User>;
 
   logoutUser(request: RefreshTokenDto): Observable<Empty>;
 
@@ -197,7 +195,7 @@ export interface UserServiceClient {
 
   userForgotPassword(request: ForgotPasswordDto): Observable<Empty>;
 
-  userResetPassword(request: ResetPasswordDto): Observable<Empty>;
+  userResetPassword(request: ResetPasswordDto, request1: TokenDto): Observable<Empty>;
 
   removeUser(request: FindOneDto): Observable<Empty>;
 }
@@ -209,13 +207,13 @@ export interface UserServiceController {
 
   userLogin(request: LoginDto): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
-  updateUserPassword(request: UpdatePasswordDto): Promise<User> | Observable<User> | User;
+  updateUserPassword(request: UpdatePasswordDto, request1: FindOneDto): Promise<User> | Observable<User> | User;
 
-  requestUpdateUserEmail(request: RequestEmailUpdateDto): Promise<Empty> | Observable<Empty> | Empty;
+  requestUpdateUserEmail(request: RequestEmailUpdateDto, request1: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  verifyEmailCode(request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
+  verifyEmailCode(request: VerifyEmailCodeDto, request1: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  updateUserEmail(request: UpdateEmailDto): Promise<User> | Observable<User> | User;
+  updateUserEmail(request: UpdateEmailDto, request1: FindOneDto): Promise<User> | Observable<User> | User;
 
   logoutUser(request: RefreshTokenDto): Promise<Empty> | Observable<Empty> | Empty;
 
@@ -223,7 +221,7 @@ export interface UserServiceController {
 
   userForgotPassword(request: ForgotPasswordDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  userResetPassword(request: ResetPasswordDto): Promise<Empty> | Observable<Empty> | Empty;
+  userResetPassword(request: ResetPasswordDto, request1: TokenDto): Promise<Empty> | Observable<Empty> | Empty;
 
   removeUser(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 }
@@ -264,15 +262,15 @@ export interface AdminServiceClient {
 
   adminLogin(request: LoginDto): Observable<AuthResponse>;
 
-  updateAdminRole(request: UpdateAdminRoleDto): Observable<Admin>;
+  updateAdminRole(request: UpdateAdminRoleDto, request1: FindOneDto): Observable<Admin>;
 
-  requestUpdateAdminEmail(request: RequestEmailUpdateDto): Observable<Empty>;
+  requestUpdateAdminEmail(request: RequestEmailUpdateDto, request1: FindOneDto): Observable<Empty>;
 
-  verifyEmailCode(request: VerifyEmailCodeDto): Observable<Empty>;
+  verifyEmailCode(request: VerifyEmailCodeDto, request1: FindOneDto): Observable<Empty>;
 
-  updateAdminEmail(request: UpdateEmailDto): Observable<Admin>;
+  updateAdminEmail(request: UpdateEmailDto, request1: FindOneDto): Observable<Admin>;
 
-  updateAdminPassword(request: UpdatePasswordDto): Observable<Admin>;
+  updateAdminPassword(request: UpdatePasswordDto, request1: FindOneDto): Observable<Admin>;
 
   logoutAdmin(request: RefreshTokenDto): Observable<Empty>;
 
@@ -280,7 +278,7 @@ export interface AdminServiceClient {
 
   adminForgotPassword(request: ForgotPasswordDto): Observable<Empty>;
 
-  adminResetPassword(request: ResetPasswordDto): Observable<Empty>;
+  adminResetPassword(request: ResetPasswordDto, request1: TokenDto): Observable<Empty>;
 
   removeAdmin(request: FindOneDto): Observable<Empty>;
 }
@@ -292,15 +290,15 @@ export interface AdminServiceController {
 
   adminLogin(request: LoginDto): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
-  updateAdminRole(request: UpdateAdminRoleDto): Promise<Admin> | Observable<Admin> | Admin;
+  updateAdminRole(request: UpdateAdminRoleDto, request1: FindOneDto): Promise<Admin> | Observable<Admin> | Admin;
 
-  requestUpdateAdminEmail(request: RequestEmailUpdateDto): Promise<Empty> | Observable<Empty> | Empty;
+  requestUpdateAdminEmail(request: RequestEmailUpdateDto, request1: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  verifyEmailCode(request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
+  verifyEmailCode(request: VerifyEmailCodeDto, request1: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  updateAdminEmail(request: UpdateEmailDto): Promise<Admin> | Observable<Admin> | Admin;
+  updateAdminEmail(request: UpdateEmailDto, request1: FindOneDto): Promise<Admin> | Observable<Admin> | Admin;
 
-  updateAdminPassword(request: UpdatePasswordDto): Promise<Admin> | Observable<Admin> | Admin;
+  updateAdminPassword(request: UpdatePasswordDto, request1: FindOneDto): Promise<Admin> | Observable<Admin> | Admin;
 
   logoutAdmin(request: RefreshTokenDto): Promise<Empty> | Observable<Empty> | Empty;
 
@@ -308,7 +306,7 @@ export interface AdminServiceController {
 
   adminForgotPassword(request: ForgotPasswordDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  adminResetPassword(request: ResetPasswordDto): Promise<Empty> | Observable<Empty> | Empty;
+  adminResetPassword(request: ResetPasswordDto, request1: TokenDto): Promise<Empty> | Observable<Empty> | Empty;
 
   removeAdmin(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 }
@@ -352,7 +350,7 @@ export interface RoleServiceClient {
 
   getRoleById(request: FindOneDto): Observable<Role>;
 
-  updateRole(request: UpdateRoleDto): Observable<Role>;
+  updateRole(request: UpdateRoleDto, request1: FindOneDto): Observable<Role>;
 
   deleteRole(request: FindOneDto): Observable<Empty>;
 }
@@ -366,7 +364,7 @@ export interface RoleServiceController {
 
   getRoleById(request: FindOneDto): Promise<Role> | Observable<Role> | Role;
 
-  updateRole(request: UpdateRoleDto): Promise<Role> | Observable<Role> | Role;
+  updateRole(request: UpdateRoleDto, request1: FindOneDto): Promise<Role> | Observable<Role> | Role;
 
   deleteRole(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 }

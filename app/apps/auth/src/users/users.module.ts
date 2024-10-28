@@ -8,13 +8,13 @@ import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 import { CommonModule } from '@app/common';
 import { AdminEntity } from '../admins/entities/admin.entity';
-import { APP_FILTER } from '@nestjs/core';
+// import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports:[
     CommonModule,
     forwardRef(() => AuthModule),
-    TypeOrmModule.forFeature([UserEntity,AdminEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
+     TypeOrmModule.forFeature([UserEntity,AdminEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
   ],
   controllers: [UsersController],
   providers: [UsersService],

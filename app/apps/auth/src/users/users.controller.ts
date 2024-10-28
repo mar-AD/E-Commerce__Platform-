@@ -1,11 +1,12 @@
 import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
-  LoginDto, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto,
+  FindOneDto,
+  LoginDto, RefreshTokenDto, RequestEmailUpdateDto, TokenDto, UpdateEmailDto, UpdatePasswordDto,
   UserServiceController,
   UserServiceControllerMethods, VerifyEmailCodeDto,
 } from '@app/common';
-import { CreateDto, FindOneDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
+import { CreateDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
 
 @Controller()
 @UserServiceControllerMethods()
@@ -20,20 +21,20 @@ export class UsersController implements UserServiceController{
     return this.usersService.userLogin(loginRequest);
   }
 
-  updateUserPassword(updatePasswordDto: UpdatePasswordDto) {
-    return this.usersService.updateUserPassword(updatePasswordDto);
+  updateUserPassword(updatePasswordDto: UpdatePasswordDto, findOneDto: FindOneDto) {
+    return this.usersService.updateUserPassword(updatePasswordDto, findOneDto);
   }
 
-  requestUpdateUserEmail (requestUpdateUserEmail: RequestEmailUpdateDto){
-    return this.usersService.requestUpdateEmail(requestUpdateUserEmail)
+  requestUpdateUserEmail (requestUpdateUserEmail: RequestEmailUpdateDto, findOneDto: FindOneDto){
+    return this.usersService.requestUpdateEmail(requestUpdateUserEmail, findOneDto)
   }
 
-  verifyEmailCode (verifyEmailCodeDto: VerifyEmailCodeDto){
-    return this.usersService.verifyEmailCode(verifyEmailCodeDto)
+  verifyEmailCode (verifyEmailCodeDto: VerifyEmailCodeDto, findOneDto: FindOneDto){
+    return this.usersService.verifyEmailCode(verifyEmailCodeDto, findOneDto);
   }
 
-  updateUserEmail(updateEmailDto: UpdateEmailDto) {
-    return this.usersService.updateUserEmail(updateEmailDto);
+  updateUserEmail(updateEmailDto: UpdateEmailDto, findOneDto: FindOneDto) {
+    return this.usersService.updateUserEmail(updateEmailDto, findOneDto);
   }
 
   logoutUser(logoutDto: RefreshTokenDto) {
@@ -48,8 +49,8 @@ export class UsersController implements UserServiceController{
     return this.usersService.userForgotPassword(forgotPassDto);
   }
 
-  userResetPassword(resetPasswordDto: ResetPasswordDto) {
-    return this.usersService.userResetPassword(resetPasswordDto);
+  userResetPassword(resetPasswordDto: ResetPasswordDto, tokenDto: TokenDto) {
+    return this.usersService.userResetPassword(resetPasswordDto, tokenDto);
   }
 
   removeUser(findOneDto: FindOneDto) {

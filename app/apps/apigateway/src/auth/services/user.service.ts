@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   CreateUserDto, FindOneDto, ForgotPasswordDto,
-  LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
+  LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto, TokenDto,
   UpdateEmailDto,
   UpdatePasswordDto,
   USER_SERVICE_NAME,
@@ -29,20 +29,20 @@ export class UserService implements OnModuleInit {
       return this.userService.userLogin(loginRequest);
   }
 
-  updatePassword(updatePasswordDto: UpdatePasswordDto) {
-    return this.userService.updateUserPassword(updatePasswordDto);
+  updatePassword(updatePasswordDto: UpdatePasswordDto, findOnsDto: FindOneDto) {
+    return this.userService.updateUserPassword(updatePasswordDto, findOnsDto);
   }
 
-  RequestEmailUpdate(requestEmailUpdateDto:RequestEmailUpdateDto) {
-    return this.userService.requestUpdateUserEmail(requestEmailUpdateDto)
+  RequestEmailUpdate(requestEmailUpdateDto:RequestEmailUpdateDto, findOnsDto: FindOneDto) {
+    return this.userService.requestUpdateUserEmail(requestEmailUpdateDto, findOnsDto)
   }
 
-  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto) {
-    return this.userService.verifyEmailCode(verifyEmailCodeDto)
+  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto, findOnsDto: FindOneDto) {
+    return this.userService.verifyEmailCode(verifyEmailCodeDto, findOnsDto)
   }
 
-  updateEmail(updateEmailDto: UpdateEmailDto) {
-    return this.userService.updateUserEmail(updateEmailDto);
+  updateEmail(updateEmailDto: UpdateEmailDto, findOnsDto: FindOneDto) {
+    return this.userService.updateUserEmail(updateEmailDto, findOnsDto);
   }
 
   logout(logoutDto: RefreshTokenDto){
@@ -57,8 +57,8 @@ export class UserService implements OnModuleInit {
     return this.userService.userForgotPassword(forgotPasswordDto)
   }
 
-  resetPassword(resetPasswordDto: ResetPasswordDto) {
-    return this.userService.userResetPassword(resetPasswordDto)
+  resetPassword(resetPasswordDto: ResetPasswordDto, tokenDto: TokenDto) {
+    return this.userService.userResetPassword(resetPasswordDto, tokenDto)
   }
 
   remove(findOneDto: FindOneDto) {

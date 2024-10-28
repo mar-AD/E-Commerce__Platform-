@@ -9,7 +9,7 @@ import {
   RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto,
-  UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto, FindOneDto,
+  UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto, FindOneDto, TokenDto,
 } from '@app/common';
 import { AUTH_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -31,24 +31,24 @@ export class AdminService implements OnModuleInit{
     return this.adminService.adminLogin(loginRequest);
   }
 
-  updatePassword(updatePasswordDto: UpdatePasswordDto) {
-    return this.adminService.updateAdminPassword(updatePasswordDto);
+  updatePassword(updatePasswordDto: UpdatePasswordDto, findOneDto: FindOneDto) {
+    return this.adminService.updateAdminPassword(updatePasswordDto, findOneDto);
   }
 
-  RequestEmailUpdate(requestEmailUpdateDto:RequestEmailUpdateDto) {
-    return this.adminService.requestUpdateAdminEmail(requestEmailUpdateDto)
+  RequestEmailUpdate(requestEmailUpdateDto:RequestEmailUpdateDto, findOneDto: FindOneDto) {
+    return this.adminService.requestUpdateAdminEmail(requestEmailUpdateDto, findOneDto)
   }
 
-  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto) {
-    return this.adminService.verifyEmailCode(verifyEmailCodeDto)
+  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto, findOneDto: FindOneDto) {
+    return this.adminService.verifyEmailCode(verifyEmailCodeDto, findOneDto)
   }
 
-  updateEmail(updateEmailDto: UpdateEmailDto) {
-    return this.adminService.updateAdminEmail(updateEmailDto);
+  updateEmail(updateEmailDto: UpdateEmailDto, findOneDto: FindOneDto) {
+    return this.adminService.updateAdminEmail(updateEmailDto, findOneDto);
   }
 
-  updateRole(id: string, updateAdminRoleDto: UpdateAdminRoleDto) {
-    return this.adminService.updateAdminRole({id, ...updateAdminRoleDto});
+  updateRole(updateAdminRoleDto: UpdateAdminRoleDto, findOneDto: FindOneDto) {
+    return this.adminService.updateAdminRole(updateAdminRoleDto, findOneDto);
   }
 
   logout(logoutDto: RefreshTokenDto){
@@ -63,8 +63,8 @@ export class AdminService implements OnModuleInit{
     return this.adminService.adminForgotPassword(forgotPasswordDto)
   }
 
-  resetPassword(resetPasswordDto: ResetPasswordDto) {
-    return this.adminService.adminResetPassword(resetPasswordDto)
+  resetPassword(resetPasswordDto: ResetPasswordDto, tokenDto: TokenDto) {
+    return this.adminService.adminResetPassword(resetPasswordDto, tokenDto)
   }
 
   remove(findOneDto: FindOneDto) {

@@ -1,8 +1,8 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { AUTH_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
-import { ROLE_SERVICE_NAME, RoleServiceClient } from '@app/common';
-import { CreateRoleDto, FindOneDto, UpdateRoleDto } from '@app/common/dtos';
+import { FindOneDto, ROLE_SERVICE_NAME, RoleServiceClient } from '@app/common';
+import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
 
 @Injectable()
 export class RolesService implements OnModuleInit{
@@ -24,8 +24,8 @@ export class RolesService implements OnModuleInit{
     return this.rolesService.getRoleById(findOnsDto);
   }
 
-  update(id: string, updateRoleDto: UpdateRoleDto) {
-    return this.rolesService.updateRole({id, ...updateRoleDto});
+  update(updateRoleDto: UpdateRoleDto, findOnsDto: FindOneDto) {
+    return this.rolesService.updateRole(updateRoleDto, findOnsDto);
   }
 
   remove(findOnsDto: FindOneDto) {

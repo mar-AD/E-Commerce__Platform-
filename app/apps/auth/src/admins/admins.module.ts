@@ -14,7 +14,7 @@ import { CommonModule } from '@app/common';
   imports:[
     CommonModule,
     forwardRef(() => AuthModule),
-    TypeOrmModule.forFeature([AdminEntity,UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity, RoleEntity]),
+     TypeOrmModule.forFeature([AdminEntity,UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity, RoleEntity]),
   ],
   controllers: [AdminsController],
   providers: [AdminsService],
