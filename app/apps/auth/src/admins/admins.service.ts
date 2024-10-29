@@ -43,62 +43,20 @@ export class AdminsService extends BaseService<Admin>{
     super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger)
   }
   createAdmin(createAdminDto: CreateAdminDto): Observable<Admin> {
-    const { role, email, password } = createAdminDto;
+    const {role} = createAdminDto;
     this.logger.log('roleRepo: Searching for role in repository...');
-
-    return from(this.roleRepository.findOne({ where: { name: role } })).pipe(
-      switchMap((thisRole) => {
-        if (!thisRole) {
+    return from(this.roleRepository.findOne({where: {name: role}})).pipe(
+      switchMap((thisRole)=>{
+        if(!thisRole){
           this.logger.error(`roleRepo: Role "${role}" not found`);
-          throw new RpcException({
+          throw new RpcException ({
             code: status.NOT_FOUND,
-            message: messages.ROLE.NOT_FOUND,
-          });
-        }
-        const adminDto = {
-          email,
-          password,
-          roleId: thisRole
-        };
-
-        return from(this.adminRepository.findOne({ where: { email } })).pipe(
-          switchMap((existingEntity) => {
-            if (existingEntity) {
-              this.logger.error(`adminRepo: entity with email "${email}" already exists.`);
-              throw new RpcException({
-                code: status.ALREADY_EXISTS,
-                message: `Admin with email: ${email} already exists.`,
-              });
-            }
-
-            this.logger.log(`adminRepo: Hashing the password for the new entity...`);
-            return hashPassword(password).pipe(
-              switchMap((hashedPass) => {
-                adminDto.password = hashedPass;
-                this.logger.log(`adminRepo: proceeding to create Entity...`);
-
-                const newEntity = this.adminRepository.create(adminDto);
-                this.logger.log(`adminRepo: Saving the new entity to the repository...`);
-
-                return from(this.adminRepository.save(newEntity)).pipe(
-                  map((createdUser) => {
-                    this.logger.log(`adminRepo: Entity successfully created with email "${email}".`);
-                    return this.mapResponse(createdUser);
-                  }),
-                  catchError((err) => {
-                    this.logger.error(`adminRepo: Failed to create and save the entity with email "${email}". Error: ${err.message}`);
-                    throw new RpcException({
-                      code: status.INTERNAL,
-                      message: messages.ADMIN.FAILED_TO_CREATE,
-                    });
-                  })
-                );
-              })
-            );
+            message: messages.ROLE.NOT_FOUND
           })
-        );
+        }
+        return this.create(thisRole, createAdminDto, AuthConstants.admin)
       })
-    );
+    )
   }
 
   adminLogin(loginRequest: LoginDto): Observable<AuthResponse> {

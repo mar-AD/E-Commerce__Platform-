@@ -29,6 +29,7 @@ import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUp
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { RoleEntity } from './roles/entities/role.entity';
 
 
 
@@ -43,7 +44,7 @@ export abstract class  BaseService<E> {
     protected readonly logger: LoggerService,
   ) {}
 
-  create(createDto: CreateDto, type: AuthConstants) : Observable<E> {
+  create(roleId: RoleEntity, createDto: CreateDto, type: AuthConstants) : Observable<E> {
     const {email, password } = createDto;
 
     const repository= this.getRepository(type);
@@ -63,9 +64,10 @@ export abstract class  BaseService<E> {
         return hashPassword(password).pipe(
           switchMap((hashedPass)=>{
             createDto.password = hashedPass;
-            this.logger.log(`${type+'Repo'}: proceeding to create Entity...`);
 
-            const newEntity = repository.create(createDto)
+            this.logger.log(`${type+'Repo'}: proceeding to create Entity...`);
+            const newEntity = this.CreateEntity(type, roleId, createDto);
+
             this.logger.log(`${type+'Repo'}: Saving the new entity to the repository...`);
             return from(repository.save(newEntity)).pipe(
 
@@ -89,6 +91,16 @@ export abstract class  BaseService<E> {
         )
       })
     )
+  }
+
+  private CreateEntity(type: AuthConstants, roleId: RoleEntity | null, createDto: CreateDto): any {
+    if (type === AuthConstants.admin) {
+      return {
+        ...createDto,
+        roleId: roleId
+      }
+    }
+    return createDto
   }
 
   login(loginRequest: LoginDto, type: AuthConstants): Observable<AuthResponse> {

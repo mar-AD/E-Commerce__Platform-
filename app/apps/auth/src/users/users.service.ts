@@ -38,48 +38,7 @@ export class UsersService extends BaseService<User>{
   }
 
   createUser(createUserDto: CreateDto) : Observable<User> {
-    const {email, password } = createUserDto;
-    this.logger.log(`userRepo'}: Searching for entity by email "${email}" in repository...'`);
-
-    return from(this.userRepository.findOne({ where: { email } })).pipe(
-      switchMap((existingEntity)=>{
-        if(existingEntity){
-          this.logger.error(`userRepo'}: entity with email "${email}" already exists.`);
-          throw new RpcException({
-            code: status.ALREADY_EXISTS,
-            message: `User with email: ${email} already exists.`,
-          });
-        }
-        this.logger.log(`userRepo'}: Hashing the password for the new entity...'`);
-        return hashPassword(password).pipe(
-          switchMap((hashedPass)=>{
-            createUserDto.password = hashedPass;
-            this.logger.log(`userRepo'}: proceeding to create Entity...`);
-
-            const newEntity = this.userRepository.create(createUserDto)
-            this.logger.log(`userRepo'}: Saving the new entity to the repository...`);
-            return from(this.userRepository.save(newEntity)).pipe(
-
-              //SEND WELCOMING EMAIL TO THIS ADMIN -------------------------------------
-
-
-              map((createdUser) => {
-                this.logger.log(`userRepo'}: Entity successfully created with email "${email}".`);
-                return this.mapResponse(createdUser);
-              }),
-
-              catchError((err) => {
-                this.logger.error(`userRepo'}: Failed to create and save the entity with email "${email}". Error: ${err.message}`);
-                throw new RpcException({
-                  code: status.INTERNAL,
-                  message: messages.USER.FAILED_TO_CREATE,
-                });
-              })
-            )
-          })
-        )
-      })
-    )
+    return this.create(null, createUserDto, AuthConstants.user)
   }
 
   userLogin(loginRequest: LoginDto): Observable<AuthResponse> {
