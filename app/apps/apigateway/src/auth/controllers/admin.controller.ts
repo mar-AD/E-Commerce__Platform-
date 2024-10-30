@@ -9,7 +9,13 @@ import {
 } from '@app/common/dtos';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { FindOneDto, TokenDto } from '@app/common';
+import {
+  FindOneDto, RequestUpdateEmailRequest,
+  ResetPasswordRequest,
+  TokenDto, UpdateAdminRoleRequest,
+  UpdateEmailRequest, UpdatePasswordRequest,
+  VerifyEmailCodeRequest,
+} from '@app/common';
 
 @ApiTags('AuthAdmins')
 @Controller('auth')
@@ -29,35 +35,40 @@ export class AdminController {
   @Patch('adminPassUpdate')
   updateAdminPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
     const id = req['payload'].id
-    const findOnsDto : FindOneDto = {id};
-    return this.adminService.updatePassword(updatePasswordDto, findOnsDto);
+    const findOneDto : FindOneDto = {id};
+    const updatePasswordRequest: UpdatePasswordRequest = { updatePasswordDto, findOneDto}
+    return this.adminService.updatePassword(updatePasswordRequest);
   }
 
   @Post('admin/requestEmailUpdate')
-  RequestAdminEmailUpdate(@Req() req: Request, @Body() requestAdminEmailUpdate: RequestEmailUpdateDto) {
+  RequestAdminEmailUpdate(@Req() req: Request, @Body() requestEmailUpdateDto: RequestEmailUpdateDto) {
     const id = req['payload'].id
-    const findOnsDto : FindOneDto = {id};
-    return this.adminService.RequestEmailUpdate(requestAdminEmailUpdate, findOnsDto)
+    const findOneDto : FindOneDto = {id};
+    const requestUpdateEmailDto: RequestUpdateEmailRequest = {requestEmailUpdateDto, findOneDto}
+    return this.adminService.RequestEmailUpdate(requestUpdateEmailDto)
   }
 
   @Get('admin/verifyEmailCode')
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
     const id = req['payload'].id
-    const findOnsDto : FindOneDto = {id};
-    return this.adminService.verifyEmailCode(verifyEmailCodeDto, findOnsDto)
+    const findOneDto : FindOneDto = {id};
+    const verifyEmailCodeRequest: VerifyEmailCodeRequest = {verifyEmailCodeDto, findOneDto}
+    return this.adminService.verifyEmailCode(verifyEmailCodeRequest)
   }
 
   @Patch('adminEmailUpdate')
   updateAdminEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
     const id = req['payload'].id
-    const findOnsDto : FindOneDto = {id};
-    return this.adminService.updateEmail(updateEmailDto, findOnsDto);
+    const findOneDto : FindOneDto = {id};
+    const updateEmailRequest: UpdateEmailRequest = {updateEmailDto, findOneDto}
+    return this.adminService.updateEmail(updateEmailRequest);
   }
 
   @Patch('adminRoleUpdate/:id')
   UpdateAdminRole(@Param('id') id: string, @Body() updateAdminRoleDto: UpdateAdminRoleDto) {
-    const findOnsDto : FindOneDto = {id};
-    return this.adminService.updateRole(updateAdminRoleDto, findOnsDto);
+    const findOneDto : FindOneDto = {id};
+    const updateAdminRoleRequest: UpdateAdminRoleRequest = {updateAdminRoleDto, findOneDto}
+    return this.adminService.updateRole(updateAdminRoleRequest);
   }
 
   @Post('admin/logout')
@@ -78,7 +89,8 @@ export class AdminController {
   @Post('admin/reset-password/token')
   adminResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     const tokenDto : TokenDto = { token };
-    return this.adminService.resetPassword(resetPasswordDto, tokenDto);
+    const resetPasswordRequest: ResetPasswordRequest = {resetPasswordDto, tokenDto}
+    return this.adminService.resetPassword(resetPasswordRequest);
   }
 
   @Delete('admin/remove')

@@ -3,9 +3,9 @@ import { RolesService } from './roles.service';
 import {
   FindOneDto,
   RoleServiceController,
-  RoleServiceControllerMethods,
+  RoleServiceControllerMethods, UpdateRoleRequest,
 } from '@app/common';
-import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
+import { CreateRoleDto } from '@app/common/dtos';
 
 @Controller()
 @RoleServiceControllerMethods()
@@ -24,8 +24,9 @@ export class RolesController implements RoleServiceController{
     return this.rolesService.findOne(findOneDto);
   }
 
-  updateRole(updateRoleDto: UpdateRoleDto, findOnsDto: FindOneDto) {
-    return this.rolesService.update(findOnsDto, updateRoleDto);
+  updateRole(updateRoleRequest: UpdateRoleRequest) {
+    const {updateRoleDto, findOneDto} = updateRoleRequest;
+    return this.rolesService.update(updateRoleDto, findOneDto);
   }
 
   deleteRole(findOneDto: FindOneDto) {

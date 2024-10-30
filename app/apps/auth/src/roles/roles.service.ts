@@ -114,121 +114,52 @@ export class RolesService {
     )
   }
 
-  // update(findOnsDto: FindOneDto, updateRoleDto: UpdateRoleDto): Observable<Role> {
-  //   const {id} = findOnsDto
-  //   this.logger.log('roleRepo: Searching for the role in repository...');
-  //   return from(this.roleRepository.findOne({where: {id}})).pipe(
-  //     switchMap((thisRole)=>{
-  //       if (!thisRole){
-  //         this.logger.error(`roleRepo: No role with id "${id}" found.`);
-  //         throw new RpcException ({
-  //           code: status.NOT_FOUND,
-  //           message: messages.ROLE.FAILED_TO_FETCH_ROLE_FOR_UPDATE
-  //         })
-  //       }
-  //       const duplicatedPermissions = findDuplicates(updateRoleDto.permissions);
-  //       if (duplicatedPermissions.length > 0) {
-  //         throw new RpcException({
-  //           code: status.ALREADY_EXISTS,
-  //           message: `Role with permission(s) "${duplicatedPermissions.map(per => PermissionsName[per as PermissionsNameKeys]).join(', ')}" already exists.`,
-  //         });
-  //       }
-  //
-  //       if (updateRoleDto.name && updateRoleDto.name !== thisRole.name) {
-  //         thisRole.name = updateRoleDto.name;
-  //       }
-  //
-  //       if (updateRoleDto.permissions && JSON.stringify(updateRoleDto.permissions)!== JSON.stringify(thisRole.permissions)) {
-  //         thisRole.permissions = updateRoleDto.permissions;
-  //       }
-  //       this.logger.log('roleRepo: Saving the updated entity to the repository...')
-  //       return from(this.roleRepository.save(thisRole)).pipe(
-  //         map((updatedRole)=>{
-  //           this.logger.log('roleRepo: Role updated successfully')
-  //           return this.mapRoleResponse(updatedRole)
-  //         }),
-  //         catchError((err)=>{
-  //           this.logger.error(`roleRepo: ${messages.ROLE.FAILED_TO_UPDATE_ROLE}: ${err.message}`);
-  //           throw new RpcException({
-  //             code: status.INTERNAL,
-  //             message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
-  //           });
-  //         })
-  //       )
-  //     })
-  //   )
-  // }
-
-  update(findOnsDto: FindOneDto, updateRoleDto: UpdateRoleDto): Observable<Role> {
-    const { id } = findOnsDto;
+  update(updateRoleDto: UpdateRoleDto, findOneDto: FindOneDto): Observable<Role> {
+    const { id } = findOneDto;
+    console.log(updateRoleDto, findOneDto);
     this.logger.log('roleRepo: Searching for the role in repository...');
-
-    return from(this.roleRepository.findOne({ where: { id } })).pipe(
-      switchMap((thisRole) => {
-        if (!thisRole) {
+    return from(this.roleRepository.findOne({where: {id: id}})).pipe(
+      switchMap((thisRole)=>{
+        if (!thisRole){
           this.logger.error(`roleRepo: No role with id "${id}" found.`);
-          throw new RpcException({
+          throw new RpcException ({
             code: status.NOT_FOUND,
-            message: messages.ROLE.FAILED_TO_FETCH_ROLE_FOR_UPDATE,
-          });
+            message: messages.ROLE.FAILED_TO_FETCH_ROLE_FOR_UPDATE
+          })
         }
-
+        console.log('my permissions',updateRoleDto.permissions);
         const duplicatedPermissions = findDuplicates(updateRoleDto.permissions);
         if (duplicatedPermissions.length > 0) {
-          this.logger.error(`roleRepo: Duplicate permissions found: "${duplicatedPermissions.join(', ')}".`);
           throw new RpcException({
             code: status.ALREADY_EXISTS,
-            message: `Role with permission(s) "${duplicatedPermissions.join(', ')}" already exists.`,
+            message: `Role with permission(s) "${duplicatedPermissions.map(per => PermissionsName[per as PermissionsNameKeys]).join(', ')}" already exists.`,
           });
         }
 
-        // Only update if the name is different
-        let nameChanged = false;
         if (updateRoleDto.name && updateRoleDto.name !== thisRole.name) {
-          const existingRole =  this.roleRepository.findOne({ where: { name: updateRoleDto.name } });
-          if (existingRole) {
-            this.logger.error(`roleRepo: Role name "${updateRoleDto.name}" already exists.`);
-            throw new RpcException({
-              code: status.ALREADY_EXISTS,
-              message: `Role name "${updateRoleDto.name}" already exists.`,
-            });
-          }
           thisRole.name = updateRoleDto.name;
-          nameChanged = true;
         }
 
-        // Only update permissions if they differ
-        const permissionsChanged = !arraysEqual(thisRole.permissions, updateRoleDto.permissions);
-        if (permissionsChanged) {
+        if (updateRoleDto.permissions && JSON.stringify(updateRoleDto.permissions)!== JSON.stringify(thisRole.permissions)) {
           thisRole.permissions = updateRoleDto.permissions;
         }
-
-        // If nothing has changed, return the existing role
-        if (!nameChanged && !permissionsChanged) {
-          this.logger.log('roleRepo: No changes detected, returning existing role.');
-          return of(this.mapRoleResponse(thisRole)); // Return the current role without saving
-        }
-
-        this.logger.log('roleRepo: Saving the updated entity to the repository...');
+        this.logger.log('roleRepo: Saving the updated entity to the repository...')
         return from(this.roleRepository.save(thisRole)).pipe(
-          map((updatedRole) => {
-            this.logger.log('roleRepo: Role updated successfully');
-            return this.mapRoleResponse(updatedRole);
+          map((updatedRole)=>{
+            this.logger.log('roleRepo: Role updated successfully')
+            return this.mapRoleResponse(updatedRole)
           }),
-          catchError((err) => {
+          catchError((err)=>{
             this.logger.error(`roleRepo: ${messages.ROLE.FAILED_TO_UPDATE_ROLE}: ${err.message}`);
             throw new RpcException({
               code: status.INTERNAL,
               message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
             });
-          }),
-        );
-      }),
-    );
+          })
+        )
+      })
+    )
   }
-
-
-
 
   remove(findOneDto: FindOneDto): Observable<Empty> {
     this.logger.log('roleRepo: Searching for the role in repository to remove...');

@@ -5,7 +5,7 @@ import {
   Admin,
   AuthResponse, CronService,
   dateToTimestamp,
-  Empty, FindOneDto, ForgotPasswordDto, hashPassword,
+  Empty, FindOneDto, ForgotPasswordDto,
   JwtTokenService, LoggerService,
   LoginDto,
   messages, RefreshTokenDto, RequestEmailUpdateDto, TokenDto, UpdateEmailDto,

@@ -2,7 +2,9 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 import { ApiTags } from '@nestjs/swagger';
 import { RolesService } from '../services/roles.service';
 import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
-import { FindOneDto } from '@app/common';
+import { FindOneDto, UpdateRoleRequest } from '@app/common';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 @ApiTags('Roles')
 @Controller('roles')
@@ -27,13 +29,15 @@ export class RolesController {
 
   @Patch('/:id')
   updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    const findOnsDto : FindOneDto = {id}
-    return this.rolesService.update(updateRoleDto, findOnsDto );
+    const findOneDto: FindOneDto = { id };
+    const updateRoleRequest: UpdateRoleRequest = { updateRoleDto, findOneDto };
+    console.log('UpdateRoleRequest:', updateRoleRequest);
+    return this.rolesService.update(updateRoleRequest);
   }
 
   @Delete('/:id')
   deleteRole(@Param('id') id: string) {
-    const findOnsDto : FindOneDto = {id}
-    return this.rolesService.remove(findOnsDto);
+    const findOneDto : FindOneDto = {id}
+    return this.rolesService.remove(findOneDto);
   }
 }
