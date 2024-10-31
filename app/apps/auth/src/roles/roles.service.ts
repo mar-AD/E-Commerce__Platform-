@@ -116,7 +116,6 @@ export class RolesService {
 
   update(updateRoleDto: UpdateRoleDto, findOneDto: FindOneDto): Observable<Role> {
     const { id } = findOneDto;
-    console.log(updateRoleDto, findOneDto);
     this.logger.log('roleRepo: Searching for the role in repository...');
     return from(this.roleRepository.findOne({where: {id: id}})).pipe(
       switchMap((thisRole)=>{
@@ -127,7 +126,6 @@ export class RolesService {
             message: messages.ROLE.FAILED_TO_FETCH_ROLE_FOR_UPDATE
           })
         }
-        console.log('my permissions',updateRoleDto.permissions);
         const duplicatedPermissions = findDuplicates(updateRoleDto.permissions);
         if (duplicatedPermissions.length > 0) {
           throw new RpcException({
@@ -140,9 +138,12 @@ export class RolesService {
           thisRole.name = updateRoleDto.name;
         }
 
-        if (updateRoleDto.permissions && JSON.stringify(updateRoleDto.permissions)!== JSON.stringify(thisRole.permissions)) {
+        console.log('we are bout to compare');
+        if (updateRoleDto.permissions && !arraysEqual(updateRoleDto.permissions, thisRole.permissions)) {
+          console.log('the compare is happening');
           thisRole.permissions = updateRoleDto.permissions;
         }
+        console.log('compare is done');
         this.logger.log('roleRepo: Saving the updated entity to the repository...')
         return from(this.roleRepository.save(thisRole)).pipe(
           map((updatedRole)=>{

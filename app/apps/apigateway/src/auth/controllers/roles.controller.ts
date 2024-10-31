@@ -31,7 +31,6 @@ export class RolesController {
   updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     const findOneDto: FindOneDto = { id };
     const updateRoleRequest: UpdateRoleRequest = { updateRoleDto, findOneDto };
-    console.log('UpdateRoleRequest:', updateRoleRequest);
     return this.rolesService.update(updateRoleRequest);
   }
 

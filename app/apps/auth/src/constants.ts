@@ -1,4 +1,6 @@
 import { Permissions } from '@app/common';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 export enum AuthConstants {
   admin = 'admin',
@@ -18,6 +20,12 @@ export const PermissionsName = {
 export type PermissionsNameKeys = keyof typeof PermissionsName;
 
 export const findDuplicates = (permissions : Permissions[]) =>{
+  if (!permissions || permissions.length === 0){
+     throw new RpcException({
+      code: status.INVALID_ARGUMENT,
+      message: 'Please select at least one permission to proceed.',
+    })
+  }
   const unique = new Set();
   const duplicate = new Set()
 
@@ -31,8 +39,7 @@ export const findDuplicates = (permissions : Permissions[]) =>{
   return Array.from(duplicate)
 }
 
-// Utility function for deep comparison of arrays
-export const arraysEqual = (arr1: any[], arr2: any[]): boolean => {
+export const arraysEqual = (arr1: Permissions[], arr2: Permissions[]): boolean => {
   if (arr1.length !== arr2.length) return false;
 
   // Sort and compare each element
