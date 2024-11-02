@@ -3,7 +3,7 @@ import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import {
   dateToTimestamp, Empty, FindOneDto,
   LoggerService,
-  messages,
+  messages, Permissions,
   Role,
   RolesResponse,
 } from '@app/common';
