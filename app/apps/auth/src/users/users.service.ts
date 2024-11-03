@@ -4,12 +4,12 @@ import {
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  User, LoggerService, FindOneDto, TokenDto, hashPassword, messages,
+  User, LoggerService, FindOneDto, TokenDto, None, messages,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { catchError, from, map, Observable, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
@@ -18,6 +18,8 @@ import { AdminEntity } from '../admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 
 @Injectable()
@@ -77,6 +79,24 @@ export class UsersService extends BaseService<User>{
 
   deleteUser(findOneDto: FindOneDto): Observable<Empty> {
     return this.remove(findOneDto, AuthConstants.user);
+  }
+
+
+  // fro the autGuard ====
+  getUser(findOneDto: FindOneDto): Observable<User> {
+    return from(this.userRepository.findOne({where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: true}})).pipe(
+      map((user) =>{
+      if (!user){
+        throw new RpcException({
+          code: status.NOT_FOUND,
+          message: messages.USER.NOT_FOUND
+        })
+      }
+        return this.mapResponse(user);
+
+    })
+    )
+
   }
 
   @Cron("0 0 * * *")

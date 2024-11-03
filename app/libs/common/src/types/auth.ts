@@ -21,6 +21,10 @@ export enum Permissions {
   UNRECOGNIZED = -1,
 }
 
+export interface Permission {
+  permissions: Permissions[];
+}
+
 export interface BaseResponse {
   status: number;
   message: string;
@@ -93,8 +97,8 @@ export interface ResetPasswordRequest {
   tokenDto: TokenDto | undefined;
 }
 
-export interface UpdateEmailRequest {
-  updateEmailDto: UpdateEmailDto | undefined;
+export interface UpdatePasswordRequest {
+  updatePasswordDto: UpdatePasswordDto | undefined;
   findOneDto: FindOneDto | undefined;
 }
 
@@ -103,8 +107,8 @@ export interface RequestUpdateEmailRequest {
   findOneDto: FindOneDto | undefined;
 }
 
-export interface UpdatePasswordRequest {
-  updatePasswordDto: UpdatePasswordDto | undefined;
+export interface UpdateEmailRequest {
+  updateEmailDto: UpdateEmailDto | undefined;
   findOneDto: FindOneDto | undefined;
 }
 
@@ -113,7 +117,6 @@ export interface CreateUserDto {
   email: string;
   password: string;
 }
-
 
 /** admin DTOs */
 export interface CreateAdminDto {
@@ -130,8 +133,6 @@ export interface UpdateAdminRoleRequest {
   updateAdminRoleDto: UpdateAdminRoleDto | undefined;
   findOneDto: FindOneDto | undefined;
 }
-
-
 
 /** role Dto */
 export interface RolesResponse {
@@ -235,6 +236,8 @@ export interface UserServiceClient {
   userResetPassword(request: ResetPasswordRequest): Observable<Empty>;
 
   removeUser(request: FindOneDto): Observable<Empty>;
+
+  findUser(request: FindOneDto): Observable<User>;
 }
 
 /** users */
@@ -261,6 +264,8 @@ export interface UserServiceController {
   userResetPassword(request: ResetPasswordRequest): Promise<Empty> | Observable<Empty> | Empty;
 
   removeUser(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
+
+  findUser(request: FindOneDto): Promise<User> | Observable<User> | User;
 }
 
 export function UserServiceControllerMethods() {
@@ -277,6 +282,7 @@ export function UserServiceControllerMethods() {
       "userForgotPassword",
       "userResetPassword",
       "removeUser",
+      "findUser",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
@@ -318,6 +324,8 @@ export interface AdminServiceClient {
   adminResetPassword(request: ResetPasswordRequest): Observable<Empty>;
 
   removeAdmin(request: FindOneDto): Observable<Empty>;
+
+  permissionsByRole(request: FindOneDto): Observable<Permission>;
 }
 
 /** Admins */
@@ -346,6 +354,8 @@ export interface AdminServiceController {
   adminResetPassword(request: ResetPasswordRequest): Promise<Empty> | Observable<Empty> | Empty;
 
   removeAdmin(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
+
+  permissionsByRole(request: FindOneDto): Promise<Permission> | Observable<Permission> | Permission;
 }
 
 export function AdminServiceControllerMethods() {
@@ -363,6 +373,7 @@ export function AdminServiceControllerMethods() {
       "adminForgotPassword",
       "adminResetPassword",
       "removeAdmin",
+      "permissionsByRole",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

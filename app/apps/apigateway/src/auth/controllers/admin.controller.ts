@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
@@ -10,19 +10,24 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, RequestUpdateEmailRequest,
+  FindOneDto, PermissionsGuard, RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto, UpdateAdminRoleRequest,
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
+import { AuthGuard } from '@nestjs/passport';
+import { PermissionsAndAccess } from '@app/common/utils/methadata';
+
 
 @ApiTags('AuthAdmins')
 @Controller('auth')
+@UseGuards(AuthGuard('jwt'), PermissionsGuard)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('admin/register')
+  @PermissionsAndAccess({ accessType: 'admin', permissions: ['view-reports', 'create-user']})
   createAdmin(@Body() createAdminDto: CreateAdminDto) {
     return this.adminService.create(createAdminDto);
   }

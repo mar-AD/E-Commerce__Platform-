@@ -55,3 +55,18 @@ export const VerifyEmailCode = (expired: Date)=>{
   }
 }
 
+
+export const PermissionsName = {
+  0: 'PERMISSION_UNSPECIFIED',
+  1: 'VIEW_DASHBOARD',
+  2: 'MANAGE_USERS',
+  3: 'MANAGE_ORDERS',
+  4: 'MANAGE_PRODUCTS',
+  5: 'MANAGE_ROLES',
+  '-1': 'UNRECOGNIZED',
+} as const;
+
+export function getPermissionName(value: number): string | undefined {
+  return PermissionsName[value] ?? undefined;
+}
+

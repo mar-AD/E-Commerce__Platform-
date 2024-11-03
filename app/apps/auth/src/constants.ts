@@ -7,17 +7,7 @@ export enum AuthConstants {
   user = 'user'
 }
 
-export const PermissionsName = {
-  0: 'PERMISSION_UNSPECIFIED',
-  1: 'VIEW_DASHBOARD',
-  2: 'MANAGE_USERS',
-  3: 'MANAGE_ORDERS',
-  4: 'MANAGE_PRODUCTS',
-  5: 'MANAGE_ROLES',
-  '-1': 'UNRECOGNIZED',
-} as const;
-
-export type PermissionsNameKeys = keyof typeof PermissionsName;
+// export type PermissionsNameKeys = keyof typeof PermissionsName;
 
 export const findDuplicates = (permissions : Permissions[]) =>{
   if (!permissions || permissions.length === 0){

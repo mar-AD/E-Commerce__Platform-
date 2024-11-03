@@ -66,4 +66,8 @@ export class UsersController implements UserServiceController{
   removeUser(findOneDto: FindOneDto) {
     return this.usersService.deleteUser(findOneDto);
   }
+
+  findUser(findOneDto: FindOneDto) {
+    return this.usersService.getUser(findOneDto);
+  }
 }

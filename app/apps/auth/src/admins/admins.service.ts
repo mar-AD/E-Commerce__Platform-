@@ -8,7 +8,7 @@ import {
   Empty, FindOneDto, ForgotPasswordDto,
   JwtTokenService, LoggerService,
   LoginDto,
-  messages, Permissions, RefreshTokenDto, RequestEmailUpdateDto, TokenDto, UpdateEmailDto,
+  messages, Permission, RefreshTokenDto, RequestEmailUpdateDto, TokenDto, UpdateEmailDto,
   UpdatePasswordDto, VerifyEmailCodeDto,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,7 +16,7 @@ import { AdminEntity } from './entities/admin.entity';
 import { Repository } from 'typeorm';
 import { RoleEntity } from '../roles/entities/role.entity';
 import { CreateAdminDto } from '@app/common/dtos/create-admin.dto';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { AuthConstants } from '../constants';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
@@ -139,7 +139,8 @@ export class AdminsService extends BaseService<Admin>{
     return this.remove(findOneDto, AuthConstants.admin);
   }
 
-  GetPermissionsByRole(findOneDto: FindOneDto): Observable<Permissions[]>{
+  // fro the autGuard ====
+  GetPermissionsByRole(findOneDto: FindOneDto): Observable<Permission>{
     const {id} = findOneDto;
     return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: true}})).pipe(
       switchMap((thisAdmin) => {
@@ -158,8 +159,8 @@ export class AdminsService extends BaseService<Admin>{
                 message: messages.ROLE.NOT_FOUND
               })
             }
-            const permissions = thisRole.permissions
-            return of(permissions)
+            return { permissions: thisRole.permissions }
+
           })
         )
       })

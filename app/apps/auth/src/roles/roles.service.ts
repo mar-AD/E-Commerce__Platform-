@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import {
-  dateToTimestamp, Empty, FindOneDto,
+  dateToTimestamp, Empty, FindOneDto, getPermissionName,
   LoggerService,
   messages, Permissions,
   Role,
@@ -13,7 +13,7 @@ import { Repository } from 'typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
-import { arraysEqual, findDuplicates, PermissionsName, PermissionsNameKeys } from '../constants';
+import { arraysEqual, findDuplicates } from '../constants';
 
 @Injectable()
 export class RolesService {
@@ -43,7 +43,7 @@ export class RolesService {
         if (duplicatedPermissions.length > 0) {
           throw new RpcException({
             code: status.ALREADY_EXISTS,
-            message: `Role with permission(s) "${duplicatedPermissions.map(per => PermissionsName[per as PermissionsNameKeys]).join(', ')}" already exists.`,
+            message: `Role with permission(s) "${duplicatedPermissions.map(per => getPermissionName(per as Permissions )).join(', ')}" already exists.`,
           })
         }
         this.logger.log('roleRepo: No existing role found, proceeding to create Entity...')
@@ -130,7 +130,7 @@ export class RolesService {
         if (duplicatedPermissions.length > 0) {
           throw new RpcException({
             code: status.ALREADY_EXISTS,
-            message: `Role with permission(s) "${duplicatedPermissions.map(per => PermissionsName[per as PermissionsNameKeys]).join(', ')}" already exists.`,
+            message: `Role with permission(s) "${duplicatedPermissions.map(per => getPermissionName(per as Permissions )).join(', ')}" already exists.`,
           });
         }
 

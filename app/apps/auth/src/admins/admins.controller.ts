@@ -4,18 +4,14 @@ import {
   AdminServiceController,
   AdminServiceControllerMethods,
   FindOneDto,
-  RequestEmailUpdateDto,
   RequestUpdateEmailRequest, ResetPasswordRequest,
-  TokenDto,
   UpdateAdminRoleRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
-  VerifyEmailCodeDto,
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { CreateAdminDto } from '@app/common/dtos/create-admin.dto';
-import { UpdateAdminRoleDto } from '@app/common/dtos/update-admin-role.dto';
-import { LoginDto, RefreshTokenDto, UpdateEmailDto, UpdatePasswordDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
+import { LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -74,5 +70,9 @@ export class AdminsController implements AdminServiceController{
 
   removeAdmin(findOneDto: FindOneDto) {
     return this.adminsService.deleteAdmin(findOneDto);
+  }
+
+  permissionsByRole(findOneDto: FindOneDto) {
+    return this.adminsService.GetPermissionsByRole(findOneDto);
   }
 }

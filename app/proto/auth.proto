@@ -8,30 +8,32 @@ import "google/protobuf/timestamp.proto";
 service UserService {
   rpc createUser (CreateUserDto) returns (User);
   rpc userLogin (LoginDto) returns (AuthResponse);
-  rpc updateUserPassword (UpdateUserPasswordRequest) returns (User);
-  rpc requestUpdateUserEmail (RequestUpdateUserEmailRequest) returns (Empty);
+  rpc updateUserPassword (UpdatePasswordRequest) returns (User);
+  rpc requestUpdateUserEmail (RequestUpdateEmailRequest) returns (Empty);
   rpc verifyEmailCode (VerifyEmailCodeRequest) returns (Empty);
-  rpc updateUserEmail (UpdateUserEmailRequest) returns (User);
+  rpc updateUserEmail (UpdateEmailRequest) returns (User);
   rpc logoutUser (RefreshTokenDto) returns (Empty);
   rpc userRefreshToken (RefreshTokenDto) returns (AuthResponse);
   rpc userForgotPassword (ForgotPasswordDto) returns (Empty);
   rpc userResetPassword (ResetPasswordRequest) returns (Empty);
   rpc removeUser (FindOneDto) returns (Empty);
+  rpc findUser (FindOneDto) returns (User);
 }
 //Admins
 service AdminService {
   rpc createAdmin (CreateAdminDto) returns (Admin);
   rpc adminLogin (LoginDto) returns (AuthResponse);
   rpc updateAdminRole (UpdateAdminRoleRequest) returns (Admin);
-  rpc updateAdminPassword (UpdateAdminPasswordRequest) returns (Admin);
-  rpc requestUpdateAdminEmail (RequestUpdateAdminEmailRequest) returns (Empty);
+  rpc updateAdminPassword (UpdatePasswordRequest) returns (Admin);
+  rpc requestUpdateAdminEmail (RequestUpdateEmailRequest) returns (Empty);
   rpc verifyEmailCode (VerifyEmailCodeRequest) returns (Empty);
-  rpc updateAdminEmail (UpdateAdminEmailRequest) returns (Admin);
+  rpc updateAdminEmail (UpdateEmailRequest) returns (Admin);
   rpc logoutAdmin (RefreshTokenDto) returns (Empty);
   rpc adminRefreshToken (RefreshTokenDto) returns (AuthResponse);
   rpc adminForgotPassword (ForgotPasswordDto) returns (Empty);
   rpc adminResetPassword (ResetPasswordRequest) returns (Empty);
   rpc removeAdmin (FindOneDto) returns (Empty);
+  rpc permissionsByRole(FindOneDto) returns (Permission);
 }
 
 //Roles
@@ -44,6 +46,9 @@ service RoleService {
 }
 //common DTOs
 
+message Permission {
+  repeated Permissions permissions = 1;
+}
 message BaseResponse {
   int32 status = 1;
   string message = 2;
@@ -115,26 +120,26 @@ message ResetPasswordRequest {
     TokenDto tokenDto = 2;
 }
 
+message UpdatePasswordRequest {
+  UpdatePasswordDto updatePasswordDto = 1;
+  FindOneDto findOneDto = 2;
+}
+
+message RequestUpdateEmailRequest {
+  RequestEmailUpdateDto requestEmailUpdateDto = 1;
+  FindOneDto findOneDto = 2;
+}
+
+message UpdateEmailRequest {
+  UpdateEmailDto updateEmailDto = 1;
+  FindOneDto findOneDto = 2;
+}
 //user DTOs
 message CreateUserDto {
   string email = 1;
   string password = 2;
 }
 
-message UpdateUserPasswordRequest {
-  UpdatePasswordDto updatePasswordDto = 1;
-  FindOneDto findOneDto = 2;
-}
-
-message RequestUpdateUserEmailRequest {
-  RequestEmailUpdateDto requestEmailUpdateDto = 1;
-  FindOneDto findOneDto = 2;
-}
-
-message UpdateUserEmailRequest {
-  UpdateEmailDto updateEmailDto = 1;
-  FindOneDto findOneDto = 2;
-}
 //admin DTOs
 message CreateAdminDto {
   string email = 1;
@@ -151,20 +156,6 @@ message UpdateAdminRoleRequest {
   FindOneDto findOneDto = 2;
 }
 
-message UpdateAdminPasswordRequest {
-  UpdatePasswordDto updatePasswordDto = 1;
-  FindOneDto findOneDto = 2;
-}
-
-message RequestUpdateAdminEmailRequest {
-  RequestEmailUpdateDto requestEmailUpdateDto = 1;
-  FindOneDto findOneDto = 2;
-}
-
-message UpdateAdminEmailRequest {
-  UpdateEmailDto updateEmailDto = 1;
-  FindOneDto findOneDto = 2;
-}
 //role Dto
 message RolesResponse {
   repeated Role roles = 1;
