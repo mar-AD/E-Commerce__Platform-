@@ -6,10 +6,13 @@ import {
   ForgotPasswordDto,
   LoginDto,
   RefreshTokenDto,
-  RequestEmailUpdateDto,
-  ResetPasswordDto,
-  UpdateEmailDto,
-  UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto, FindOneDto,
+  FindOneDto,
+  ResetPasswordRequest,
+  UpdateEmailRequest,
+  VerifyEmailCodeRequest,
+  RequestUpdateEmailRequest,
+  UpdatePasswordRequest,
+  UpdateAdminRoleRequest,
 } from '@app/common';
 import { AUTH_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -31,24 +34,24 @@ export class AdminService implements OnModuleInit{
     return this.adminService.adminLogin(loginRequest);
   }
 
-  updatePassword(updatePasswordDto: UpdatePasswordDto) {
+  updatePassword(updatePasswordDto: UpdatePasswordRequest) {
     return this.adminService.updateAdminPassword(updatePasswordDto);
   }
 
-  RequestEmailUpdate(requestEmailUpdateDto:RequestEmailUpdateDto) {
+  RequestEmailUpdate(requestEmailUpdateDto:RequestUpdateEmailRequest) {
     return this.adminService.requestUpdateAdminEmail(requestEmailUpdateDto)
   }
 
-  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto) {
-    return this.adminService.verifyEmailCode(verifyEmailCodeDto)
+  verifyEmailCode(verifyEmailCodeRequest: VerifyEmailCodeRequest) {
+    return this.adminService.verifyEmailCode(verifyEmailCodeRequest)
   }
 
-  updateEmail(updateEmailDto: UpdateEmailDto) {
-    return this.adminService.updateAdminEmail(updateEmailDto);
+  updateEmail(updateEmailRequest: UpdateEmailRequest) {
+    return this.adminService.updateAdminEmail(updateEmailRequest);
   }
 
-  updateRole(id: string, updateAdminRoleDto: UpdateAdminRoleDto) {
-    return this.adminService.updateAdminRole({id, ...updateAdminRoleDto});
+  updateRole(updateAdminRoleRequest: UpdateAdminRoleRequest) {
+    return this.adminService.updateAdminRole(updateAdminRoleRequest);
   }
 
   logout(logoutDto: RefreshTokenDto){
@@ -63,8 +66,8 @@ export class AdminService implements OnModuleInit{
     return this.adminService.adminForgotPassword(forgotPasswordDto)
   }
 
-  resetPassword(resetPasswordDto: ResetPasswordDto) {
-    return this.adminService.adminResetPassword(resetPasswordDto)
+  resetPassword(resetPasswordRequest: ResetPasswordRequest) {
+    return this.adminService.adminResetPassword(resetPasswordRequest)
   }
 
   remove(findOneDto: FindOneDto) {

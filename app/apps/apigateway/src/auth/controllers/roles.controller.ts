@@ -1,37 +1,42 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { RolesService } from '../services/roles.service';
-import { CreateRoleDto, FindOneDto, UpdateRoleDto } from '@app/common/dtos';
+import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
+import { FindOneDto, UpdateRoleRequest } from '@app/common';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 @ApiTags('Roles')
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  @Post('roles/register')
-  createRole(createRoleDto: CreateRoleDto) {
+  @Post('register')
+  createRole(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
   }
 
-  @Get('roles')
+  @Get()
   getAllRoles() {
     return this.rolesService.findAll();
   }
 
-  @Get('roles/:id')
-  getRoleById(@Param('id') id: string, @Body() findOnsDto: FindOneDto) {
-    findOnsDto.id = id;
-    return this.rolesService.findOne(findOnsDto);
+  @Get('/:id')
+  getRoleById(@Param('id') id: string) {
+    const findOneDto: FindOneDto = { id };
+    return this.rolesService.findOne(findOneDto);
   }
 
-  @Patch('roles/:id')
+  @Patch('/:id')
   updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.rolesService.update(id, updateRoleDto );
+    const findOneDto: FindOneDto = { id };
+    const updateRoleRequest: UpdateRoleRequest = { updateRoleDto, findOneDto };
+    return this.rolesService.update(updateRoleRequest);
   }
 
-  @Delete('roles/:id')
-  deleteRole(@Param('id') id: string, @Body() findOnsDto: FindOneDto) {
-    findOnsDto.id = id;
-    return this.rolesService.remove(findOnsDto);
+  @Delete('/:id')
+  deleteRole(@Param('id') id: string) {
+    const findOneDto : FindOneDto = {id}
+    return this.rolesService.remove(findOneDto);
   }
 }

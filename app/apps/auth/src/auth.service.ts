@@ -12,23 +12,24 @@ import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
 import {
   AuthResponse,
-  Empty,
+  Empty, FindOneDto,
   generateEmailCode,
   getExpiryDate,
   hashPassword,
   JwtTokenService, LoggerService,
-  messages,
+  messages, TokenDto,
   VerifyEmailCode,
   verifyPassword,
 } from '@app/common';
 import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { AuthConstants } from './constants';
 import { AdminEntity } from './admins/entities/admin.entity';
-import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
+import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { RoleEntity } from './roles/entities/role.entity';
 
 
 
@@ -43,7 +44,7 @@ export abstract class  BaseService<E> {
     protected readonly logger: LoggerService,
   ) {}
 
-  create(createDto: CreateDto, type: AuthConstants) : Observable<E> {
+  create(roleId: RoleEntity, createDto: CreateDto, type: AuthConstants) : Observable<E> {
     const {email, password } = createDto;
 
     const repository= this.getRepository(type);
@@ -55,7 +56,7 @@ export abstract class  BaseService<E> {
         if(existingEntity){
           this.logger.error(`${type+'Repo'}: entity with email "${email}" already exists.`);
           throw new RpcException({
-            code: status.NOT_FOUND,
+            code: status.ALREADY_EXISTS,
             message: `${type} with email: ${email} already exists.`,
           });
         }
@@ -63,8 +64,10 @@ export abstract class  BaseService<E> {
         return hashPassword(password).pipe(
           switchMap((hashedPass)=>{
             createDto.password = hashedPass;
+
             this.logger.log(`${type+'Repo'}: proceeding to create Entity...`);
-            const newEntity = repository.create(createDto)
+            const newEntity = this.CreateEntity(type, roleId, createDto);
+
             this.logger.log(`${type+'Repo'}: Saving the new entity to the repository...`);
             return from(repository.save(newEntity)).pipe(
 
@@ -88,6 +91,16 @@ export abstract class  BaseService<E> {
         )
       })
     )
+  }
+
+  private CreateEntity(type: AuthConstants, roleId: RoleEntity | null, createDto: CreateDto): any {
+    if (type === AuthConstants.admin) {
+      return {
+        ...createDto,
+        roleId: roleId
+      }
+    }
+    return createDto
   }
 
   login(loginRequest: LoginDto, type: AuthConstants): Observable<AuthResponse> {
@@ -151,16 +164,16 @@ export abstract class  BaseService<E> {
     )
   }
 
-  updatePassword(updatePasswordDto: UpdatePasswordDto, type: AuthConstants):Observable<E> {
+  updatePassword(findOneDto: FindOneDto, updatePasswordDto: UpdatePasswordDto, type: AuthConstants):Observable<E> {
     const { password, newPassword, confirmPassword } = updatePasswordDto;
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type)
 
-    this.logger.log(`${type+'Repo'}: Searching for entity by ID "${updatePasswordDto.id}" in repository...`);
-    return from(repository.findOne({where: {id: updatePasswordDto.id, isDeleted: false}})).pipe(
+    this.logger.log(`${type+'Repo'}: Searching for entity by ID "${findOneDto.id}" in repository...`);
+    return from(repository.findOne({where: {id: findOneDto.id, isDeleted: false}})).pipe(
       switchMap((thisAdmin) =>{
         if(!thisAdmin){
-          this.logger.error(`${type+'Repo'}: entity with ID "${updatePasswordDto.id}" doesn't exist.`);
+          this.logger.error(`${type+'Repo'}: entity with ID "${findOneDto.id}" doesn't exist.`);
           throw new RpcException ({
             code: status.NOT_FOUND,
             message: messageType.FAILED_TO_FETCH_FOR_UPDATE
@@ -207,20 +220,20 @@ export abstract class  BaseService<E> {
     )
   }
 
-  requestUpEmail(requestEmailUpdateDto: RequestEmailUpdateDto, type: AuthConstants): Observable<Empty> {
+  requestUpEmail(findOneDto: FindOneDto, requestEmailUpdateDto: RequestEmailUpdateDto, type: AuthConstants): Observable<Empty> {
     const code = generateEmailCode();
     const expiredAt = getExpiryDate(0, 0, 5);
 
-    const condition = this.getCondition(type, { code: code, expiresAt: expiredAt }, { id: requestEmailUpdateDto.id });
+    const condition = this.getCondition(type, { code: code, expiresAt: expiredAt }, { id: findOneDto.id });
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
 
-    this.logger.log(`${type + 'Repo'}: Finding entity with id: ${requestEmailUpdateDto.id} for email update...`);
+    this.logger.log(`${type + 'Repo'}: Finding entity with id: ${findOneDto.id} for email update...`);
 
-    return from(repository.findOne({ where: { id: requestEmailUpdateDto.id, isDeleted: false } })).pipe(
+    return from(repository.findOne({ where: { id: findOneDto.id, isDeleted: false } })).pipe(
       switchMap((thisEntity) => {
         if (!thisEntity) {
-          this.logger.error(`${type + 'Repo'}: Entity not found with id: ${requestEmailUpdateDto.id}`);
+          this.logger.error(`${type + 'Repo'}: Entity not found with id: ${findOneDto.id}`);
           throw new RpcException ({
             code: status.NOT_FOUND,
             message: messageType.FAILED_FETCH,
@@ -254,18 +267,18 @@ export abstract class  BaseService<E> {
     );
   }
 
-  verifyCode(verifyEmailCodeDto: VerifyEmailCodeDto, type: AuthConstants): Observable<Empty> {
+  verifyCode(findOneDto: FindOneDto, verifyEmailCodeDto: VerifyEmailCodeDto, type: AuthConstants): Observable<Empty> {
 
-    const whereCondition = this.getCondition(type, { code: verifyEmailCodeDto.verificationCode }, { id: verifyEmailCodeDto.id });
+    const whereCondition = this.getCondition(type, { code: verifyEmailCodeDto.verificationCode }, { id: findOneDto.id });
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
 
-    this.logger.log(`${type + 'Repo'}: Searching for entity with id: ${verifyEmailCodeDto.id} to verify code...`);
+    this.logger.log(`${type + 'Repo'}: Searching for entity with id: ${findOneDto.id} to verify code...`);
 
-    return from(repository.findOne({ where: { id: verifyEmailCodeDto.id, isDeleted: false } })).pipe(
+    return from(repository.findOne({ where: { id: findOneDto.id, isDeleted: false } })).pipe(
       switchMap((thisEntity) => {
         if (!thisEntity) {
-          this.logger.error(`${type + 'Repo'}: Entity not found with id: ${verifyEmailCodeDto.id}`);
+          this.logger.error(`${type + 'Repo'}: Entity not found with id: ${findOneDto.id}`);
           throw new RpcException ({
             code: status.NOT_FOUND,
             message: messageType.FAILED_FETCH,
@@ -276,17 +289,17 @@ export abstract class  BaseService<E> {
         return from(this.emailVerificationCodeRepository.findOne({ where: whereCondition })).pipe(
           map((verificationCode) => {
             if (!verificationCode) {
-              this.logger.error(`Verification code not found or invalid for id: ${verifyEmailCodeDto.id}`);
+              this.logger.error(`Verification code not found or invalid for id: ${findOneDto.id}`);
               throw new NotFoundException ({
                 code: status.NOT_FOUND,
                 message: 'Verification code not found or invalid.',
               });
             }
 
-            this.logger.log(`Verification code found. Verifying code for id: ${verifyEmailCodeDto.id}`);
+            this.logger.log(`Verification code found. Verifying code for id: ${findOneDto.id}`);
             VerifyEmailCode(verificationCode.expiresAt);
 
-            this.logger.log(`Verification code successfully verified for id: ${verifyEmailCodeDto.id}`);
+            this.logger.log(`Verification code successfully verified for id: ${findOneDto.id}`);
             return {
               result: {
                 status: HttpStatus.OK,
@@ -295,7 +308,7 @@ export abstract class  BaseService<E> {
             };
           }),
           catchError((error) => {
-            this.logger.error(`Error verifying code for id: ${verifyEmailCodeDto.id}. Error: ${error.message}`);
+            this.logger.error(`Error verifying code for id: ${findOneDto.id}. Error: ${error.message}`);
             throw new RpcException({
               code: status.INTERNAL,
               message: error.message,
@@ -306,32 +319,32 @@ export abstract class  BaseService<E> {
     );
   }
 
-  updateEmail(updateEmailDto: UpdateEmailDto, type: AuthConstants): Observable<E> {
+  updateEmail(findOneDto: FindOneDto, updateEmailDto: UpdateEmailDto, type: AuthConstants): Observable<E> {
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
 
-    this.logger.log(`${type + 'Repo'}: Searching for entity with id: ${updateEmailDto.id} to update email...`);
+    this.logger.log(`${type + 'Repo'}: Searching for entity with id: ${findOneDto.id} to update email...`);
 
-    return from(repository.findOne({ where: { id: updateEmailDto.id, isDeleted: false } })).pipe(
+    return from(repository.findOne({ where: { id: findOneDto.id, isDeleted: false } })).pipe(
       switchMap((thisEntity) => {
         if (!thisEntity) {
-          this.logger.error(`${type + 'Repo'}: Entity not found with id: ${updateEmailDto.id}.`);
+          this.logger.error(`${type + 'Repo'}: Entity not found with id: ${findOneDto.id}.`);
           throw new RpcException ({
             code: status.NOT_FOUND,
             message: messageType.FAILED_TO_FETCH_FOR_UPDATE,
           });
         }
 
-        this.logger.log(`${type + 'Repo'}: Entity found. Updating email for id: ${updateEmailDto.id}.`);
+        this.logger.log(`${type + 'Repo'}: Entity found. Updating email for id: ${findOneDto.id}.`);
         thisEntity.email = updateEmailDto.email;
 
         return from(repository.save(thisEntity)).pipe(
           map((updatedEntity) => {
-            this.logger.log(`${type + 'Repo'}: Email updated successfully for id: ${updateEmailDto.id}.`);
+            this.logger.log(`${type + 'Repo'}: Email updated successfully for id: ${findOneDto.id}.`);
             return this.mapResponse(updatedEntity);
           }),
           catchError((error) => {
-            this.logger.error(`${type + 'Repo'}: Failed to update email for id: ${updateEmailDto.id}. Error: ${error.message}`);
+            this.logger.error(`${type + 'Repo'}: Failed to update email for id: ${findOneDto.id}. Error: ${error.message}`);
             throw new InternalServerErrorException({
               code: status.INTERNAL,
               message: messages.EMAIL.FAILED_TO_UPDATE_EMAIL,
@@ -488,8 +501,9 @@ export abstract class  BaseService<E> {
     );
   }
 
-  resetPassword(resetPasswordDto: ResetPasswordDto, type: AuthConstants): Observable<Empty> {
-    const { token, newPassword, confirmPassword } = resetPasswordDto;
+  resetPassword(tokenDto: TokenDto, resetPasswordDto: ResetPasswordDto, type: AuthConstants): Observable<Empty> {
+    const { newPassword, confirmPassword } = resetPasswordDto;
+    const {token} = tokenDto
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
 

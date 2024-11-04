@@ -6,11 +6,9 @@ import { UserController } from './controllers/user.controller';
 import { AdminController } from './controllers/admin.controller';
 import { RolesController } from './controllers/roles.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AUTH_PACKAGE_NAME } from '@app/common';
+import { AUTH_PACKAGE_NAME, CommonModule } from '@app/common';
 import { join } from 'path';
 import { AUTH_SERVICE } from './constants';
-// import { APP_FILTER } from '@nestjs/core';
-// import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions';
 
 @Module({
   imports: [

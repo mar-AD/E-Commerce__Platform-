@@ -1,12 +1,11 @@
 import { Controller } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import {
-  CreateRoleDto,
   FindOneDto,
   RoleServiceController,
-  RoleServiceControllerMethods,
-  UpdateRoleDto,
+  RoleServiceControllerMethods, UpdateRoleRequest,
 } from '@app/common';
+import { CreateRoleDto } from '@app/common/dtos';
 
 @Controller()
 @RoleServiceControllerMethods()
@@ -25,8 +24,9 @@ export class RolesController implements RoleServiceController{
     return this.rolesService.findOne(findOneDto);
   }
 
-  updateRole(updateRoleDto: UpdateRoleDto) {
-    return this.rolesService.update(updateRoleDto.id, updateRoleDto);
+  updateRole(updateRoleRequest: UpdateRoleRequest) {
+    const {updateRoleDto, findOneDto} = updateRoleRequest;
+    return this.rolesService.update(updateRoleDto, findOneDto);
   }
 
   deleteRole(findOneDto: FindOneDto) {

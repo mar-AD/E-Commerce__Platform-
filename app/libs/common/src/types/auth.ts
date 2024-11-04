@@ -21,6 +21,10 @@ export enum Permissions {
   UNRECOGNIZED = -1,
 }
 
+export interface Permission {
+  permissions: Permissions[];
+}
+
 export interface BaseResponse {
   status: number;
   message: string;
@@ -53,18 +57,15 @@ export interface ForgotPasswordDto {
 }
 
 export interface ResetPasswordDto {
-  token: string;
   newPassword: string;
   confirmPassword: string;
 }
 
 export interface RequestEmailUpdateDto {
-  id: string;
   email: string;
 }
 
 export interface VerifyEmailCodeDto {
-  id: string;
   verificationCode: string;
 }
 
@@ -73,15 +74,42 @@ export interface RefreshTokenDto {
 }
 
 export interface UpdateEmailDto {
-  id: string;
   email: string;
 }
 
 export interface UpdatePasswordDto {
-  id: string;
   password: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+export interface TokenDto {
+  token: string;
+}
+
+export interface VerifyEmailCodeRequest {
+  verifyEmailCodeDto: VerifyEmailCodeDto | undefined;
+  findOneDto: FindOneDto | undefined;
+}
+
+export interface ResetPasswordRequest {
+  resetPasswordDto: ResetPasswordDto | undefined;
+  tokenDto: TokenDto | undefined;
+}
+
+export interface UpdatePasswordRequest {
+  updatePasswordDto: UpdatePasswordDto | undefined;
+  findOneDto: FindOneDto | undefined;
+}
+
+export interface RequestUpdateEmailRequest {
+  requestEmailUpdateDto: RequestEmailUpdateDto | undefined;
+  findOneDto: FindOneDto | undefined;
+}
+
+export interface UpdateEmailRequest {
+  updateEmailDto: UpdateEmailDto | undefined;
+  findOneDto: FindOneDto | undefined;
 }
 
 /** user DTOs */
@@ -98,8 +126,12 @@ export interface CreateAdminDto {
 }
 
 export interface UpdateAdminRoleDto {
-  id: string;
   role: string;
+}
+
+export interface UpdateAdminRoleRequest {
+  updateAdminRoleDto: UpdateAdminRoleDto | undefined;
+  findOneDto: FindOneDto | undefined;
 }
 
 /** role Dto */
@@ -114,9 +146,13 @@ export interface CreateRoleDto {
 }
 
 export interface UpdateRoleDto {
-  id: string;
-  name?: string;
+  name?: string | undefined;
   permissions?: Permissions[];
+}
+
+export interface UpdateRoleRequest {
+  updateRoleDto: UpdateRoleDto | undefined;
+  findOneDto: FindOneDto | undefined;
 }
 
 /** user response */
@@ -183,13 +219,13 @@ export interface UserServiceClient {
 
   userLogin(request: LoginDto): Observable<AuthResponse>;
 
-  updateUserPassword(request: UpdatePasswordDto): Observable<User>;
+  updateUserPassword(request: UpdatePasswordRequest): Observable<User>;
 
-  requestUpdateUserEmail(request: RequestEmailUpdateDto): Observable<Empty>;
+  requestUpdateUserEmail(request: RequestUpdateEmailRequest): Observable<Empty>;
 
-  verifyEmailCode(request: VerifyEmailCodeDto): Observable<Empty>;
+  verifyEmailCode(request: VerifyEmailCodeRequest): Observable<Empty>;
 
-  updateUserEmail(request: UpdateEmailDto): Observable<User>;
+  updateUserEmail(request: UpdateEmailRequest): Observable<User>;
 
   logoutUser(request: RefreshTokenDto): Observable<Empty>;
 
@@ -197,9 +233,11 @@ export interface UserServiceClient {
 
   userForgotPassword(request: ForgotPasswordDto): Observable<Empty>;
 
-  userResetPassword(request: ResetPasswordDto): Observable<Empty>;
+  userResetPassword(request: ResetPasswordRequest): Observable<Empty>;
 
   removeUser(request: FindOneDto): Observable<Empty>;
+
+  findUser(request: FindOneDto): Observable<User>;
 }
 
 /** users */
@@ -209,13 +247,13 @@ export interface UserServiceController {
 
   userLogin(request: LoginDto): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
-  updateUserPassword(request: UpdatePasswordDto): Promise<User> | Observable<User> | User;
+  updateUserPassword(request: UpdatePasswordRequest): Promise<User> | Observable<User> | User;
 
-  requestUpdateUserEmail(request: RequestEmailUpdateDto): Promise<Empty> | Observable<Empty> | Empty;
+  requestUpdateUserEmail(request: RequestUpdateEmailRequest): Promise<Empty> | Observable<Empty> | Empty;
 
-  verifyEmailCode(request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
+  verifyEmailCode(request: VerifyEmailCodeRequest): Promise<Empty> | Observable<Empty> | Empty;
 
-  updateUserEmail(request: UpdateEmailDto): Promise<User> | Observable<User> | User;
+  updateUserEmail(request: UpdateEmailRequest): Promise<User> | Observable<User> | User;
 
   logoutUser(request: RefreshTokenDto): Promise<Empty> | Observable<Empty> | Empty;
 
@@ -223,9 +261,11 @@ export interface UserServiceController {
 
   userForgotPassword(request: ForgotPasswordDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  userResetPassword(request: ResetPasswordDto): Promise<Empty> | Observable<Empty> | Empty;
+  userResetPassword(request: ResetPasswordRequest): Promise<Empty> | Observable<Empty> | Empty;
 
   removeUser(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
+
+  findUser(request: FindOneDto): Promise<User> | Observable<User> | User;
 }
 
 export function UserServiceControllerMethods() {
@@ -242,6 +282,7 @@ export function UserServiceControllerMethods() {
       "userForgotPassword",
       "userResetPassword",
       "removeUser",
+      "findUser",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
@@ -264,15 +305,15 @@ export interface AdminServiceClient {
 
   adminLogin(request: LoginDto): Observable<AuthResponse>;
 
-  updateAdminRole(request: UpdateAdminRoleDto): Observable<Admin>;
+  updateAdminRole(request: UpdateAdminRoleRequest): Observable<Admin>;
 
-  requestUpdateAdminEmail(request: RequestEmailUpdateDto): Observable<Empty>;
+  updateAdminPassword(request: UpdatePasswordRequest): Observable<Admin>;
 
-  verifyEmailCode(request: VerifyEmailCodeDto): Observable<Empty>;
+  requestUpdateAdminEmail(request: RequestUpdateEmailRequest): Observable<Empty>;
 
-  updateAdminEmail(request: UpdateEmailDto): Observable<Admin>;
+  verifyEmailCode(request: VerifyEmailCodeRequest): Observable<Empty>;
 
-  updateAdminPassword(request: UpdatePasswordDto): Observable<Admin>;
+  updateAdminEmail(request: UpdateEmailRequest): Observable<Admin>;
 
   logoutAdmin(request: RefreshTokenDto): Observable<Empty>;
 
@@ -280,9 +321,11 @@ export interface AdminServiceClient {
 
   adminForgotPassword(request: ForgotPasswordDto): Observable<Empty>;
 
-  adminResetPassword(request: ResetPasswordDto): Observable<Empty>;
+  adminResetPassword(request: ResetPasswordRequest): Observable<Empty>;
 
   removeAdmin(request: FindOneDto): Observable<Empty>;
+
+  permissionsByRole(request: FindOneDto): Observable<Permission>;
 }
 
 /** Admins */
@@ -292,15 +335,15 @@ export interface AdminServiceController {
 
   adminLogin(request: LoginDto): Promise<AuthResponse> | Observable<AuthResponse> | AuthResponse;
 
-  updateAdminRole(request: UpdateAdminRoleDto): Promise<Admin> | Observable<Admin> | Admin;
+  updateAdminRole(request: UpdateAdminRoleRequest): Promise<Admin> | Observable<Admin> | Admin;
 
-  requestUpdateAdminEmail(request: RequestEmailUpdateDto): Promise<Empty> | Observable<Empty> | Empty;
+  updateAdminPassword(request: UpdatePasswordRequest): Promise<Admin> | Observable<Admin> | Admin;
 
-  verifyEmailCode(request: VerifyEmailCodeDto): Promise<Empty> | Observable<Empty> | Empty;
+  requestUpdateAdminEmail(request: RequestUpdateEmailRequest): Promise<Empty> | Observable<Empty> | Empty;
 
-  updateAdminEmail(request: UpdateEmailDto): Promise<Admin> | Observable<Admin> | Admin;
+  verifyEmailCode(request: VerifyEmailCodeRequest): Promise<Empty> | Observable<Empty> | Empty;
 
-  updateAdminPassword(request: UpdatePasswordDto): Promise<Admin> | Observable<Admin> | Admin;
+  updateAdminEmail(request: UpdateEmailRequest): Promise<Admin> | Observable<Admin> | Admin;
 
   logoutAdmin(request: RefreshTokenDto): Promise<Empty> | Observable<Empty> | Empty;
 
@@ -308,9 +351,11 @@ export interface AdminServiceController {
 
   adminForgotPassword(request: ForgotPasswordDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  adminResetPassword(request: ResetPasswordDto): Promise<Empty> | Observable<Empty> | Empty;
+  adminResetPassword(request: ResetPasswordRequest): Promise<Empty> | Observable<Empty> | Empty;
 
   removeAdmin(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
+
+  permissionsByRole(request: FindOneDto): Promise<Permission> | Observable<Permission> | Permission;
 }
 
 export function AdminServiceControllerMethods() {
@@ -319,15 +364,16 @@ export function AdminServiceControllerMethods() {
       "createAdmin",
       "adminLogin",
       "updateAdminRole",
+      "updateAdminPassword",
       "requestUpdateAdminEmail",
       "verifyEmailCode",
       "updateAdminEmail",
-      "updateAdminPassword",
       "logoutAdmin",
       "adminRefreshToken",
       "adminForgotPassword",
       "adminResetPassword",
       "removeAdmin",
+      "permissionsByRole",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
@@ -352,7 +398,7 @@ export interface RoleServiceClient {
 
   getRoleById(request: FindOneDto): Observable<Role>;
 
-  updateRole(request: UpdateRoleDto): Observable<Role>;
+  updateRole(request: UpdateRoleRequest): Observable<Role>;
 
   deleteRole(request: FindOneDto): Observable<Empty>;
 }
@@ -366,7 +412,7 @@ export interface RoleServiceController {
 
   getRoleById(request: FindOneDto): Promise<Role> | Observable<Role> | Role;
 
-  updateRole(request: UpdateRoleDto): Promise<Role> | Observable<Role> | Role;
+  updateRole(request: UpdateRoleRequest): Promise<Role> | Observable<Role> | Role;
 
   deleteRole(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 }

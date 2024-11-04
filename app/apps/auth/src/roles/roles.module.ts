@@ -10,7 +10,7 @@ import { CommonModule } from '@app/common';
   imports:[
     CommonModule,
     forwardRef(() => AuthModule),
-    TypeOrmModule.forFeature([RoleEntity])
+     TypeOrmModule.forFeature([RoleEntity])
   ],
   controllers: [RolesController],
   providers: [RolesService],

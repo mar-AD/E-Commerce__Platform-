@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Patch, Param, Delete, Req, Get } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
-  CreateDto, FindOneDto,
+  CreateDto,
   ForgotPasswordDto,
   LoginDto,
   RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
@@ -10,6 +10,14 @@ import {
 } from '@app/common/dtos' ;
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
+import {
+  FindOneDto,
+  RequestUpdateEmailRequest,
+  ResetPasswordRequest,
+  TokenDto,
+  UpdateEmailRequest, UpdatePasswordRequest,
+  VerifyEmailCodeRequest,
+} from '@app/common';
 
 
 @ApiTags('AuthUsers')
@@ -29,26 +37,34 @@ export class UserController {
 
   @Patch('userPassUpdate')
   updateUserPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
-    updatePasswordDto.id = req['payload'].id
-    return this.userService.updatePassword(updatePasswordDto);
+    const id = req['payload'].id
+    const findOneDto : FindOneDto = {id};
+    const updatePasswordRequest: UpdatePasswordRequest = { updatePasswordDto, findOneDto}
+    return this.userService.updatePassword(updatePasswordRequest);
   }
 
   @Post('user/requestEmailUpdate')
-  RequestAdminEmailUpdate(@Req() req: Request, @Body() requestAdminEmailUpdate: RequestEmailUpdateDto) {
-    requestAdminEmailUpdate.id = req['payload'].id;
-    return this.userService.RequestEmailUpdate(requestAdminEmailUpdate)
+  RequestAdminEmailUpdate(@Req() req: Request, @Body() requestEmailUpdateDto: RequestEmailUpdateDto) {
+    const id = req['payload'].id
+    const findOneDto : FindOneDto = {id};
+    const requestUpdateEmailDto: RequestUpdateEmailRequest = {requestEmailUpdateDto, findOneDto}
+    return this.userService.RequestEmailUpdate(requestUpdateEmailDto)
   }
 
   @Get('user/verifyEmailCode')
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
-    verifyEmailCodeDto.id = req['payload'].id;
-    return this.userService.verifyEmailCode(verifyEmailCodeDto)
+    const id = req['payload'].id
+    const findOneDto : FindOneDto = {id};
+    const verifyEmailCodeRequest: VerifyEmailCodeRequest = {verifyEmailCodeDto, findOneDto}
+    return this.userService.verifyEmailCode(verifyEmailCodeRequest)
   }
 
   @Patch('userEmailUpdate')
   updateUserEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
-    updateEmailDto.id = req['payload'].id
-    return this.userService.updateEmail(updateEmailDto);
+    const id = req['payload'].id
+    const findOneDto : FindOneDto = {id};
+    const updateEmailRequest: UpdateEmailRequest = {updateEmailDto, findOneDto}
+    return this.userService.updateEmail(updateEmailRequest);
   }
 
   @Post('user/logout')
@@ -68,13 +84,15 @@ export class UserController {
 
   @Post('user/reset-password/token')
   userResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
-    resetPasswordDto.token = token;
-    return this.userService.resetPassword(resetPasswordDto);
+    const tokenDto : TokenDto = { token };
+    const resetPasswordRequest: ResetPasswordRequest = {resetPasswordDto, tokenDto}
+    return this.userService.resetPassword(resetPasswordRequest);
   }
 
   @Delete('user/remove')
-  remove(@Req() req: Request, @Body() findOneDto: FindOneDto) {
-    findOneDto.id = req['payload'].id
+  remove(@Req() req: Request) {
+    const id = req['payload'].id
+    const findOneDto : FindOneDto = {id};
     return this.userService.remove(findOneDto);
   }
 }

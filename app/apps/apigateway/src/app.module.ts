@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-// import { GrpcExceptionFilter } from '@app/common';
-// import { APP_FILTER } from '@nestjs/core';
+import { CommonModule } from '@app/common';
 
 @Module({
   imports: [AuthModule,
-    ConfigModule.forRoot({isGlobal: true})
+    ConfigModule.forRoot({isGlobal: true}),
+    CommonModule,
   ],
   controllers: [],
   providers: [],

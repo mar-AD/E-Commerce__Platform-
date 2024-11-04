@@ -5,10 +5,5 @@ export class UpdateAdminRoleDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  id: string
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
   role: string
 }

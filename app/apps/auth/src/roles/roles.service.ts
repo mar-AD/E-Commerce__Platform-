@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import {
-  CreateRoleDto,
-  dateToTimestamp, Empty,
-  FindOneDto,
+  dateToTimestamp, Empty, FindOneDto, getPermissionName,
   LoggerService,
-  messages,
+  messages, Permissions,
   Role,
   RolesResponse,
-  UpdateRoleDto,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from './entities/role.entity';
 import { Repository } from 'typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
+import { arraysEqual, findDuplicates } from '../constants';
 
 @Injectable()
 export class RolesService {
@@ -26,7 +25,7 @@ export class RolesService {
   }
 
   create(createRoleDto: CreateRoleDto): Observable<Role> {
-    const {name} = createRoleDto;
+    const {name, permissions} = createRoleDto;
     this.logger.log('roleRepo: Searching for role in repository...');
     return from(this.roleRepository.findOne({where: {name: name}})).pipe(
       switchMap((thisRole)=>{
@@ -36,6 +35,15 @@ export class RolesService {
           throw new RpcException({
             code: status.ALREADY_EXISTS,
             message: 'Role with this name already exist'
+          })
+        }
+        // const duplicatedPermission = new Set(permissions);
+        const duplicatedPermissions = findDuplicates(permissions)
+
+        if (duplicatedPermissions.length > 0) {
+          throw new RpcException({
+            code: status.ALREADY_EXISTS,
+            message: `Role with permission(s) "${duplicatedPermissions.map(per => getPermissionName(per as Permissions )).join(', ')}" already exists.`,
           })
         }
         this.logger.log('roleRepo: No existing role found, proceeding to create Entity...')
@@ -54,13 +62,6 @@ export class RolesService {
             });
           })
         )
-      }),
-      catchError((err) => {
-        this.logger.error(`roleRepo: Failed to process role creation. Error: ${err.message}`);
-        throw new RpcException({
-          code: status.INTERNAL,
-          message: messages.ROLE.FAILED_TO_CREATE_ROLE,
-        });
       }),
     )
   }
@@ -113,9 +114,10 @@ export class RolesService {
     )
   }
 
-  update(id: string, updateRoleDto: UpdateRoleDto): Observable<Role> {
+  update(updateRoleDto: UpdateRoleDto, findOneDto: FindOneDto): Observable<Role> {
+    const { id } = findOneDto;
     this.logger.log('roleRepo: Searching for the role in repository...');
-    return from(this.roleRepository.findOne({where: {id}})).pipe(
+    return from(this.roleRepository.findOne({where: {id: id}})).pipe(
       switchMap((thisRole)=>{
         if (!thisRole){
           this.logger.error(`roleRepo: No role with id "${id}" found.`);
@@ -124,12 +126,24 @@ export class RolesService {
             message: messages.ROLE.FAILED_TO_FETCH_ROLE_FOR_UPDATE
           })
         }
-        if (updateRoleDto.name && updateRoleDto.name!== thisRole.name) {
+        const duplicatedPermissions = findDuplicates(updateRoleDto.permissions);
+        if (duplicatedPermissions.length > 0) {
+          throw new RpcException({
+            code: status.ALREADY_EXISTS,
+            message: `Role with permission(s) "${duplicatedPermissions.map(per => getPermissionName(per as Permissions )).join(', ')}" already exists.`,
+          });
+        }
+
+        if (updateRoleDto.name && updateRoleDto.name !== thisRole.name) {
           thisRole.name = updateRoleDto.name;
         }
-        if (updateRoleDto.permissions && updateRoleDto.permissions!== thisRole.permissions) {
+
+        console.log('we are bout to compare');
+        if (updateRoleDto.permissions && !arraysEqual(updateRoleDto.permissions, thisRole.permissions)) {
+          console.log('the compare is happening');
           thisRole.permissions = updateRoleDto.permissions;
         }
+        console.log('compare is done');
         this.logger.log('roleRepo: Saving the updated entity to the repository...')
         return from(this.roleRepository.save(thisRole)).pipe(
           map((updatedRole)=>{
@@ -144,13 +158,6 @@ export class RolesService {
             });
           })
         )
-      }),
-      catchError((err)=>{
-        this.logger.error(`roleRepo: ${messages.ROLE.FAILED_TO_UPDATE_ROLE}: ${err.message}`);
-        throw new RpcException({
-          code: status.INTERNAL,
-          message: messages.ROLE.FAILED_TO_UPDATE_ROLE,
-        });
       })
     )
   }
@@ -187,13 +194,6 @@ export class RolesService {
             });
           })
         );
-      }),
-      catchError((err) => {
-        this.logger.error(`roleRepo: ${messages.ROLE.FAILED_REMOVE_ROLE}: ${err.message}`);
-        throw new RpcException({
-          code: status.INTERNAL,
-          message: messages.ROLE.FAILED_REMOVE_ROLE,
-        });
       })
     );
   }

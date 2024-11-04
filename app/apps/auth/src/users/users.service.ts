@@ -4,20 +4,22 @@ import {
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  User, LoggerService,
+  User, LoggerService, FindOneDto, TokenDto, None, messages,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Observable } from 'rxjs';
+import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 import { BaseService } from '../auth.service';
 import { AdminEntity } from '../admins/entities/admin.entity';
-import { CreateDto, FindOneDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
+import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 
 
 @Injectable()
@@ -36,27 +38,27 @@ export class UsersService extends BaseService<User>{
   }
 
   createUser(createUserDto: CreateDto) : Observable<User> {
-    return this.create(createUserDto, AuthConstants.user)
+    return this.create(null, createUserDto, AuthConstants.user)
   }
 
   userLogin(loginRequest: LoginDto): Observable<AuthResponse> {
     return this.login(loginRequest, AuthConstants.user)
   }
 
-  updateUserPassword(updatePasswordDto: UpdatePasswordDto):Observable<User> {
-    return this.updatePassword(updatePasswordDto, AuthConstants.user)
+  updateUserPassword(updatePasswordDto: UpdatePasswordDto, findOneDto: FindOneDto):Observable<User> {
+    return this.updatePassword(findOneDto, updatePasswordDto, AuthConstants.user)
   }
 
-  requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto):Observable<Empty>{
-    return this.requestUpEmail(requestEmailUpdateDto, AuthConstants.user)
+  requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto, findOneDto: FindOneDto):Observable<Empty>{
+    return this.requestUpEmail(findOneDto, requestEmailUpdateDto, AuthConstants.user)
   }
 
-  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto): Observable<Empty>{
-    return this.verifyCode(verifyEmailCodeDto, AuthConstants.user)
+  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto, findOneDto: FindOneDto): Observable<Empty>{
+    return this.verifyCode(findOneDto, verifyEmailCodeDto, AuthConstants.user)
   }
 
-  updateUserEmail(updateEmailDto: UpdateEmailDto):Observable<User> {
-    return this.updateEmail(updateEmailDto, AuthConstants.user)
+  updateUserEmail(updateEmailDto: UpdateEmailDto, findOneDto: FindOneDto):Observable<User> {
+    return this.updateEmail(findOneDto, updateEmailDto, AuthConstants.user)
   }
 
   logoutUser(logoutDto: RefreshTokenDto):Observable<Empty> {
@@ -71,12 +73,30 @@ export class UsersService extends BaseService<User>{
     return this.forgotPassword(forgotPassDto, AuthConstants.user)
   }
 
-  userResetPassword(resetPasswordDto: ResetPasswordDto) {
-    return this.resetPassword(resetPasswordDto, AuthConstants.user);
+  userResetPassword(resetPasswordDto: ResetPasswordDto, tokenDto: TokenDto) {
+    return this.resetPassword(tokenDto, resetPasswordDto, AuthConstants.user);
   }
 
   deleteUser(findOneDto: FindOneDto): Observable<Empty> {
     return this.remove(findOneDto, AuthConstants.user);
+  }
+
+
+  // fro the autGuard ====
+  getUser(findOneDto: FindOneDto): Observable<User> {
+    return from(this.userRepository.findOne({where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: true}})).pipe(
+      map((user) =>{
+      if (!user){
+        throw new RpcException({
+          code: status.NOT_FOUND,
+          message: messages.USER.NOT_FOUND
+        })
+      }
+        return this.mapResponse(user);
+
+    })
+    )
+
   }
 
   @Cron("0 0 * * *")

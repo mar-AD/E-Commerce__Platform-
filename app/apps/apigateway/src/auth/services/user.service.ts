@@ -1,13 +1,19 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
-  CreateUserDto, FindOneDto, ForgotPasswordDto,
-  LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
-  UpdateEmailDto,
-  UpdatePasswordDto,
+  CreateUserDto,
+  FindOneDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RefreshTokenDto,
+  RequestUpdateEmailRequest,
+  ResetPasswordRequest,
+  UpdateEmailRequest,
+  UpdatePasswordRequest,
   USER_SERVICE_NAME,
-  UserServiceClient, VerifyEmailCodeDto,
+  UserServiceClient,
+  VerifyEmailCodeRequest,
 } from '@app/common';
-import { ClientGrpc, RpcException } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '../constants';
 
 
@@ -29,20 +35,20 @@ export class UserService implements OnModuleInit {
       return this.userService.userLogin(loginRequest);
   }
 
-  updatePassword(updatePasswordDto: UpdatePasswordDto) {
+  updatePassword(updatePasswordDto: UpdatePasswordRequest) {
     return this.userService.updateUserPassword(updatePasswordDto);
   }
 
-  RequestEmailUpdate(requestEmailUpdateDto:RequestEmailUpdateDto) {
+  RequestEmailUpdate(requestEmailUpdateDto:RequestUpdateEmailRequest) {
     return this.userService.requestUpdateUserEmail(requestEmailUpdateDto)
   }
 
-  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto) {
-    return this.userService.verifyEmailCode(verifyEmailCodeDto)
+  verifyEmailCode(verifyEmailCodeRequest: VerifyEmailCodeRequest) {
+    return this.userService.verifyEmailCode(verifyEmailCodeRequest)
   }
 
-  updateEmail(updateEmailDto: UpdateEmailDto) {
-    return this.userService.updateUserEmail(updateEmailDto);
+  updateEmail(updateEmailRequest: UpdateEmailRequest) {
+    return this.userService.updateUserEmail(updateEmailRequest);
   }
 
   logout(logoutDto: RefreshTokenDto){
@@ -57,8 +63,8 @@ export class UserService implements OnModuleInit {
     return this.userService.userForgotPassword(forgotPasswordDto)
   }
 
-  resetPassword(resetPasswordDto: ResetPasswordDto) {
-    return this.userService.userResetPassword(resetPasswordDto)
+  resetPassword(resetPasswordRequest: ResetPasswordRequest) {
+    return this.userService.userResetPassword(resetPasswordRequest)
   }
 
   remove(findOneDto: FindOneDto) {

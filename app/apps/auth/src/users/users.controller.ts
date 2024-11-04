@@ -1,11 +1,17 @@
 import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
-  LoginDto, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto, UpdatePasswordDto,
+  FindOneDto,
+  LoginDto,
+  RefreshTokenDto,
+  RequestUpdateEmailRequest, ResetPasswordRequest,
+  UpdateEmailRequest,
+  UpdatePasswordRequest,
   UserServiceController,
-  UserServiceControllerMethods, VerifyEmailCodeDto,
+  UserServiceControllerMethods,
+  VerifyEmailCodeRequest,
 } from '@app/common';
-import { CreateDto, FindOneDto, ForgotPasswordDto, ResetPasswordDto } from '@app/common/dtos';
+import { CreateDto, ForgotPasswordDto } from '@app/common/dtos';
 
 @Controller()
 @UserServiceControllerMethods()
@@ -20,20 +26,24 @@ export class UsersController implements UserServiceController{
     return this.usersService.userLogin(loginRequest);
   }
 
-  updateUserPassword(updatePasswordDto: UpdatePasswordDto) {
-    return this.usersService.updateUserPassword(updatePasswordDto);
+  updateUserPassword(updatePasswordRequest: UpdatePasswordRequest) {
+    const {updatePasswordDto, findOneDto} = updatePasswordRequest;
+    return this.usersService.updateUserPassword(updatePasswordDto, findOneDto);
   }
 
-  requestUpdateUserEmail (requestUpdateUserEmail: RequestEmailUpdateDto){
-    return this.usersService.requestUpdateEmail(requestUpdateUserEmail)
+  requestUpdateUserEmail (requestUpdateEmailRequest: RequestUpdateEmailRequest){
+    const {requestEmailUpdateDto, findOneDto } = requestUpdateEmailRequest;
+    return this.usersService.requestUpdateEmail(requestEmailUpdateDto, findOneDto)
   }
 
-  verifyEmailCode (verifyEmailCodeDto: VerifyEmailCodeDto){
-    return this.usersService.verifyEmailCode(verifyEmailCodeDto)
+  verifyEmailCode (verifyEmailCodeRequest : VerifyEmailCodeRequest){
+    const {verifyEmailCodeDto, findOneDto} = verifyEmailCodeRequest;
+    return this.usersService.verifyEmailCode(verifyEmailCodeDto, findOneDto);
   }
 
-  updateUserEmail(updateEmailDto: UpdateEmailDto) {
-    return this.usersService.updateUserEmail(updateEmailDto);
+  updateUserEmail(updateEmailRequest: UpdateEmailRequest) {
+    const {updateEmailDto, findOneDto} = updateEmailRequest;
+    return this.usersService.updateUserEmail(updateEmailDto, findOneDto);
   }
 
   logoutUser(logoutDto: RefreshTokenDto) {
@@ -48,11 +58,16 @@ export class UsersController implements UserServiceController{
     return this.usersService.userForgotPassword(forgotPassDto);
   }
 
-  userResetPassword(resetPasswordDto: ResetPasswordDto) {
-    return this.usersService.userResetPassword(resetPasswordDto);
+  userResetPassword(resetPasswordRequest: ResetPasswordRequest) {
+    const {resetPasswordDto, tokenDto} = resetPasswordRequest;
+    return this.usersService.userResetPassword(resetPasswordDto, tokenDto);
   }
 
   removeUser(findOneDto: FindOneDto) {
     return this.usersService.deleteUser(findOneDto);
+  }
+
+  findUser(findOneDto: FindOneDto) {
+    return this.usersService.getUser(findOneDto);
   }
 }

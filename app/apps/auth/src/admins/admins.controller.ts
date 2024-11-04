@@ -3,12 +3,15 @@ import { AdminsService } from './admins.service';
 import {
   AdminServiceController,
   AdminServiceControllerMethods,
-  RequestEmailUpdateDto,
-  VerifyEmailCodeDto,
+  FindOneDto,
+  RequestUpdateEmailRequest, ResetPasswordRequest,
+  UpdateAdminRoleRequest,
+  UpdateEmailRequest,
+  UpdatePasswordRequest,
+  VerifyEmailCodeRequest,
 } from '@app/common';
 import { CreateAdminDto } from '@app/common/dtos/create-admin.dto';
-import { UpdateAdminRoleDto } from '@app/common/dtos/update-admin-role.dto';
-import { LoginDto, RefreshTokenDto, UpdateEmailDto, UpdatePasswordDto, ForgotPasswordDto, ResetPasswordDto, FindOneDto } from '@app/common/dtos';
+import { LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -23,24 +26,29 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.adminLogin(loginDto)
   }
 
-  updateAdminPassword(updateAdminPassDto: UpdatePasswordDto) {
-    return this.adminsService.updateAdminPassword(updateAdminPassDto);
+  updateAdminPassword(updatePasswordRequest: UpdatePasswordRequest) {
+    const {updatePasswordDto, findOneDto} = updatePasswordRequest;
+    return this.adminsService.updateAdminPassword(updatePasswordDto, findOneDto);
   }
 
-  requestUpdateAdminEmail(requestEmailUpdateDto:RequestEmailUpdateDto){
-    return this.adminsService.requestUpdateEmail(requestEmailUpdateDto)
+  requestUpdateAdminEmail(requestUpdateEmailRequest: RequestUpdateEmailRequest){
+    const {requestEmailUpdateDto, findOneDto } = requestUpdateEmailRequest;
+    return this.adminsService.requestUpdateEmail(requestEmailUpdateDto, findOneDto)
   }
 
-  verifyEmailCode (verifyEmailCodeDto: VerifyEmailCodeDto){
-    return this.adminsService.verifyEmailCode(verifyEmailCodeDto)
+  verifyEmailCode (verifyEmailCodeRequest: VerifyEmailCodeRequest){
+    const {verifyEmailCodeDto, findOneDto} = verifyEmailCodeRequest;
+    return this.adminsService.verifyEmailCode(verifyEmailCodeDto, findOneDto)
   }
 
-  updateAdminEmail(updateAdminEmailDto: UpdateEmailDto) {
-    return this.adminsService.updateAdminEmail(updateAdminEmailDto);
+  updateAdminEmail(updateEmailRequest: UpdateEmailRequest) {
+    const {updateEmailDto, findOneDto} = updateEmailRequest;
+    return this.adminsService.updateAdminEmail(updateEmailDto, findOneDto);
   }
 
-  updateAdminRole(updateAdminRoleDto: UpdateAdminRoleDto) {
-    return this.adminsService.updateAdminRole(updateAdminRoleDto.id, updateAdminRoleDto);
+  updateAdminRole(updateAdminRoleRequest: UpdateAdminRoleRequest) {
+    const {updateAdminRoleDto, findOneDto} = updateAdminRoleRequest;
+    return this.adminsService.updateAdminRole(updateAdminRoleDto, findOneDto);
   }
 
   logoutAdmin(logoutDto: RefreshTokenDto) {
@@ -55,11 +63,16 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.adminForgotPassword(forgotPassDto);
   }
 
-  adminResetPassword(resetPasswordDto: ResetPasswordDto) {
-    return this.adminsService.adminResetPassword(resetPasswordDto);
+  adminResetPassword(resetPasswordRequest: ResetPasswordRequest) {
+    const {resetPasswordDto, tokenDto} = resetPasswordRequest;
+    return this.adminsService.adminResetPassword(resetPasswordDto, tokenDto);
   }
 
   removeAdmin(findOneDto: FindOneDto) {
     return this.adminsService.deleteAdmin(findOneDto);
+  }
+
+  permissionsByRole(findOneDto: FindOneDto) {
+    return this.adminsService.GetPermissionsByRole(findOneDto);
   }
 }

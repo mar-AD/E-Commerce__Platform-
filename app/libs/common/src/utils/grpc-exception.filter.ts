@@ -9,7 +9,7 @@ import {
   ConflictException,
   UnauthorizedException,
   ForbiddenException,
-  ServiceUnavailableException
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
 import { isObject } from 'class-validator';
@@ -34,6 +34,7 @@ const createHttpException = (status: number, defaultError: string = '') => {
       super(createHttpExceptionBody(message, error, status), status);
     }
   }
+
   return CustomHttpException;
 };
 
@@ -62,50 +63,16 @@ export const GrpcToHttpExceptionMapping: GrpcToHttpExceptionMap = {
   [grpc.status.DATA_LOSS]: InternalServerErrorException,
 };
 
-
-// @Catch()
-// export class GrpcExceptionFilter implements ExceptionFilter {
-//   catch(exception: any, host: ArgumentsHost) {
-//     const ctx = host.switchToHttp();
-//     const response = ctx.getResponse();
-//
-//     // Get the appropriate HTTP exception based on the gRPC status
-//     const grpcStatus = exception.code || grpc.status.UNKNOWN;
-//     const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;
-//
-//     const message = exception.details || exception.message.split(': ')[1] || 'An error occurred';
-//     // Create an instance of the HttpException and retrieve its status
-//     const httpException = new HttpExceptionClass(message);
-//     const status = httpException.getStatus ? httpException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-//
-//
-//     const responsePayload = {
-//       status,
-//       message: httpException.message,
-//       error: HttpExceptionClass.name,
-//     };
-//     console.log(`GrpcExceptionFilter response: ${JSON.stringify(responsePayload)}`);
-//     if (exception.getStatus() === 400) {
-//       const responseBody = exception.getResponse();
-//
-//       // Transform the response as needed
-//       response.status(exception.getStatus());
-//       response.send({
-//         status: exception.getStatus(),
-//         message: responseBody.message || responseBody,
-//         error: 'Bad Request',
-//       });
-//     } else{
-//       response.status(status).json(responsePayload);
-//     }
-//   }
-// }
-
 @Catch()
 export class GrpcExceptionFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
+    // Extracts the HTTP context from the ArgumentsHost, allowing access to the incoming request and response objects
     const ctx = host.switchToHttp();
+
+    // Retrieves the HTTP response object, which will be used to send back the error details to the client
     const response = ctx.getResponse();
+    console.log('Caught Exception:', exception);
+
 
     // Detect if exception is a BadRequestException (validation error)
     if (exception instanceof BadRequestException) {
@@ -119,11 +86,32 @@ export class GrpcExceptionFilter implements ExceptionFilter {
         message: message,
         error: 'Bad Request',
       });
+    } else if(exception instanceof UnauthorizedException) {
+      const responseBody = exception.getResponse();
+      const message = Array.isArray(responseBody['message']) ? responseBody['message'] : responseBody['message'];
+      response.status(HttpStatus.UNAUTHORIZED).json({
+        status: HttpStatus.UNAUTHORIZED,
+        message: message,
+        error: 'Unauthorized',
+      })
+
     } else {
       // Handle other gRPC error mappings
-      const grpcStatus = exception.code || grpc.status.UNKNOWN;
+      // const grpcStatus = exception.code || grpc.status.UNKNOWN;
+      // const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;
+      // const message = exception.details || exception.message || 'An error occurred';
+      // const httpException = new HttpExceptionClass(message);
+      // const status = httpException.getStatus ? httpException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+      //
+      // response.status(status).json({
+      //   status,
+      //   message: httpException.message,
+      //   error: HttpExceptionClass.name,
+      // });
+
+      const grpcStatus = exception.code || (exception.error ? exception.error.code : grpc.status.UNKNOWN);
       const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;
-      const message = exception.details || exception.message || 'An error occurred';
+      const message = exception.details || exception.message || (exception.error ? exception.error.message : 'An error occurred');
       const httpException = new HttpExceptionClass(message);
       const status = httpException.getStatus ? httpException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -132,6 +120,8 @@ export class GrpcExceptionFilter implements ExceptionFilter {
         message: httpException.message,
         error: HttpExceptionClass.name,
       });
+
+      // console.log(response);
     }
   }
 }

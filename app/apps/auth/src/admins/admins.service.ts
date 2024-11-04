@@ -1,17 +1,14 @@
 import {
-  HttpStatus,
   Injectable,
-  InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   Admin,
   AuthResponse, CronService,
   dateToTimestamp,
-  Empty, ForgotPasswordDto,
+  Empty, FindOneDto, ForgotPasswordDto,
   JwtTokenService, LoggerService,
   LoginDto,
-  messages, RefreshTokenDto, RequestEmailUpdateDto, UpdateEmailDto,
+  messages, Permission, RefreshTokenDto, RequestEmailUpdateDto, TokenDto, UpdateEmailDto,
   UpdatePasswordDto, VerifyEmailCodeDto,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,7 +23,7 @@ import { EmailVerificationCodeEntity } from '../entities/email-verification-code
 import { UpdateAdminRoleDto } from '@app/common/dtos/update-admin-role.dto';
 import { BaseService } from '../auth.service';
 import { UserEntity } from '../users/entities/user.entity';
-import { FindOneDto, ResetPasswordDto } from '@app/common/dtos';
+import { ResetPasswordDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
@@ -57,8 +54,7 @@ export class AdminsService extends BaseService<Admin>{
             message: messages.ROLE.NOT_FOUND
           })
         }
-        createAdminDto.role = thisRole.id
-        return this.create(createAdminDto, AuthConstants.admin)
+        return this.create(thisRole, createAdminDto, AuthConstants.admin)
       })
     )
   }
@@ -67,23 +63,24 @@ export class AdminsService extends BaseService<Admin>{
    return this.login(loginRequest, AuthConstants.admin)
   }
 
-  updateAdminPassword(updatePasswordDto: UpdatePasswordDto):Observable<Admin> {
-    return this.updatePassword(updatePasswordDto, AuthConstants.admin)
+  updateAdminPassword(updatePasswordDto: UpdatePasswordDto, findOneDto: FindOneDto):Observable<Admin> {
+    return this.updatePassword(findOneDto, updatePasswordDto, AuthConstants.admin)
   }
 
-  requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto):Observable<Empty>{
-    return this.requestUpEmail(requestEmailUpdateDto, AuthConstants.admin)
+  requestUpdateEmail(requestEmailUpdateDto:RequestEmailUpdateDto, findOneDto:FindOneDto):Observable<Empty>{
+    return this.requestUpEmail(findOneDto, requestEmailUpdateDto, AuthConstants.admin)
   }
 
-  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto): Observable<Empty>{
-    return this.verifyCode(verifyEmailCodeDto, AuthConstants.admin)
+  verifyEmailCode(verifyEmailCodeDto: VerifyEmailCodeDto, findOneDto: FindOneDto): Observable<Empty>{
+    return this.verifyCode(findOneDto, verifyEmailCodeDto, AuthConstants.admin)
   }
 
-  updateAdminEmail(updateEmailDto: UpdateEmailDto):Observable<Admin> {
-    return this.updateEmail(updateEmailDto, AuthConstants.admin)
+  updateAdminEmail(updateEmailDto: UpdateEmailDto, findOneDto: FindOneDto):Observable<Admin> {
+    return this.updateEmail(findOneDto, updateEmailDto, AuthConstants.admin)
   }
 
-  updateAdminRole(id:string, updateAdminRoleDto: UpdateAdminRoleDto):Observable<Admin>{
+  updateAdminRole(updateAdminRoleDto: UpdateAdminRoleDto, findOneDto: FindOneDto):Observable<Admin>{
+    const {id} = findOneDto
     this.logger.log(`adminRepo: Searching for admin entity with ID: ${id} ...`);
     return from(this.adminRepository.findOne({where: { id: id, isDeleted: false }})).pipe(
       switchMap((thisAdmin) =>{
@@ -134,12 +131,40 @@ export class AdminsService extends BaseService<Admin>{
     return this.forgotPassword(forgotPassDto, AuthConstants.admin)
   }
 
-  adminResetPassword(resetPasswordDto: ResetPasswordDto): Observable<Empty> {
-    return this.resetPassword(resetPasswordDto, AuthConstants.admin)
+  adminResetPassword(resetPasswordDto: ResetPasswordDto, tokenDto: TokenDto): Observable<Empty> {
+    return this.resetPassword(tokenDto, resetPasswordDto, AuthConstants.admin)
   }
 
   deleteAdmin(findOneDto: FindOneDto): Observable<Empty> {
     return this.remove(findOneDto, AuthConstants.admin);
+  }
+
+  // fro the autGuard ====
+  GetPermissionsByRole(findOneDto: FindOneDto): Observable<Permission>{
+    const {id} = findOneDto;
+    return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: true}})).pipe(
+      switchMap((thisAdmin) => {
+        if (!thisAdmin){
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.ADMIN.NOT_FOUND
+          })
+        }
+        const role = thisAdmin.roleId;
+        return from(this.roleRepository.findOne({where: {id: role.id}})).pipe(
+          map((thisRole) => {
+            if (!thisRole){
+              throw new RpcException({
+                code: status.NOT_FOUND,
+                message: messages.ROLE.NOT_FOUND
+              })
+            }
+            return { permissions: thisRole.permissions }
+
+          })
+        )
+      })
+    )
   }
 
   @Cron('0 0 * * *')
