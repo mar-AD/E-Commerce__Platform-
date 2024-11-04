@@ -7,10 +7,10 @@ import {
   UpdateEmailDto,
   UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,
 } from '@app/common/dtos';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, PermissionsGuard, RequestUpdateEmailRequest,
+  FindOneDto, getPermissionName, Permissions, PermissionsGuard, RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto, UpdateAdminRoleRequest,
   UpdateEmailRequest, UpdatePasswordRequest,
@@ -21,13 +21,14 @@ import { PermissionsAndAccess } from '@app/common/utils/methadata';
 
 
 @ApiTags('AuthAdmins')
-@Controller('auth')
 @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+@Controller('auth')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('admin/register')
-  @PermissionsAndAccess({ accessType: 'admin', permissions: ['view-reports', 'create-user']})
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
   createAdmin(@Body() createAdminDto: CreateAdminDto) {
     return this.adminService.create(createAdminDto);
   }

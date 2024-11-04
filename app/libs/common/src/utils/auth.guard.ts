@@ -41,7 +41,7 @@ export class PermissionsGuard implements CanActivate {
     }
 
     const {accessType, permission} = this.reflector.get<{
-      accessType: 'admin' | 'user';
+      accessType: ('admin' | 'user')[];
       permission: string
     }>('AccessTypeAndPermissions', context.getHandler())
 
@@ -51,7 +51,7 @@ export class PermissionsGuard implements CanActivate {
         message: `Unauthorized: You do not have access to this resource as a ${payload.type}.`,
       });
     }
-    if (payload.type === 'user' && accessType === 'user') {
+    if (payload.type === 'user' && accessType.includes('user')) {
       return from(this.userService.findUser(payload.id)).pipe(
         map(()=>{
           return true
@@ -59,7 +59,7 @@ export class PermissionsGuard implements CanActivate {
       )
     }
 
-    if (payload.type === 'admin' && accessType === 'admin'){
+    if (payload.type === 'admin' && accessType.includes('admin')){
        return from(this.adminService.permissionsByRole(payload.id)).pipe(
          switchMap(permissions => {
            if (!permissions){

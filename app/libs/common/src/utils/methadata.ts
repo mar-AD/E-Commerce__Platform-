@@ -1,11 +1,10 @@
-import { AuthConstants } from '../../../../apps/auth/src/constants';
-import { SetMetadata } from '@nestjs/common';
+import { CustomDecorator, SetMetadata } from '@nestjs/common';
 
 interface permissionAndAccessTypeOptions {
-  accessTye: AuthConstants.admin | AuthConstants.user;
+  accessType: ('admin' | 'user')[];
   permission?: string
 }
 
-export const PermissionsAndAccess = (options: permissionAndAccessTypeOptions) => {
-  SetMetadata('AccessTypeAndPermissions', options)
+export const PermissionsAndAccess = (options: permissionAndAccessTypeOptions): CustomDecorator<string> => {
+  return SetMetadata("AccessTypeAndPermissions", options)
 }
