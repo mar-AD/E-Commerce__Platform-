@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Delete, Req, Get } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Delete, Req, Get, UseGuards } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
   CreateDto,
@@ -8,16 +8,18 @@ import {
   UpdateEmailDto,
   UpdatePasswordDto, VerifyEmailCodeDto,
 } from '@app/common/dtos' ;
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto,
+  FindOneDto, getPermissionName, Permissions, PermissionsGuard,
   RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto,
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
+import { PermissionsAndAccess } from '@app/common/utils/methadata';
+import { AuthGuard } from '@nestjs/passport';
 
 
 @ApiTags('AuthUsers')
@@ -36,6 +38,9 @@ export class UserController {
   }
 
   @Patch('userPassUpdate')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   updateUserPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -44,6 +49,9 @@ export class UserController {
   }
 
   @Post('user/requestEmailUpdate')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   RequestAdminEmailUpdate(@Req() req: Request, @Body() requestEmailUpdateDto: RequestEmailUpdateDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -52,6 +60,9 @@ export class UserController {
   }
 
   @Get('user/verifyEmailCode')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -60,6 +71,9 @@ export class UserController {
   }
 
   @Patch('userEmailUpdate')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   updateUserEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -68,21 +82,33 @@ export class UserController {
   }
 
   @Post('user/logout')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   logoutUser(@Body() logoutDto: RefreshTokenDto) {
     return this.userService.logout(logoutDto);
   }
 
   @Post('user/refresh-token')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   userRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.userService.refreshToken(refreshTokenDto);
   }
 
   @Post('user/forgot-password')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   userForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
     return this.userService.forgotPassword(forgotPassDto);
   }
 
   @Post('user/reset-password/token')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   userResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     const tokenDto : TokenDto = { token };
     const resetPasswordRequest: ResetPasswordRequest = {resetPasswordDto, tokenDto}
@@ -90,6 +116,9 @@ export class UserController {
   }
 
   @Delete('user/remove')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   remove(@Req() req: Request) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};

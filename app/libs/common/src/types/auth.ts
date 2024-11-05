@@ -18,6 +18,7 @@ export enum Permissions {
   MANAGE_ORDERS = 3,
   MANAGE_PRODUCTS = 4,
   MANAGE_ROLES = 5,
+  MANAGE_ADMINS = 6,
   UNRECOGNIZED = -1,
 }
 
@@ -184,7 +185,7 @@ export interface Admin {
 export interface Role {
   id: string;
   name: string;
-  permissions: Permissions[];
+  permissions: string[];
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
 }

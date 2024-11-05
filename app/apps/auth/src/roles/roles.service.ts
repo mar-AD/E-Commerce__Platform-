@@ -37,7 +37,7 @@ export class RolesService {
             message: 'Role with this name already exist'
           })
         }
-        // const duplicatedPermission = new Set(permissions);
+
         const duplicatedPermissions = findDuplicates(permissions)
 
         if (duplicatedPermissions.length > 0) {
@@ -204,7 +204,7 @@ export class RolesService {
     return {
       id: role.id,
       name: role.name,
-      permissions: role.permissions,
+      permissions: role.permissions.map(per => getPermissionName(per as Permissions)),
       createdAt: dateToTimestamp(role.createdAt),
       updatedAt: dateToTimestamp(role.updatedAt),
     }

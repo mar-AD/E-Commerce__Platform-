@@ -217,6 +217,7 @@ enum Permissions {
   MANAGE_ORDERS = 3;
   MANAGE_PRODUCTS = 4;
   MANAGE_ROLES = 5;
+  MANAGE_ADMINS = 6;
 }
 
 //refreshToken response
