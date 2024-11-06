@@ -6,7 +6,7 @@ import { status } from '@grpc/grpc-js';
 import {
   ADMIN_SERVICE_NAME,
   AdminServiceClient,
-  getPermissionName,
+  getPermissionName, isPublicKey,
   USER_SERVICE_NAME,
   UserServiceClient,
 } from '@app/common';
@@ -23,7 +23,7 @@ export class PermissionsGuard implements CanActivate {
     this.userService = this.client.getService<UserServiceClient>(USER_SERVICE_NAME)
   }
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const isPublic =  this.reflector.getAllAndOverride<boolean>('IS_PUBLIC_KEY', [
+    const isPublic =  this.reflector.getAllAndOverride<boolean>(isPublicKey, [
       context.getHandler(),
       context.getClass()
     ])

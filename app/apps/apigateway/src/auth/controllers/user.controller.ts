@@ -11,7 +11,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, getPermissionName, Permissions, PermissionsGuard,
+  FindOneDto, isPublic, PermissionsGuard,
   RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto,
@@ -23,22 +23,24 @@ import { AuthGuard } from '@nestjs/passport';
 
 
 @ApiTags('AuthUsers')
+@UseGuards(AuthGuard('jwt'), PermissionsGuard)
 @Controller('auth')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
+  @isPublic()
   createUser(@Body() createUserDto: CreateDto) {
     return this.userService.create(createUserDto);
   }
 
   @Post('user/login')
+  @isPublic()
   userLogin(@Body() loginRequest: LoginDto) {
     return this.userService.login(loginRequest);
   }
 
   @Patch('userPassUpdate')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   updateUserPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
@@ -49,7 +51,6 @@ export class UserController {
   }
 
   @Post('user/requestEmailUpdate')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   RequestAdminEmailUpdate(@Req() req: Request, @Body() requestEmailUpdateDto: RequestEmailUpdateDto) {
@@ -60,7 +61,6 @@ export class UserController {
   }
 
   @Get('user/verifyEmailCode')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
@@ -71,7 +71,6 @@ export class UserController {
   }
 
   @Patch('userEmailUpdate')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   updateUserEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
@@ -82,7 +81,6 @@ export class UserController {
   }
 
   @Post('user/logout')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   logoutUser(@Body() logoutDto: RefreshTokenDto) {
@@ -90,7 +88,6 @@ export class UserController {
   }
 
   @Post('user/refresh-token')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   userRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
@@ -98,7 +95,6 @@ export class UserController {
   }
 
   @Post('user/forgot-password')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   userForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
@@ -106,7 +102,6 @@ export class UserController {
   }
 
   @Post('user/reset-password/token')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   userResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
@@ -116,7 +111,6 @@ export class UserController {
   }
 
   @Delete('user/remove')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   remove(@Req() req: Request) {

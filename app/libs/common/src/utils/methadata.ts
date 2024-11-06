@@ -8,3 +8,10 @@ interface permissionAndAccessTypeOptions {
 export const PermissionsAndAccess = (options: permissionAndAccessTypeOptions): CustomDecorator<string> => {
   return SetMetadata("AccessTypeAndPermissions", options)
 }
+
+
+//for the public endpoints
+export const isPublicKey = 'IS_PUBLIC_KEY';
+export const isPublic = () => {
+  return SetMetadata(isPublicKey, true)
+}
