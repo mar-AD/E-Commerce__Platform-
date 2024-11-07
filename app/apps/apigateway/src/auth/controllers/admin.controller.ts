@@ -40,7 +40,8 @@ export class AdminController {
   }
 
   @Patch('adminPassUpdate')
-  @isPublic()
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   updateAdminPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -49,7 +50,8 @@ export class AdminController {
   }
 
   @Post('admin/requestEmailUpdate')
-  @isPublic()
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   RequestAdminEmailUpdate(@Req() req: Request, @Body() requestEmailUpdateDto: RequestEmailUpdateDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -58,7 +60,8 @@ export class AdminController {
   }
 
   @Get('admin/verifyEmailCode')
-  @isPublic()
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -67,7 +70,8 @@ export class AdminController {
   }
 
   @Patch('adminEmailUpdate')
-  @isPublic()
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   updateAdminEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -85,13 +89,15 @@ export class AdminController {
   }
 
   @Post('admin/logout')
-  @isPublic()
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   logoutAdmin(@Body() logoutDto: RefreshTokenDto) {
     return this.adminService.logout(logoutDto);
   }
 
   @Post('admin/refresh-token')
-  @isPublic()
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   adminRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.adminService.refreshToken(refreshTokenDto);
   }
@@ -103,7 +109,8 @@ export class AdminController {
   }
 
   @Post('admin/reset-password/token')
-  @isPublic()
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   adminResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     const tokenDto : TokenDto = { token };
     const resetPasswordRequest: ResetPasswordRequest = {resetPasswordDto, tokenDto}

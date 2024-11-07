@@ -11,7 +11,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, isPublic, PermissionsGuard,
+  FindOneDto, getPermissionName, isPublic, Permissions, PermissionsGuard,
   RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto,
@@ -29,7 +29,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
-  @isPublic()
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
   createUser(@Body() createUserDto: CreateDto) {
     return this.userService.create(createUserDto);
   }

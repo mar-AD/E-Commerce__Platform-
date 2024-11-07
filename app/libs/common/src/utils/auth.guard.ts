@@ -23,10 +23,8 @@ export class PermissionsGuard implements CanActivate {
     this.userService = this.client.getService<UserServiceClient>(USER_SERVICE_NAME)
   }
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    const isPublic =  this.reflector.getAllAndOverride<boolean>(isPublicKey, [
-      context.getHandler(),
-      context.getClass()
-    ])
+    const isPublic =  this.reflector.get<boolean>(isPublicKey,
+      context.getHandler())
     if (isPublic){
       return true
     }
@@ -60,14 +58,21 @@ export class PermissionsGuard implements CanActivate {
     }
 
     if (payload.type === 'admin' && accessType.includes('admin')){
-       return from(this.adminService.permissionsByRole(payload.id)).pipe(
-         switchMap(permissions => {
-           if (!permissions){
-             throw new RpcException({
-               code: status.NOT_FOUND,
-               message: 'No permissions found for this admin'
-             })
+       return from(this.adminService.findOneAdmin(payload.id)).pipe(
+         switchMap( () => {
+
+           if (!permission) {
+             return of(true);
            }
+
+           return from(this.adminService.permissionsByRole(payload.id)).pipe(
+             switchMap(permissions => {
+               if (!permissions){
+                 throw new RpcException({
+                   code: status.NOT_FOUND,
+                   message: 'No permissions found for the role that is assigned for this admin'
+                 })
+               }
            const requiredPermissions = permissions.permissions.map(par => getPermissionName(par))
            if (!requiredPermissions.includes(permission)){
              throw new RpcException({
@@ -76,6 +81,8 @@ export class PermissionsGuard implements CanActivate {
              })
            }
            return of(true)
+             })
+           )
          })
        )
     }

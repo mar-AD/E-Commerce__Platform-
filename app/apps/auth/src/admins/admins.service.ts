@@ -3,7 +3,7 @@ import {
 } from '@nestjs/common';
 import {
   Admin,
-  AuthResponse, CronService,
+  AuthResponse, BooleanResponse, CronService,
   dateToTimestamp,
   Empty, FindOneDto, ForgotPasswordDto,
   JwtTokenService, LoggerService,
@@ -139,7 +139,25 @@ export class AdminsService extends BaseService<Admin>{
     return this.remove(findOneDto, AuthConstants.admin);
   }
 
-  // fro the autGuard ====
+  // for the autGuard ====
+
+  FindAdmin(findOneDto: FindOneDto): Observable<BooleanResponse>{
+    const {id} = findOneDto;
+    return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: true}})).pipe(
+      map((thisAdmin) => {
+        if (!thisAdmin) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.ADMIN.NOT_FOUND
+          })
+        }
+        return {
+          result: true
+        };
+      })
+    )
+  }
+
   GetPermissionsByRole(findOneDto: FindOneDto): Observable<Permission>{
     const {id} = findOneDto;
     return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: true}})).pipe(
