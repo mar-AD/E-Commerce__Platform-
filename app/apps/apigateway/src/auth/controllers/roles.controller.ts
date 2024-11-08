@@ -2,17 +2,23 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@n
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RolesService } from '../services/roles.service';
 import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
-import { FindOneDto, getPermissionName, Permissions, PermissionsGuard, UpdateRoleRequest } from '@app/common';
-import { AuthGuard } from '@nestjs/passport';
+import {
+  FindOneDto,
+  getPermissionName,
+  JwtAuthGuard,
+  Permissions,
+  PermissionsGuard,
+  UpdateRoleRequest,
+} from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
 
 @ApiTags('Roles')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Post('register')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ROLES) })
   createRole(@Body() createRoleDto: CreateRoleDto) {
@@ -20,24 +26,21 @@ export class RolesController {
   }
 
   @Get()
-  // @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-  // @ApiBearerAuth()
-  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ROLES) })
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ROLES) })
   getAllRoles() {
     return this.rolesService.findAll();
   }
 
   @Get('/:id')
-  // @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-  // @ApiBearerAuth()
-  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ROLES) })
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ROLES) })
   getRoleById(@Param('id') id: string) {
     const findOneDto: FindOneDto = { id };
     return this.rolesService.findOne(findOneDto);
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ROLES) })
   updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
@@ -47,7 +50,6 @@ export class RolesController {
   }
 
   @Delete('/:id')
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ROLES) })
   deleteRole(@Param('id') id: string) {

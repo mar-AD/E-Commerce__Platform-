@@ -10,7 +10,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, getPermissionName, isPublic, Permissions, PermissionsGuard, RequestUpdateEmailRequest,
+  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, PermissionsGuard, RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto, UpdateAdminRoleRequest,
   UpdateEmailRequest, UpdatePasswordRequest,
@@ -21,7 +21,7 @@ import { PermissionsAndAccess } from '@app/common/utils/methadata';
 
 
 @ApiTags('AuthAdmins')
-@UseGuards(AuthGuard('jwt'), PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('auth')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}

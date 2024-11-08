@@ -11,7 +11,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, getPermissionName, isPublic, Permissions, PermissionsGuard,
+  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, PermissionsGuard,
   RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto,
@@ -23,7 +23,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 
 @ApiTags('AuthUsers')
-@UseGuards(AuthGuard('jwt'), PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('auth')
 export class UserController {
   constructor(private readonly userService: UserService) {}

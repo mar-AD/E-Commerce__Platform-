@@ -5,3 +5,4 @@ export * from '@app/common/utils/jwt.strategy';
 export * from '@app/common/utils/grpc-exception.filter';
 export * from '@app/common/utils/auth.guard';
 export * from '@app/common/utils/methadata';
+export * from '@app/common/utils/jwt.auth.guard';

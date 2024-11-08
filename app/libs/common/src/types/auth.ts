@@ -189,7 +189,7 @@ export interface Admin {
 export interface Role {
   id: string;
   name: string;
-  permissions: Permissions[];
+  permissions: string[];
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
 }

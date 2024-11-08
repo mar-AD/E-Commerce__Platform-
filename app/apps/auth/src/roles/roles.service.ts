@@ -204,7 +204,7 @@ export class RolesService {
     return {
       id: role.id,
       name: role.name,
-      permissions: role.permissions.map(per => getPermissionName(per as Permissions)),
+      permissions: role.permissions.map(perm => getPermissionName(perm as Permissions )),
       createdAt: dateToTimestamp(role.createdAt),
       updatedAt: dateToTimestamp(role.updatedAt),
     }
