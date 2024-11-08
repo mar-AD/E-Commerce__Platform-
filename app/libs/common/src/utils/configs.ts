@@ -55,7 +55,7 @@ export const VerifyEmailCode = (expired: Date)=>{
   }
 }
 
-
+//for getting the roles string name instead of the value (numbers)
 export const PermissionsName = {
   0: 'PERMISSION_UNSPECIFIED',
   1: 'VIEW_DASHBOARD',
@@ -63,6 +63,7 @@ export const PermissionsName = {
   3: 'MANAGE_ORDERS',
   4: 'MANAGE_PRODUCTS',
   5: 'MANAGE_ROLES',
+  6: 'MANAGE_ADMINS',
   '-1': 'UNRECOGNIZED',
 } as const;
 

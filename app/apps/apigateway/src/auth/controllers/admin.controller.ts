@@ -10,7 +10,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, getPermissionName, Permissions, PermissionsGuard, RequestUpdateEmailRequest,
+  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, PermissionsGuard, RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto, UpdateAdminRoleRequest,
   UpdateEmailRequest, UpdatePasswordRequest,
@@ -21,24 +21,27 @@ import { PermissionsAndAccess } from '@app/common/utils/methadata';
 
 
 @ApiTags('AuthAdmins')
-@UseGuards(AuthGuard('jwt'), PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('auth')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('admin/register')
   @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
   createAdmin(@Body() createAdminDto: CreateAdminDto) {
     return this.adminService.create(createAdminDto);
   }
 
   @Post('admin/login')
+  @isPublic()
   adminLogin(@Body() loginRequest: LoginDto) {
     return this.adminService.login(loginRequest);
   }
 
   @Patch('adminPassUpdate')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   updateAdminPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -47,6 +50,8 @@ export class AdminController {
   }
 
   @Post('admin/requestEmailUpdate')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   RequestAdminEmailUpdate(@Req() req: Request, @Body() requestEmailUpdateDto: RequestEmailUpdateDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -55,6 +60,8 @@ export class AdminController {
   }
 
   @Get('admin/verifyEmailCode')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -63,6 +70,8 @@ export class AdminController {
   }
 
   @Patch('adminEmailUpdate')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   updateAdminEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -71,6 +80,8 @@ export class AdminController {
   }
 
   @Patch('adminRoleUpdate/:id')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
   UpdateAdminRole(@Param('id') id: string, @Body() updateAdminRoleDto: UpdateAdminRoleDto) {
     const findOneDto : FindOneDto = {id};
     const updateAdminRoleRequest: UpdateAdminRoleRequest = {updateAdminRoleDto, findOneDto}
@@ -78,21 +89,28 @@ export class AdminController {
   }
 
   @Post('admin/logout')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   logoutAdmin(@Body() logoutDto: RefreshTokenDto) {
     return this.adminService.logout(logoutDto);
   }
 
   @Post('admin/refresh-token')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   adminRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.adminService.refreshToken(refreshTokenDto);
   }
 
   @Post('admin/forgot-password')
+  @isPublic()
   adminForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
     return this.adminService.forgotPassword(forgotPassDto);
   }
 
   @Post('admin/reset-password/token')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'] })
   adminResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     const tokenDto : TokenDto = { token };
     const resetPasswordRequest: ResetPasswordRequest = {resetPasswordDto, tokenDto}
@@ -100,6 +118,8 @@ export class AdminController {
   }
 
   @Delete('admin/remove')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
   remove(@Req() req: Request) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};

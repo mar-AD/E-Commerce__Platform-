@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Delete, Req, Get } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Delete, Req, Get, UseGuards } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
   CreateDto,
@@ -8,34 +8,42 @@ import {
   UpdateEmailDto,
   UpdatePasswordDto, VerifyEmailCodeDto,
 } from '@app/common/dtos' ;
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto,
+  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, PermissionsGuard,
   RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto,
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
+import { PermissionsAndAccess } from '@app/common/utils/methadata';
+import { AuthGuard } from '@nestjs/passport';
 
 
 @ApiTags('AuthUsers')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('auth')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
   createUser(@Body() createUserDto: CreateDto) {
     return this.userService.create(createUserDto);
   }
 
   @Post('user/login')
+  @isPublic()
   userLogin(@Body() loginRequest: LoginDto) {
     return this.userService.login(loginRequest);
   }
 
   @Patch('userPassUpdate')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   updateUserPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -44,6 +52,8 @@ export class UserController {
   }
 
   @Post('user/requestEmailUpdate')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   RequestAdminEmailUpdate(@Req() req: Request, @Body() requestEmailUpdateDto: RequestEmailUpdateDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -52,6 +62,8 @@ export class UserController {
   }
 
   @Get('user/verifyEmailCode')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -60,6 +72,8 @@ export class UserController {
   }
 
   @Patch('userEmailUpdate')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   updateUserEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
@@ -68,21 +82,29 @@ export class UserController {
   }
 
   @Post('user/logout')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   logoutUser(@Body() logoutDto: RefreshTokenDto) {
     return this.userService.logout(logoutDto);
   }
 
   @Post('user/refresh-token')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   userRefreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.userService.refreshToken(refreshTokenDto);
   }
 
   @Post('user/forgot-password')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   userForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
     return this.userService.forgotPassword(forgotPassDto);
   }
 
   @Post('user/reset-password/token')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   userResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     const tokenDto : TokenDto = { token };
     const resetPasswordRequest: ResetPasswordRequest = {resetPasswordDto, tokenDto}
@@ -90,6 +112,8 @@ export class UserController {
   }
 
   @Delete('user/remove')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user'] })
   remove(@Req() req: Request) {
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};

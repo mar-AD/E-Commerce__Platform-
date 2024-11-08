@@ -18,7 +18,12 @@ export enum Permissions {
   MANAGE_ORDERS = 3,
   MANAGE_PRODUCTS = 4,
   MANAGE_ROLES = 5,
+  MANAGE_ADMINS = 6,
   UNRECOGNIZED = -1,
+}
+
+export interface BooleanResponse {
+  result: boolean;
 }
 
 export interface Permission {
@@ -184,7 +189,7 @@ export interface Admin {
 export interface Role {
   id: string;
   name: string;
-  permissions: Permissions[];
+  permissions: string[];
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
 }
@@ -325,6 +330,8 @@ export interface AdminServiceClient {
 
   removeAdmin(request: FindOneDto): Observable<Empty>;
 
+  findOneAdmin(request: FindOneDto): Observable<BooleanResponse>;
+
   permissionsByRole(request: FindOneDto): Observable<Permission>;
 }
 
@@ -355,6 +362,8 @@ export interface AdminServiceController {
 
   removeAdmin(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
+  findOneAdmin(request: FindOneDto): Promise<BooleanResponse> | Observable<BooleanResponse> | BooleanResponse;
+
   permissionsByRole(request: FindOneDto): Promise<Permission> | Observable<Permission> | Permission;
 }
 
@@ -373,6 +382,7 @@ export function AdminServiceControllerMethods() {
       "adminForgotPassword",
       "adminResetPassword",
       "removeAdmin",
+      "findOneAdmin",
       "permissionsByRole",
     ];
     for (const method of grpcMethods) {

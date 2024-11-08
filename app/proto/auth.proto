@@ -33,6 +33,7 @@ service AdminService {
   rpc adminForgotPassword (ForgotPasswordDto) returns (Empty);
   rpc adminResetPassword (ResetPasswordRequest) returns (Empty);
   rpc removeAdmin (FindOneDto) returns (Empty);
+  rpc findOneAdmin (FindOneDto) returns (BooleanResponse);
   rpc permissionsByRole(FindOneDto) returns (Permission);
 }
 
@@ -45,6 +46,10 @@ service RoleService {
   rpc DeleteRole (FindOneDto) returns (Empty) {}
 }
 //common DTOs
+
+message BooleanResponse {
+  bool result = 1;
+}
 
 message Permission {
   repeated Permissions permissions = 1;
@@ -205,7 +210,7 @@ message Admin {
 message Role {
   string id = 1;
   string name = 2;
-  repeated Permissions permissions = 3;
+  repeated string permissions = 3;
   google.protobuf.Timestamp createdAt = 4;
   google.protobuf.Timestamp updatedAt = 5;
 }
@@ -217,6 +222,7 @@ enum Permissions {
   MANAGE_ORDERS = 3;
   MANAGE_PRODUCTS = 4;
   MANAGE_ROLES = 5;
+  MANAGE_ADMINS = 6;
 }
 
 //refreshToken response

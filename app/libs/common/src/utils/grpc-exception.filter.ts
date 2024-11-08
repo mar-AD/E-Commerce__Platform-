@@ -14,11 +14,6 @@ import {
 import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
 import { isObject } from 'class-validator';
 
-// Custom function to check if a value is an object
-// const isObject = (value: unknown): value is Record<string, unknown> => {
-//   return value !== null && typeof value === 'object' && !Array.isArray(value);
-// };
-
 // to create the HTTP exception body
 const createHttpExceptionBody = (message: object | string, error?: string, status?: number) => {
   if (!message) {
@@ -80,15 +75,17 @@ export class GrpcExceptionFilter implements ExceptionFilter {
 
       const message = Array.isArray(responseBody['message']) ? responseBody['message'].join(', ') : responseBody['message'];
 
-      // Extract validation message(s) and respond with INVALID_ARGUMENT status for gRPC
       response.status(HttpStatus.BAD_REQUEST).json({
         status: HttpStatus.BAD_REQUEST,
         message: message,
         error: 'Bad Request',
       });
-    } else if(exception instanceof UnauthorizedException) {
+    } else if(exception instanceof UnauthorizedException) { //to handle the jwt strategy (PassportStrategy) exceptions
+
       const responseBody = exception.getResponse();
+
       const message = Array.isArray(responseBody['message']) ? responseBody['message'] : responseBody['message'];
+
       response.status(HttpStatus.UNAUTHORIZED).json({
         status: HttpStatus.UNAUTHORIZED,
         message: message,
@@ -96,19 +93,6 @@ export class GrpcExceptionFilter implements ExceptionFilter {
       })
 
     } else {
-      // Handle other gRPC error mappings
-      // const grpcStatus = exception.code || grpc.status.UNKNOWN;
-      // const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;
-      // const message = exception.details || exception.message || 'An error occurred';
-      // const httpException = new HttpExceptionClass(message);
-      // const status = httpException.getStatus ? httpException.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-      //
-      // response.status(status).json({
-      //   status,
-      //   message: httpException.message,
-      //   error: HttpExceptionClass.name,
-      // });
-
       const grpcStatus = exception.code || (exception.error ? exception.error.code : grpc.status.UNKNOWN);
       const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;
       const message = exception.details || exception.message || (exception.error ? exception.error.message : 'An error occurred');
@@ -120,8 +104,6 @@ export class GrpcExceptionFilter implements ExceptionFilter {
         message: httpException.message,
         error: HttpExceptionClass.name,
       });
-
-      // console.log(response);
     }
   }
 }

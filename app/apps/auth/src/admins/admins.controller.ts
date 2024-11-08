@@ -72,6 +72,10 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.deleteAdmin(findOneDto);
   }
 
+  findOneAdmin(findOneDto: FindOneDto) {
+    return this.adminsService.FindAdmin(findOneDto);
+  }
+
   permissionsByRole(findOneDto: FindOneDto) {
     return this.adminsService.GetPermissionsByRole(findOneDto);
   }
