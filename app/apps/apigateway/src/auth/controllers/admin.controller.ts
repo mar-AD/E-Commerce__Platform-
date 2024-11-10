@@ -21,7 +21,7 @@ import { PermissionsAndAccess } from '@app/common/utils/methadata';
 
 
 @ApiTags('AuthAdmins')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+// @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('auth')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
