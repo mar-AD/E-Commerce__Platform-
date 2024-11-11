@@ -24,7 +24,7 @@ export class PermissionsGuard implements CanActivate {
     this.userService = this.client.getService<UserServiceClient>(USER_SERVICE_NAME)
   }
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    debugger
+    console.log('PermissionsGuard: Checking permissions and roles...');
     const isPublic =  this.reflector.get<boolean>(isPublicKey, context.getHandler())
     if (isPublic){
       return true
