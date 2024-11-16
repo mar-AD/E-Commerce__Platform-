@@ -84,12 +84,12 @@ export class UsersService extends BaseService<User>{
 
   // fro the autGuard ====
   getUser(findOneDto: FindOneDto): Observable<User> {
-    return from(this.userRepository.findOne({where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: true}})).pipe(
+    return from(this.userRepository.findOne({where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
       map((user) =>{
       if (!user){
         throw new RpcException({
           code: status.NOT_FOUND,
-          message: messages.USER.NOT_FOUND
+          message: messages.USER.NOT_FOUND2
         })
       }
         return this.mapResponse(user);
