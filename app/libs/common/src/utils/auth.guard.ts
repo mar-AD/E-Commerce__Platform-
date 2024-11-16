@@ -43,38 +43,38 @@ export class PermissionsGuard implements CanActivate {
       return true
     }
 
-    if (request.url.includes('user/register') && payload){
-      if (payload.type !== 'admin'){
-        throw new RpcException({
-          code: status.UNAUTHENTICATED,
-          message: `Unauthorized: Only admins can create users.`,
-        });
-      }
-      return from(this.adminService.findOneAdmin(payload.id)).pipe(
-        switchMap( () => {
-
-          return from(this.adminService.permissionsByRole(payload.id)).pipe(
-            switchMap(permissions => {
-              if (!permissions){
-                throw new RpcException({
-                  code: status.NOT_FOUND,
-                  message: 'No permissions found for the role that is assigned for this admin'
-                })
-              }
-              const requiredPermissions = permissions.permissions.map(par => getPermissionName(par))
-              if (!requiredPermissions.includes(permission)){
-                throw new RpcException({
-                  code: status.UNAUTHENTICATED,
-                  message: 'You do not have sufficient permissions to access this resource.'
-                })
-              }
-              return of(true)
-            })
-          )
-        })
-      )
-
-    }
+    // if (request.url.includes('user/register') && payload){
+    //   if (payload.type !== 'admin'){
+    //     throw new RpcException({
+    //       code: status.UNAUTHENTICATED,
+    //       message: `Unauthorized: Only admins can create users.`,
+    //     });
+    //   }
+    //   return from(this.adminService.findOneAdmin(payload.id)).pipe(
+    //     switchMap( () => {
+    //
+    //       return from(this.adminService.permissionsByRole(payload.id)).pipe(
+    //         switchMap(permissions => {
+    //           if (!permissions){
+    //             throw new RpcException({
+    //               code: status.NOT_FOUND,
+    //               message: 'No permissions found for the role that is assigned for this admin'
+    //             })
+    //           }
+    //           const requiredPermissions = permissions.permissions.map(par => getPermissionName(par))
+    //           if (!requiredPermissions.includes(permission)){
+    //             throw new RpcException({
+    //               code: status.UNAUTHENTICATED,
+    //               message: 'You do not have sufficient permissions to access this resource.'
+    //             })
+    //           }
+    //           return of(true)
+    //         })
+    //       )
+    //     })
+    //   )
+    //
+    // }
 
 
 
