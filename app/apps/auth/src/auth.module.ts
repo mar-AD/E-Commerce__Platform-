@@ -10,13 +10,8 @@ import { UserEntity } from './users/entities/user.entity';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { CommonModule, JwtStrategy } from '@app/common';
-import { BaseService } from './auth.service';
-import { AdminService } from '../../apigateway/src/auth/services/admin.service';
-import { RolesService } from './roles/roles.service';
-import { UsersService } from './users/users.service';
+import { CommonModule } from '@app/common';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
-import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -47,7 +42,7 @@ import { APP_FILTER } from '@nestjs/core';
         type: 'postgres',
         url: configService.get('POSTGRES_AUTH_URI'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: false,
       }),
       // useFactory:() =>({
       //   ...dataSourceOptions,

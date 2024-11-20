@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Delete, Req, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Delete, Req, Get, UseGuards, Logger } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import {
   CreateDto,
@@ -19,7 +19,6 @@ import {
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
-import { AuthGuard } from '@nestjs/passport';
 
 
 @ApiTags('AuthUsers')
@@ -29,8 +28,9 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
-  @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  // @ApiBearerAuth()
+  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  @isPublic()
   createUser(@Body() createUserDto: CreateDto) {
     return this.userService.create(createUserDto);
   }
@@ -45,6 +45,9 @@ export class UserController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   updateUserPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
+    Logger.log('Request Headers:', JSON.stringify(req.headers, null, 2));
+    Logger.log('Request Body:', JSON.stringify(req.body, null, 2));
+    Logger.log('Request Payload:', JSON.stringify(req['payload'], null, 2));
     const id = req['payload'].id
     const findOneDto : FindOneDto = {id};
     const updatePasswordRequest: UpdatePasswordRequest = { updatePasswordDto, findOneDto}

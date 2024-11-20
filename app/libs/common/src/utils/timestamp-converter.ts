@@ -10,7 +10,7 @@ export function dateToTimestamp(date: Date | null | undefined): { seconds: numbe
 
   const seconds = Math.floor(date.getTime() / 1000);
   const nanos = (date.getTime() % 1000) * 1000000; // Convert milliseconds to nanoseconds
-  console.log('mytimestamp', { seconds, nanos });
-  console.log('thwl', timestampToDate({ seconds, nanos }));
+  // console.log('mytimestamp', { seconds, nanos });
+  // console.log('thwl', timestampToDate({ seconds, nanos }));
   return { seconds, nanos };
 }

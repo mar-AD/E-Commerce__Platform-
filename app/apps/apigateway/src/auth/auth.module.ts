@@ -25,7 +25,6 @@ import { AUTH_SERVICE } from './constants';
     ]),
   ],
   controllers: [UserController, AdminController, RolesController],
-  providers: [UserService, AdminService, RolesService
-  ],
+  providers: [UserService, AdminService, RolesService],
 })
 export class AuthModule {}
