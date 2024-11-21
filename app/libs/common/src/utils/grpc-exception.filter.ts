@@ -92,6 +92,17 @@ export class GrpcExceptionFilter implements ExceptionFilter {
         error: 'Unauthorized',
       })
 
+    } else if(exception instanceof ForbiddenException) { //to handle jwt auth guard (forbidden) exceptions
+
+      const responseBody = exception.getResponse();
+
+      const message = Array.isArray(responseBody['message']) ? responseBody['message'] : responseBody['message'];
+
+      response.status(HttpStatus.UNAUTHORIZED).json({
+        status: HttpStatus.FORBIDDEN,
+        message: message,
+        error: 'Forbidden',
+      })
     } else {
       const grpcStatus = exception.code || (exception.error ? exception.error.code : grpc.status.UNKNOWN);
       const HttpExceptionClass = GrpcToHttpExceptionMapping[grpcStatus] || InternalServerErrorException;

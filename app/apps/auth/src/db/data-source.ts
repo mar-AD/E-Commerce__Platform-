@@ -1,6 +1,5 @@
 // import * as dotenv from 'dotenv';
 //
-// // Load environment variables from the .env file
 // dotenv.config({ path: './apps/auth/.env' });
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as process from 'node:process';

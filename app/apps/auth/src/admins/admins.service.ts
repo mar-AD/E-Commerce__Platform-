@@ -140,15 +140,14 @@ export class AdminsService extends BaseService<Admin>{
   }
 
   // for the autGuard ====
-
   FindAdmin(findOneDto: FindOneDto): Observable<BooleanResponse>{
     const {id} = findOneDto;
-    return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: true}})).pipe(
+    return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
       map((thisAdmin) => {
         if (!thisAdmin) {
           throw new RpcException({
             code: status.NOT_FOUND,
-            message: messages.ADMIN.NOT_FOUND
+            message: messages.ADMIN.NOT_FOUND2
           })
         }
         return {
@@ -160,12 +159,12 @@ export class AdminsService extends BaseService<Admin>{
 
   GetPermissionsByRole(findOneDto: FindOneDto): Observable<Permission>{
     const {id} = findOneDto;
-    return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: true}})).pipe(
+    return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: false}, relations: ['roleId']})).pipe(
       switchMap((thisAdmin) => {
         if (!thisAdmin){
           throw new RpcException({
             code: status.NOT_FOUND,
-            message: messages.ADMIN.NOT_FOUND
+            message: messages.ADMIN.NOT_FOUND2
           })
         }
         const role = thisAdmin.roleId;

@@ -8,7 +8,6 @@ export class CronService {
     private readonly logger: LoggerService,
   ) {
   }
-
   async CleanUpJob(entityRepository: Repository<any>, monthsOld: number){
     this.logger.log(`Starting cleanup for entities older than ${monthsOld} months.`);
     const currentDate = new Date();
@@ -26,5 +25,4 @@ export class CronService {
       this.logger.log(`No entities older than ${monthsOld} months found for deletion.`);
     }
   }
-
 }

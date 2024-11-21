@@ -15,6 +15,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
 
+    // const request = context.switchToHttp().getRequest();
+    // const payload = request.user;
+    //
+    // console.log('jwtauthguard',payload);
+    // if (request.url.includes('user/register') && !payload){
+    //   return true
+    // }
+    //
+    // if (request.url.includes('user/register') && payload && payload.type !== 'admin') {
+    //   return false;
+    // }
+
     return super.canActivate(context);
   }
 }

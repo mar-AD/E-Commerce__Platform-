@@ -55,6 +55,16 @@ export const VerifyEmailCode = (expired: Date)=>{
   }
 }
 
+export enum PermissionsNames {
+  VIEW_DASHBOARD = 'VIEW_DASHBOARD',
+  MANAGE_USERS = 'MANAGE_USERS',
+  MANAGE_ORDERS = 'MANAGE_ORDERS',
+  MANAGE_PRODUCTS = 'MANAGE_PRODUCTS',
+  MANAGE_ROLES = 'MANAGE_ROLES',
+  MANAGE_ADMINS = 'MANAGE_ADMINS',
+}
+
+
 //for getting the roles string name instead of the value (numbers)
 export const PermissionsName = {
   0: 'PERMISSION_UNSPECIFIED',

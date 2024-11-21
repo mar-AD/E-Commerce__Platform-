@@ -171,8 +171,8 @@ export abstract class  BaseService<E> {
 
     this.logger.log(`${type+'Repo'}: Searching for entity by ID "${findOneDto.id}" in repository...`);
     return from(repository.findOne({where: {id: findOneDto.id, isDeleted: false}})).pipe(
-      switchMap((thisAdmin) =>{
-        if(!thisAdmin){
+      switchMap((thisEntity) =>{
+        if(!thisEntity){
           this.logger.error(`${type+'Repo'}: entity with ID "${findOneDto.id}" doesn't exist.`);
           throw new RpcException ({
             code: status.NOT_FOUND,
@@ -180,7 +180,7 @@ export abstract class  BaseService<E> {
           })
         }
         this.logger.log(`${type+'Repo'}: Verifying password ...`);
-        return verifyPassword(password, thisAdmin.password).pipe(
+        return verifyPassword(password, thisEntity.password).pipe(
           switchMap((isMatch)=>{
             if (!isMatch) {
               this.logger.error(`${type+'Repo'}: Password verification failed.`);
@@ -199,11 +199,11 @@ export abstract class  BaseService<E> {
             this.logger.log(`${type+'Repo'}: Hashing password...`);
             return hashPassword(newPassword).pipe(
               switchMap((hashedPassword)=>{
-                thisAdmin.password = hashedPassword
+                thisEntity.password = hashedPassword
 
                 this.logger.log(`${type+'Repo'}: Saving the updated entity to the repository...`);
-                return from(repository.save(thisAdmin)).pipe(
-                  map((updatedAdmin)=> this.mapResponse(updatedAdmin)),
+                return from(repository.save(thisEntity)).pipe(
+                  map((updatedEntity)=> this.mapResponse(updatedEntity)),
                   catchError((err)=>{
                     this.logger.error(`${type+'Repo'}: Failed to update the entity. Error: ${err.message}`)
                     throw new RpcException({
@@ -241,7 +241,13 @@ export abstract class  BaseService<E> {
         }
 
         this.logger.log(`${type + 'Repo'}: Entity found, proceeding to request email update for: ${thisEntity.email}`);
-        requestEmailUpdateDto.email = thisEntity.email;
+        if (requestEmailUpdateDto.email !== thisEntity.email){
+          throw new RpcException ({
+            code: status.INVALID_ARGUMENT,
+            message: `This ${type} is associated with a different email. Please verify the email and try again.`
+          });
+        }
+
 
         this.logger.log(`emailVerificationCodeRepo: Saving the email code entity ...`);
         return from(this.emailVerificationCodeRepository.save(condition)).pipe(
