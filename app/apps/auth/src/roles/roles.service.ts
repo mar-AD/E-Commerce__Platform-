@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import {
   dateToTimestamp, Empty, FindOneDto, getPermissionName,
@@ -74,7 +74,7 @@ export class RolesService {
         return {
           roles: roles.map(role => this.mapRoleResponse(role)),
           result: {
-            status: status.OK,
+            status: HttpStatus.OK,
             message: messages.ROLE.FETCH_ALL_ROLES,
           }
         }
@@ -181,7 +181,7 @@ export class RolesService {
             this.logger.log(`roleRepo: ${messages.ROLE.ROLE_REMOVED_SUCCESSFULLY}`);
             return {
               result: {
-                status: status.OK,
+                status: HttpStatus.OK,
                 message: messages.ROLE.ROLE_REMOVED_SUCCESSFULLY
               }
             }

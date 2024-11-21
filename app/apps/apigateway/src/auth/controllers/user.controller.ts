@@ -11,7 +11,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, PermissionsGuard,
+  FindOneDto, isPublic, JwtAuthGuard, PermissionsGuard,
   RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto,
@@ -45,10 +45,7 @@ export class UserController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   updateUserPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
-    Logger.log('Request Headers:', JSON.stringify(req.headers, null, 2));
-    Logger.log('Request Body:', JSON.stringify(req.body, null, 2));
-    Logger.log('Request Payload:', JSON.stringify(req['payload'], null, 2));
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     const updatePasswordRequest: UpdatePasswordRequest = { updatePasswordDto, findOneDto}
     return this.userService.updatePassword(updatePasswordRequest);
@@ -58,7 +55,7 @@ export class UserController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   RequestAdminEmailUpdate(@Req() req: Request, @Body() requestEmailUpdateDto: RequestEmailUpdateDto) {
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     const requestUpdateEmailDto: RequestUpdateEmailRequest = {requestEmailUpdateDto, findOneDto}
     return this.userService.RequestEmailUpdate(requestUpdateEmailDto)
@@ -68,7 +65,7 @@ export class UserController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     const verifyEmailCodeRequest: VerifyEmailCodeRequest = {verifyEmailCodeDto, findOneDto}
     return this.userService.verifyEmailCode(verifyEmailCodeRequest)
@@ -78,7 +75,7 @@ export class UserController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   updateUserEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     const updateEmailRequest: UpdateEmailRequest = {updateEmailDto, findOneDto}
     return this.userService.updateEmail(updateEmailRequest);
@@ -118,7 +115,7 @@ export class UserController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
   remove(@Req() req: Request) {
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     return this.userService.remove(findOneDto);
   }

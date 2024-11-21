@@ -32,6 +32,7 @@ export const messages = {
     FAILED_TO_FETCH_FOR_UPDATE: "Failed to fetch admin for update",
     FAILED_TO_UPDATE: "Failed to update admin ",
     NOT_FOUND: "Admin with this email does not exist",
+    NOT_FOUND2: "Admin not found",
     FAILED_FETCH: "Failed to fetch admins",
     FAILED_FETCH_FOR_REMOVAL: "Failed to fetch admin for removal",
     FAILED_REMOVE: "Failed to remove admin",

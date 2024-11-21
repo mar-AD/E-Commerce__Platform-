@@ -241,7 +241,13 @@ export abstract class  BaseService<E> {
         }
 
         this.logger.log(`${type + 'Repo'}: Entity found, proceeding to request email update for: ${thisEntity.email}`);
-        requestEmailUpdateDto.email = thisEntity.email;
+        if (requestEmailUpdateDto.email !== thisEntity.email){
+          throw new RpcException ({
+            code: status.INVALID_ARGUMENT,
+            message: `This ${type} is associated with a different email. Please verify the email and try again.`
+          });
+        }
+
 
         this.logger.log(`emailVerificationCodeRepo: Saving the email code entity ...`);
         return from(this.emailVerificationCodeRepository.save(condition)).pipe(

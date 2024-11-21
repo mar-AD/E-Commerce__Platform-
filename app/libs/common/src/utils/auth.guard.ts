@@ -38,7 +38,8 @@ export class PermissionsGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    const payload = request.user;
+    const payload = request.user.payload;
+    console.log('payload',payload);
 
     if (!payload) {
       throw new RpcException({
@@ -71,8 +72,9 @@ export class PermissionsGuard implements CanActivate {
           if (!permission) {
             return of(true);
           }
+          console.log('idddd2',payload.id);
 
-          return from(this.adminService.permissionsByRole(payload.id)).pipe(
+          return from(this.adminService.permissionsByRole({ id: payload.id })).pipe(
             switchMap(permissions => {
               if (!permissions) {
                 throw new RpcException({

@@ -16,7 +16,6 @@ import {
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
-import { AuthGuard } from '@nestjs/passport';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
 
 
@@ -27,8 +26,9 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Post('admin/register')
-  @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
+  // @ApiBearerAuth()
+  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
+  @isPublic()
   createAdmin(@Body() createAdminDto: CreateAdminDto) {
     return this.adminService.create(createAdminDto);
   }
@@ -43,7 +43,7 @@ export class AdminController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'] })
   updateAdminPassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto) {
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     const updatePasswordRequest: UpdatePasswordRequest = { updatePasswordDto, findOneDto}
     return this.adminService.updatePassword(updatePasswordRequest);
@@ -53,7 +53,7 @@ export class AdminController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'] })
   RequestAdminEmailUpdate(@Req() req: Request, @Body() requestEmailUpdateDto: RequestEmailUpdateDto) {
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     const requestUpdateEmailDto: RequestUpdateEmailRequest = {requestEmailUpdateDto, findOneDto}
     return this.adminService.RequestEmailUpdate(requestUpdateEmailDto)
@@ -63,7 +63,7 @@ export class AdminController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'] })
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     const verifyEmailCodeRequest: VerifyEmailCodeRequest = {verifyEmailCodeDto, findOneDto}
     return this.adminService.verifyEmailCode(verifyEmailCodeRequest)
@@ -73,7 +73,7 @@ export class AdminController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'] })
   updateAdminEmail(@Req() req: Request, @Body() updateEmailDto: UpdateEmailDto) {
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     const updateEmailRequest: UpdateEmailRequest = {updateEmailDto, findOneDto}
     return this.adminService.updateEmail(updateEmailRequest);
@@ -121,7 +121,7 @@ export class AdminController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
   remove(@Req() req: Request) {
-    const id = req['payload'].id
+    const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     return this.adminService.remove(findOneDto);
   }
