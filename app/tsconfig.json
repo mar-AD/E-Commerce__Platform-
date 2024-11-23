@@ -10,7 +10,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-//    "rootDir": "./src",
+    //    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "incremental": true,
@@ -22,11 +22,25 @@
     "noFallthroughCasesInSwitch": false,
     "resolveJsonModule": true,
     "paths": {
-      "@app/common": ["libs/common/src"],
-      "@app/common/*": ["libs/common/src/*"],
-      "google/protobuf/*": ["google/protobuf/*"]
+      "@app/common": [
+        "libs/common/src"
+      ],
+      "@app/common/*": [
+        "libs/common/src/*"
+      ],
+      "google/protobuf/*": [
+        "google/protobuf/*"
+      ]
     }
   },
-  "include": ["apps/**/*", "libs/**/*", "google/**/*", "proto/**/*.proto" ],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "apps/**/*",
+    "libs/**/*",
+    "google/**/*",
+    "proto/**/*.proto"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
