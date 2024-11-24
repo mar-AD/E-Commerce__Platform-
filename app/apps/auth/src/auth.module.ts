@@ -52,6 +52,8 @@ import { EmailVerificationCodeEntity } from './entities/email-verification-code.
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
+
+
   ],
   controllers: [],
   providers: [],
