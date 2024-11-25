@@ -26,18 +26,15 @@ async function bootstrap() {
     await grpcApp.listen();
     console.log('Auth microservice is running on port 50051 (Grpc client)');
 
-    const rabbitClient = await NestFactory.createMicroservice<MicroserviceOptions>(
-      AuthModule,
+    const rabbitClient = app.connectMicroservice<MicroserviceOptions>(
       {
         transport: Transport.RMQ,
         options: {
-          urls: [configService.get<string>('noryet')],
-          queue:configService.get<string>('notyet'),
-          noAck: false,
+          urls: [configService.get<string>('RABBITMQ_URL')],
+          queue:configService.get<string>('RABBITMQ_EMAIL_QUEUE'),
           queueOptions: {
             durable: true,
           },
-          persistent: true
         }
       }
     )

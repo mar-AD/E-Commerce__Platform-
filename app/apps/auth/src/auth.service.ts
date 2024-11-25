@@ -27,14 +27,17 @@ import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, ClientProxyFactory, RpcException, Transport } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { RoleEntity } from './roles/entities/role.entity';
+import { ConfigService } from '@nestjs/config';
 
 
 
 @Injectable()
 export abstract class  BaseService<E> {
+  private readonly client: ClientProxy
+
   protected constructor(
     @InjectRepository(AdminEntity) protected readonly adminRepository: Repository<AdminEntity>,
     @InjectRepository(UserEntity) protected readonly userRepository: Repository<UserEntity>,
@@ -42,7 +45,17 @@ export abstract class  BaseService<E> {
     @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
     protected readonly jwtTokenService: JwtTokenService,
     protected readonly logger: LoggerService,
-  ) {}
+    protected readonly configService: ConfigService,
+  ) {
+    this.client = ClientProxyFactory.create({
+      transport: Transport.RMQ,
+      options: {
+        urls: [this.configService.get<string>('RABBITMQ_URL')],
+        queue: this.configService.get<string>('RABBITMQ_EMAIL_QUEUE'),
+        queueOptions: { durable: true }
+      }
+    })
+  }
 
   create(roleId: RoleEntity, createDto: CreateDto, type: AuthConstants) : Observable<E> {
     const {email, password } = createDto;
@@ -71,7 +84,7 @@ export abstract class  BaseService<E> {
             this.logger.log(`${type+'Repo'}: Saving the new entity to the repository...`);
             return from(repository.save(newEntity)).pipe(
 
-              //SEND WELCOMING EMAIL TO THIS ADMIN -------------------------------------
+              this.client.emit('welcom_email')
 
 
               map((createdUser) => {

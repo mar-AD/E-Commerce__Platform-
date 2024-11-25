@@ -12,12 +12,12 @@ async function bootstrap() {
     {
       transport: Transport.RMQ,
       options:{
-        urls: [configService.get<string>('notyet')],
-        queue: configService.get<string>('notyet'),
+        urls: [configService.get<string>('RABBITMQ_URL')],
+        queue: configService.get<string>('RABBITMQ_EMAIL_QUEUE'),
         queueOptions: {
           durable: true
         },
-        noAck: false,
+        noAck: false,// Ensures messages are acknowledged only after successful processing
         persistent: true
       }
     }
