@@ -12,6 +12,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule } from '@app/common';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
+import { EmailModule } from '../../email/src/email.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EmailVerificationCodeEntity } from './entities/email-verification-code.
     forwardRef(() => RolesModule),
     CommonModule,
     PassportModule,
+    EmailModule,
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),

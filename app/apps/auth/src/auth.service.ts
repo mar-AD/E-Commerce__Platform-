@@ -21,7 +21,7 @@ import {
   VerifyEmailCode,
   verifyPassword,
 } from '@app/common';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import { AuthConstants } from './constants';
 import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
@@ -83,10 +83,12 @@ export abstract class  BaseService<E> {
 
             this.logger.log(`${type+'Repo'}: Saving the new entity to the repository...`);
             return from(repository.save(newEntity)).pipe(
+              //SEND WELCOMING EMAIL TO THIS ADMIN/USER -------------------------------------
 
-              this.client.emit('welcom_email')
-
-
+              tap(() => {
+                this.logger.log(`Sending welcome email to ${email}`);
+                this.client.emit('welcome.email', {email: email});
+              }),
               map((createdUser) => {
                 this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
                 return this.mapResponse(createdUser);

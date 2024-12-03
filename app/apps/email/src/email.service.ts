@@ -1,27 +1,18 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { LoggerService } from '@app/common';
 import * as nodemailer from 'nodemailer'
 import * as process from 'node:process';
 import * as hbs from 'nodemailer-express-handlebars'
 import { join } from 'path'
-import { RpcException } from '@nestjs/microservices';
+import { EventPattern, Payload, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 
 @Injectable()
 export class EmailService {
   constructor(
     private readonly logger: LoggerService,
-    private transporter: nodemailer.Transporter
+    @Inject('MAIL_TRANSPORTER') private transporter: nodemailer.Transporter,
   ) {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
-      secure: false,
-      auth:{
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      }
-    })
 
     this.transporter.use(
       'compile',
@@ -37,8 +28,10 @@ export class EmailService {
     );
   }
 
+  @EventPattern('welcome.email')
+  async sendWelcomeEmail(@Payload() payload:{email: string} ): Promise<void> {
+    const {email} = payload
 
-  async sendWelcomeEmail(email: string): Promise<void> {
     const mailOptions = {
       from: process.env.EMAIL_FROM,
       to: email,

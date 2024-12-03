@@ -27,6 +27,7 @@ import { ResetPasswordDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AdminsService extends BaseService<Admin>{
@@ -39,8 +40,9 @@ export class AdminsService extends BaseService<Admin>{
     protected readonly jwtTokenService: JwtTokenService,
     private readonly cronService: CronService,
     protected readonly logger: LoggerService,
+    protected readonly configService: ConfigService,
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService)
   }
   createAdmin(createAdminDto: CreateAdminDto): Observable<Admin> {
     const {role} = createAdminDto;
