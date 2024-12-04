@@ -12,7 +12,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule } from '@app/common';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
-import { EmailModule } from '../../email/src/email.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import * as process from 'node:process';
 
 @Module({
   imports: [
@@ -29,7 +30,6 @@ import { EmailModule } from '../../email/src/email.module';
     forwardRef(() => RolesModule),
     CommonModule,
     PassportModule,
-    EmailModule,
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
@@ -54,8 +54,19 @@ import { EmailModule } from '../../email/src/email.module';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
-
-
+    ClientsModule.register([
+      {
+        name: 'RMQ_CLIENT',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ_URL],
+          queue: process.env.RABBITMQ_EMAIL_QUEUE,
+          queueOptions:{
+            durable: true,
+          }
+        }
+      }
+    ])
   ],
   controllers: [],
   providers: [],

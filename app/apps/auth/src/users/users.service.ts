@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   AuthResponse,
   dateToTimestamp,
@@ -18,7 +18,7 @@ import { AdminEntity } from '../admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { ConfigService } from '@nestjs/config';
 
@@ -35,8 +35,9 @@ export class UsersService extends BaseService<User>{
     private readonly cronService: CronService,
     protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
+    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
   }
 
   createUser(createUserDto: CreateDto) : Observable<User> {

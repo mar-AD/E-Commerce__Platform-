@@ -26,37 +26,6 @@ async function bootstrap() {
     await grpcApp.listen();
     console.log('Auth microservice is running on port 50051 (Grpc client)');
 
-    console.log(configService.get<string>('RABBITMQ_EMAIL_QUEUE'));
-    // import amqp from 'amqplib';
-    //
-    // async function connectToRabbitMQ() {
-    //   const connection = await amqp.connect(process.env.RABBITMQ_URL);
-    //   const channel = await connection.createChannel();
-    //   console.log('RabbitMQ connected');
-    //   return channel;
-    // }
-    //
-    // connectToRabbitMQ().catch((err) => {
-    //   console.error('Error connecting to RabbitMQ:', err.message);
-    // });
-
-
-    const rabbitClient = app.connectMicroservice<MicroserviceOptions>(
-      {
-        transport: Transport.RMQ,
-        options: {
-          urls: [configService.get<string>('RABBITMQ_URL')],
-          queue:configService.get<string>('RABBITMQ_EMAIL_QUEUE'),
-          queueOptions: {
-            durable: true,
-          },
-        }
-      }
-    )
-
-    await rabbitClient.listen()
-    console.log('Auth microservice is running on port 50051 (rabbit client)');
-
   } catch (error) {
     console.error('Error starting the Auth microservice:', error);
   }

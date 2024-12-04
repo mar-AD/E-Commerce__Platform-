@@ -24,5 +24,6 @@ async function bootstrap() {
   );
 
   await app.listen();
+  console.log('email server started: Email service is listening for events...');
 }
 bootstrap();

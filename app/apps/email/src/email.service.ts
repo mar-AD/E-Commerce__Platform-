@@ -1,39 +1,24 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { LoggerService } from '@app/common';
+import { Inject, Injectable } from '@nestjs/common';
+// import { LoggerService } from '@app/common';
 import * as nodemailer from 'nodemailer'
 import * as process from 'node:process';
-import * as hbs from 'nodemailer-express-handlebars'
-import { join } from 'path'
-import { EventPattern, Payload, RpcException } from '@nestjs/microservices';
-import { status } from '@grpc/grpc-js';
+import { Ctx, EventPattern, Payload, RmqContext, RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class EmailService {
   constructor(
-    private readonly logger: LoggerService,
-    @Inject('MAIL_TRANSPORTER') private transporter: nodemailer.Transporter,
-  ) {
-
-    this.transporter.use(
-      'compile',
-      hbs({
-        viewEngine: {
-          extname: '.hbs',
-          layoutsDir: join(__dirname, '../templates'),
-          defaultLayout: false,
-        },
-        viewPath: join(__dirname, '../templates'),
-        extname: '.hbs',
-      })
-    );
-  }
+    // private readonly logger: LoggerService,
+    @Inject('MAIL_TRANSPORTER') private readonly transporter: nodemailer.Transporter
+  ) {}
 
   @EventPattern('welcome.email')
-  async sendWelcomeEmail(@Payload() payload:{email: string} ): Promise<void> {
+  async sendWelcomeEmail(@Payload() payload: {email: string}, @Ctx() context: RmqContext): Promise<void> {
     const {email} = payload
+    const channel = context.getChannelRef(); // Get the channel for message acknowledgment
+    const originalMessage = context.getMessage(); // Get the original message
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Welcome to ...',
       template: 'welcome',
@@ -44,14 +29,13 @@ export class EmailService {
     }
     try {
       await this.transporter.sendMail(mailOptions);
-      this.logger.log(`Welcome email sent to ${email}`)
+      console.log(`Welcome email sent to ${email}`)
+      channel.ack(originalMessage);
     }
     catch(error){
-      this.logger.error(`Failed to send welcome email to ${email}`);
-      throw new RpcException({
-        status: status.INTERNAL,
-        message: 'Email delivery failed',
-      })
+      console.error(`Failed to send welcome email to ${email}`);
+      channel.nack(originalMessage);
+      throw new RpcException('Email delivery failed')
     }
   }
 

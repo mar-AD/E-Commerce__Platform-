@@ -1,6 +1,6 @@
 import {
   BadRequestException,
-  HttpStatus,
+  HttpStatus, Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -36,7 +36,6 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export abstract class  BaseService<E> {
-  private readonly client: ClientProxy
 
   protected constructor(
     @InjectRepository(AdminEntity) protected readonly adminRepository: Repository<AdminEntity>,
@@ -46,15 +45,8 @@ export abstract class  BaseService<E> {
     protected readonly jwtTokenService: JwtTokenService,
     protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
+    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
   ) {
-    this.client = ClientProxyFactory.create({
-      transport: Transport.RMQ,
-      options: {
-        urls: [this.configService.get<string>('RABBITMQ_URL')],
-        queue: this.configService.get<string>('RABBITMQ_EMAIL_QUEUE'),
-        queueOptions: { durable: true }
-      }
-    })
   }
 
   create(roleId: RoleEntity, createDto: CreateDto, type: AuthConstants) : Observable<E> {

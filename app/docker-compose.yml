@@ -9,7 +9,6 @@ services:
       - .env
     depends_on:
       - auth
-      - email
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -60,7 +59,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    command: sh -c "echo 'Starting email Service'; npm run start:dev emil"
+    command: sh -c "echo 'Starting email Service'; npm run start:dev email"
 
   auth-db:
     image: postgres:16

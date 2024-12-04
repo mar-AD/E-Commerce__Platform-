@@ -55,8 +55,8 @@
     "email": {
       "type": "application",
       "root": "apps/email",
-      "entryFile": "main",
-      "sourceRoot": "apps/email/src",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/email/tsconfig.app.json"
       }
