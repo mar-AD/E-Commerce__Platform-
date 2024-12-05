@@ -31,6 +31,7 @@ import { ClientProxy, ClientProxyFactory, RpcException, Transport } from '@nestj
 import { status } from '@grpc/grpc-js';
 import { RoleEntity } from './roles/entities/role.entity';
 import { ConfigService } from '@nestjs/config';
+import { tryCatchBlock } from 'ts-proto/build/src/utils';
 
 
 
@@ -78,8 +79,14 @@ export abstract class  BaseService<E> {
               //SEND WELCOMING EMAIL TO THIS ADMIN/USER -------------------------------------
 
               tap(() => {
-                this.logger.log(`Sending welcome email to ${email}`);
-                this.client.emit('welcome.email', {email: email});
+                this.client.connect().then(()=>{
+                  this.logger.log('RabbitMQ client connected');
+                  this.client.emit('welcome.email', {email: email});
+                  this.logger.log(`Sending welcome email to ${email}`);
+                }).catch((err)=>{
+                  this.logger.error(`RabbitMQ client failed to connect: ${err.message}`);
+                })
+
               }),
               map((createdUser) => {
                 this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);

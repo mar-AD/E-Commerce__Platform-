@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { AdminsModule } from './admins/admins.module';
 import { RolesModule } from './roles/roles.module';
@@ -54,16 +54,31 @@ import * as process from 'node:process';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
         name: 'RMQ_CLIENT',
-        transport: Transport.RMQ,
-        options: {
-          urls: [process.env.RABBITMQ_URL],
-          queue: process.env.RABBITMQ_EMAIL_QUEUE,
-          queueOptions:{
-            durable: true,
-          }
+        useFactory: async () => {
+          const logger = new Logger('RabbitMQClientConfig');
+
+          const rabbitmqUrl = process.env.RABBITMQ_URL;
+          const queueName = process.env.RABBITMQ_EMAIL_QUEUE;
+
+          logger.log(`Configuring RabbitMQ Client...`);
+          logger.log(`RabbitMQ URL: ${rabbitmqUrl}`);
+          logger.log(`Queue Name: ${queueName}`);
+
+          return {
+            transport: Transport.RMQ,
+            options: {
+              urls: [rabbitmqUrl],
+              queue: queueName,
+              queueOptions: {
+                durable: true,
+              },
+              persistent: true,
+              heartbeat: 60,
+            },
+          };
         }
       }
     ])
