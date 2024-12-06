@@ -16,11 +16,10 @@ import { join } from 'path';
         './.env'
       ]
     }),
-
-    // CommonModule
   ],
   controllers: [EmailController],
-  providers: [EmailService,
+  providers: [
+    EmailService,
     {
       provide: 'MAIL_TRANSPORTER',
       useFactory: () => {

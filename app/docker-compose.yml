@@ -72,7 +72,7 @@ services:
       - ./db/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:4.0.4-management
     container_name: rabbitmq
     hostname: rabbitmq
     volumes:

@@ -79,14 +79,9 @@ export abstract class  BaseService<E> {
               //SEND WELCOMING EMAIL TO THIS ADMIN/USER -------------------------------------
 
               tap(() => {
-                this.client.connect().then(()=>{
-                  this.logger.log('RabbitMQ client connected');
-                  this.client.emit('welcome.email', {email: email});
-                  this.logger.log(`Sending welcome email to ${email}`);
-                }).catch((err)=>{
-                  this.logger.error(`RabbitMQ client failed to connect: ${err.message}`);
-                })
-
+                this.logger.log('Emitting welcome email event');
+                this.client.emit('welcome.email', { email: email });
+                this.logger.log(`Welcome email event emitted for ${email}`);
               }),
               map((createdUser) => {
                 this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
@@ -351,7 +346,7 @@ export abstract class  BaseService<E> {
           this.logger.error(`${type + 'Repo'}: Entity not found with id: ${findOneDto.id}.`);
           throw new RpcException ({
             code: status.NOT_FOUND,
-            message: messageType.FAILED_TO_FETCH_FOR_UPDATE,
+            message: messageType.FAILED_TO_FETCH_FOR_UPDATE
           });
         }
 
@@ -633,8 +628,6 @@ export abstract class  BaseService<E> {
       })
     );
   }
-
-
 
   protected getRepository(type: AuthConstants): Repository<AdminEntity | UserEntity> {
     this.logger.log(`getRepository called with type: ${type}`);
