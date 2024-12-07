@@ -11,11 +11,11 @@ export class EmailService {
     @Inject('MAIL_TRANSPORTER') private readonly transporter: nodemailer.Transporter
   ) {}
 
-  @EventPattern('welcome.email')
-  async sendWelcomeEmail(@Payload() payload: {email: string}, @Ctx() context: RmqContext): Promise<void> {
-    const {email} = payload;
+  @EventPattern('welcome_email')
+  async sendWelcomeEmail(@Payload() data: {email: string}, @Ctx() context: RmqContext): Promise<void> {
+    const {email} = data;
     this.logger.log(`Received welcome.email event for ${email}`);
-    
+
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
 

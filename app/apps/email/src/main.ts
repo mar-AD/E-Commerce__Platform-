@@ -6,10 +6,10 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   console.log('Starting Email Microservice bootstrap process...');
 
-  const appContext = await NestFactory.createApplicationContext(EmailModule);
+  const app = await NestFactory.create(EmailModule);
   console.log('Application context created.');
 
-  const configService = appContext.get(ConfigService);
+  const configService = app.get(ConfigService);
   console.log('ConfigService loaded.');
 
   const rabbitmqUrl = configService.get<string>('RABBITMQ_URL');
@@ -18,8 +18,7 @@ async function bootstrap() {
   console.log(`[Configuration] RabbitMQ URL: ${rabbitmqUrl}`);
   console.log(`[Configuration] Email Queue Name: ${emailQueue}`);
 
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    EmailModule,
+  app.connectMicroservice<MicroserviceOptions>(
     {
       transport: Transport.RMQ,
       options: {
@@ -36,7 +35,7 @@ async function bootstrap() {
 
   console.log('Microservice created. Attempting to start...');
   try {
-    await app.listen();
+    await app.startAllMicroservices()
     console.log('Email Microservice started successfully: Listening for events...');
   } catch (error) {
     console.error('Failed to start Email Microservice:', error);

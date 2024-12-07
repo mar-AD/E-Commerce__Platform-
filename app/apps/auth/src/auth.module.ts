@@ -54,34 +54,33 @@ import * as process from 'node:process';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
-    ClientsModule.registerAsync([
-      {
-        name: 'RMQ_CLIENT',
-        useFactory: async () => {
-          const logger = new Logger('RabbitMQClientConfig');
-
-          const rabbitmqUrl = process.env.RABBITMQ_URL;
-          const queueName = process.env.RABBITMQ_EMAIL_QUEUE;
-
-          logger.log(`Configuring RabbitMQ Client...`);
-          logger.log(`RabbitMQ URL: ${rabbitmqUrl}`);
-          logger.log(`Queue Name: ${queueName}`);
-
-          return {
-            transport: Transport.RMQ,
-            options: {
-              urls: [rabbitmqUrl],
-              queue: queueName,
-              queueOptions: {
-                durable: true,
-              },
-              persistent: true,
-              heartbeat: 60,
-            },
-          };
-        }
-      }
-    ])
+    // ClientsModule.registerAsync([
+    //   {
+    //     name: 'RMQ_CLIENT',
+    //     useFactory: async () => {
+    //       const logger = new Logger('RabbitMQClientConfig');
+    //
+    //       const rabbitmqUrl = process.env.RABBITMQ_URL;
+    //       const queueName = process.env.RABBITMQ_EMAIL_QUEUE;
+    //
+    //       logger.log(`Configuring RabbitMQ Client...`);
+    //       logger.log(`RabbitMQ URL: ${rabbitmqUrl}`);
+    //       logger.log(`Queue Name: ${queueName}`);
+    //
+    //       return {
+    //         transport: Transport.RMQ,
+    //         options: {
+    //           urls: [rabbitmqUrl],
+    //           queue: queueName,
+    //           queueOptions: {
+    //             durable: true,
+    //           },
+    //           persistent: true,
+    //         },
+    //       };
+    //     }
+    //   }
+    // ])
   ],
   controllers: [],
   providers: [],

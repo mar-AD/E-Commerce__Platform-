@@ -12,14 +12,36 @@ import {
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { CreateDto, ForgotPasswordDto } from '@app/common/dtos';
+import { Client, ClientProxy, Transport } from '@nestjs/microservices';
+import * as process from 'node:process';
 
 @Controller()
 @UserServiceControllerMethods()
 export class UsersController implements UserServiceController{
+  @Client({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://marra:password@rabbitmq:5672'],
+      queue: 'email_queue',
+      queueOptions: {
+        durable: true,
+      },
+    },
+  })
+  private client: ClientProxy;
   constructor(private readonly usersService: UsersService) {}
 
   createUser(createUserDto: CreateDto) {
-    return this.usersService.createUser(createUserDto);
+     const admin =this.usersService.createUser(createUserDto);
+    this.client.emit('welcome_email', { email: createUserDto.email }).subscribe({
+      next: () => {
+        console.log('Message emitted successfully.');
+      },
+      error: (err) => {
+        console.error('Message emission failed:', err);
+      },
+    });
+    return admin;
   }
 
   userLogin(loginRequest: LoginDto){
