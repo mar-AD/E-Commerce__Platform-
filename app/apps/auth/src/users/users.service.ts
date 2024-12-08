@@ -35,9 +35,9 @@ export class UsersService extends BaseService<User>{
     private readonly cronService: CronService,
     protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
-    // @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
+    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
   }
 
   createUser(createUserDto: CreateDto) : Observable<User> {

@@ -3,9 +3,8 @@ import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
 import { ConfigModule } from '@nestjs/config';
 import process from 'node:process';
-import * as nodemailer from 'nodemailer'
-import * as hbs from 'nodemailer-express-handlebars'
-import { join } from 'path';
+import * as nodemailer from 'nodemailer';
+import { CommonModule } from '@app/common';
 
 @Module({
   imports: [
@@ -16,6 +15,7 @@ import { join } from 'path';
         './.env'
       ]
     }),
+    CommonModule
   ],
   controllers: [EmailController],
   providers: [
@@ -23,7 +23,7 @@ import { join } from 'path';
     {
       provide: 'MAIL_TRANSPORTER',
       useFactory: () => {
-        const transporter = nodemailer.createTransport({
+        return nodemailer.createTransport({
           host: process.env.EMAIL_HOST,
           port: process.env.EMAIL_PORT,
           secure: false,
@@ -32,19 +32,19 @@ import { join } from 'path';
             pass: process.env.EMAIL_PASS,
           }
         })
-        transporter.use(
-          'compile',
-          hbs.default({
-            viewEngine: {
-              extname: '.hbs',
-              layoutsDir: join(__dirname, '../templates'),
-              defaultLayout: false,
-            },
-            viewPath: join(__dirname, '../templates'),
-            extname: '.hbs',
-          })
-        );
-        return transporter
+        // transporter.use(
+        //   'compile',
+        //   hbs.default({
+        //     viewEngine: {
+        //       extname: '.hbs',
+        //       layoutsDir: join(__dirname, '../templates'),
+        //       defaultLayout: false,
+        //     },
+        //     viewPath: join(__dirname, '../templates'),
+        //     extname: '.hbs',
+        //   })
+        // );
+        // return transporter
       }
     }
   ],

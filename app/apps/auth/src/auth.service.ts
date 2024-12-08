@@ -46,7 +46,7 @@ export abstract class  BaseService<E> {
     protected readonly jwtTokenService: JwtTokenService,
     protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
-    // @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
+    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
   ) {
   }
 
@@ -76,31 +76,6 @@ export abstract class  BaseService<E> {
 
             this.logger.log(`${type+'Repo'}: Saving the new entity to the repository...`);
             return from(repository.save(newEntity)).pipe(
-              //SEND WELCOMING EMAIL TO THIS ADMIN/USER -------------------------------------
-
-              // mergeMap((createdUser) => {
-              //   this.logger.log(`Saved user: ${createdUser.email}. Emitting welcome email event.`);
-              //   this.logger.log(`Client Proxy status: ${this.client ? 'Initialized' : 'Not initialized'}`);
-              //
-              //   // Emit the event and handle subscription
-              //   return this.client.emit('welcome_email', { email: createdUser.email }).pipe(
-              //     // Handling the emission result inside the observable pipeline
-              //     catchError((err) => {
-              //       this.logger.error(`Message emission failed: ${JSON.stringify(err, null, 2)}`);
-              //       return of(null); // Return a safe observable in case of error to continue the flow
-              //     }),
-              //     // Log successful emission
-              //     tap({
-              //       next: () => {
-              //         this.logger.log('Message emitted successfully.');
-              //       },
-              //       complete: () => {
-              //         this.logger.log('Email event emission complete.');
-              //       },
-              //     })
-              //   );
-              //
-              // }),
               map((createdUser) => {
                 this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
                 return this.mapResponse(createdUser);
@@ -116,7 +91,27 @@ export abstract class  BaseService<E> {
             )
           })
         )
-      })
+      }),
+
+    //SEND WELCOMING EMAIL TO THIS ADMIN/USER -------------------------------------
+
+    tap(()=>{
+      this.logger.log(`Emitting welcome_email event for ${email}...`);
+
+      this.client.emit('welcome_email', { email: email }).pipe(
+
+        tap(()=>{
+          this.logger.log(`Successfully emitted welcome_email event for ${email}.`);
+        }),
+
+        catchError((err) => {
+          this.logger.error(
+            `Failed to emit welcome_email event for ${email}. Error: ${err.message}`
+          );
+          return of(null); // Handle error gracefully
+        })
+      ).subscribe()
+    }),
     )
   }
 

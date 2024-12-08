@@ -12,8 +12,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule } from '@app/common';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import * as process from 'node:process';
+import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -53,37 +52,28 @@ import * as process from 'node:process';
       // }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
-    // ClientsModule.registerAsync([
-    //   {
-    //     name: 'RMQ_CLIENT',
-    //     useFactory: async () => {
-    //       const logger = new Logger('RabbitMQClientConfig');
-    //
-    //       const rabbitmqUrl = process.env.RABBITMQ_URL;
-    //       const queueName = process.env.RABBITMQ_EMAIL_QUEUE;
-    //
-    //       logger.log(`Configuring RabbitMQ Client...`);
-    //       logger.log(`RabbitMQ URL: ${rabbitmqUrl}`);
-    //       logger.log(`Queue Name: ${queueName}`);
-    //
-    //       return {
-    //         transport: Transport.RMQ,
-    //         options: {
-    //           urls: [rabbitmqUrl],
-    //           queue: queueName,
-    //           queueOptions: {
-    //             durable: true,
-    //           },
-    //           persistent: true,
-    //         },
-    //       };
-    //     }
-    //   }
-    // ])
+    TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity])
   ],
   controllers: [],
-  providers: [],
-  exports:[]
+  providers: [
+    {
+      provide: 'RMQ_CLIENT',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_EMAIL_QUEUE'),
+            queueOptions: {
+              durable: true,
+            },
+            persistent: true,
+          }
+        })
+      },
+      inject:[ConfigService],
+    }
+  ],
+  exports:['RMQ_CLIENT']
 })
 export class AuthModule {}

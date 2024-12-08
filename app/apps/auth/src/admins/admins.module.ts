@@ -9,27 +9,12 @@ import { EmailVerificationCodeEntity } from '../entities/email-verification-code
 import { AdminEntity } from './entities/admin.entity';
 import { RoleEntity } from '../roles/entities/role.entity';
 import { CommonModule } from '@app/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import * as process from 'node:process';
 
 @Module({
   imports:[
     CommonModule,
     forwardRef(() => AuthModule),
      TypeOrmModule.forFeature([AdminEntity,UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity, RoleEntity]),
-    // ClientsModule.register([
-    //   {
-    //     name: 'RMQ_CLIENT',
-    //     transport: Transport.RMQ,
-    //     options:{
-    //       urls: [process.env.RABBITMQ_URL],
-    //       queue:process.env.RABBITMQ_EMAIL_QUEUE,
-    //       queueOptions:{
-    //         durable: true,
-    //       }
-    //     }
-    //   }
-    // ])
   ],
   controllers: [AdminsController],
   providers: [AdminsService],
