@@ -14,6 +14,6 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start:dev apigateway"]
-
+#CMD ["npm", "run", "start:dev apigateway"]
+CMD ["node", "dist/apps/apigateway/src/main"]
 #CMD ["npm", "run", "test"]

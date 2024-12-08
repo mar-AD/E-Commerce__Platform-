@@ -16,10 +16,12 @@ import { CreateDto, ForgotPasswordDto } from '@app/common/dtos';
 @Controller()
 @UserServiceControllerMethods()
 export class UsersController implements UserServiceController{
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+  ) {}
 
   createUser(createUserDto: CreateDto) {
-    return this.usersService.createUser(createUserDto);
+     return this.usersService.createUser(createUserDto);
   }
 
   userLogin(loginRequest: LoginDto){

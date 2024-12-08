@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { AdminsModule } from './admins/admins.module';
 import { RolesModule } from './roles/roles.module';
@@ -12,6 +12,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule } from '@app/common';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
+import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -51,10 +52,28 @@ import { EmailVerificationCodeEntity } from './entities/email-verification-code.
       // }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
+    TypeOrmModule.forFeature([AdminEntity, RoleEntity, UserEntity, RefreshTokenEntity, EmailVerificationCodeEntity])
   ],
   controllers: [],
-  providers: [],
-  exports:[]
+  providers: [
+    {
+      provide: 'RMQ_CLIENT',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_EMAIL_QUEUE'),
+            queueOptions: {
+              durable: true,
+            },
+            persistent: true,
+          }
+        })
+      },
+      inject:[ConfigService],
+    }
+  ],
+  exports:['RMQ_CLIENT']
 })
 export class AuthModule {}

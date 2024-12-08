@@ -3,10 +3,15 @@ import { AuthModule } from './auth.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { AUTH_PACKAGE_NAME } from '@app/common';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
+
   try {
-    const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+    const app = await NestFactory.create(AuthModule);
+    const configService = app.get(ConfigService);
+
+    const grpcApp = await NestFactory.createMicroservice<MicroserviceOptions>(
       AuthModule,
       {
         transport: Transport.GRPC,
@@ -17,8 +22,10 @@ async function bootstrap() {
         },
       },
     );
-    await app.listen();
-    console.log('Auth microservice is running on port 50051');
+
+    await grpcApp.listen();
+    console.log('Auth microservice is running on port 50051 (Grpc client)');
+
   } catch (error) {
     console.error('Error starting the Auth microservice:', error);
   }

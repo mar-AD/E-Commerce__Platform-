@@ -1,6 +1,6 @@
 import {
   BadRequestException,
-  HttpStatus,
+  HttpStatus, Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -21,20 +21,23 @@ import {
   VerifyEmailCode,
   verifyPassword,
 } from '@app/common';
-import { catchError, from, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, from, map, mergeMap, Observable, of, switchMap, tap } from 'rxjs';
 import { AuthConstants } from './constants';
 import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, ClientProxyFactory, RpcException, Transport } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { RoleEntity } from './roles/entities/role.entity';
+import { ConfigService } from '@nestjs/config';
+import { tryCatchBlock } from 'ts-proto/build/src/utils';
 
 
 
 @Injectable()
 export abstract class  BaseService<E> {
+
   protected constructor(
     @InjectRepository(AdminEntity) protected readonly adminRepository: Repository<AdminEntity>,
     @InjectRepository(UserEntity) protected readonly userRepository: Repository<UserEntity>,
@@ -42,7 +45,10 @@ export abstract class  BaseService<E> {
     @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
     protected readonly jwtTokenService: JwtTokenService,
     protected readonly logger: LoggerService,
-  ) {}
+    protected readonly configService: ConfigService,
+    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
+  ) {
+  }
 
   create(roleId: RoleEntity, createDto: CreateDto, type: AuthConstants) : Observable<E> {
     const {email, password } = createDto;
@@ -70,10 +76,6 @@ export abstract class  BaseService<E> {
 
             this.logger.log(`${type+'Repo'}: Saving the new entity to the repository...`);
             return from(repository.save(newEntity)).pipe(
-
-              //SEND WELCOMING EMAIL TO THIS ADMIN -------------------------------------
-
-
               map((createdUser) => {
                 this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
                 return this.mapResponse(createdUser);
@@ -89,7 +91,27 @@ export abstract class  BaseService<E> {
             )
           })
         )
-      })
+      }),
+
+    //SEND WELCOMING EMAIL TO THIS ADMIN/USER -------------------------------------
+
+    tap(()=>{
+      this.logger.log(`Emitting welcome_email event for ${email}...`);
+
+      this.client.emit('welcome_email', { email: email }).pipe(
+
+        tap(()=>{
+          this.logger.log(`Successfully emitted welcome_email event for ${email}.`);
+        }),
+
+        catchError((err) => {
+          this.logger.error(
+            `Failed to emit welcome_email event for ${email}. Error: ${err.message}`
+          );
+          return of(null); // Handle error gracefully
+        })
+      ).subscribe()
+    }),
     )
   }
 
@@ -337,7 +359,7 @@ export abstract class  BaseService<E> {
           this.logger.error(`${type + 'Repo'}: Entity not found with id: ${findOneDto.id}.`);
           throw new RpcException ({
             code: status.NOT_FOUND,
-            message: messageType.FAILED_TO_FETCH_FOR_UPDATE,
+            message: messageType.FAILED_TO_FETCH_FOR_UPDATE
           });
         }
 
@@ -619,8 +641,6 @@ export abstract class  BaseService<E> {
       })
     );
   }
-
-
 
   protected getRepository(type: AuthConstants): Repository<AdminEntity | UserEntity> {
     this.logger.log(`getRepository called with type: ${type}`);

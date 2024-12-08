@@ -47,6 +47,19 @@ services:
 #        - action: rebuild
 #          path: package.json
 
+  email:
+    build:
+      context: ./
+      dockerfile: ./apps/email/Dockerfile
+    env_file:
+      - .env
+      - ./apps/email/.env
+    depends_on:
+      - rabbitmq
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "echo 'Starting email Service'; npm run start:dev email"
 
   auth-db:
     image: postgres:16
@@ -57,6 +70,18 @@ services:
     volumes:
       - ./db/auth-data:/var/lib/postgresql/data
       - ./db/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
+
+  rabbitmq:
+    image: rabbitmq:4.0.4-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    env_file:
+      - .env
 
   postgres_admin:
     image: dpage/pgadmin4

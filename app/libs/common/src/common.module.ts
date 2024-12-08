@@ -23,15 +23,15 @@ import { join } from 'path';
 
       inject: [ConfigService],
     }),
-    ClientsModule.register([{
-      name: AUTH_SERVICE,
-      transport: Transport.GRPC,
-      options: {
-        package: AUTH_PACKAGE_NAME,
-        protoPath: join(__dirname, '../proto/auth.proto'),
-        url: 'auth:50051',
-      }
-    }])
+    // ClientsModule.register([{
+    //   name: AUTH_SERVICE,
+    //   transport: Transport.GRPC,
+    //   options: {
+    //     package: AUTH_PACKAGE_NAME,
+    //     protoPath: join(__dirname, '../proto/auth.proto'),
+    //     url: 'auth:50051',
+    //   }
+    // }])
   ],
   providers: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService],
   exports: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService],
