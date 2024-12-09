@@ -1,7 +1,9 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { RmqContext, RpcException } from '@nestjs/microservices';
 import { LoggerService } from '@app/common';
+import { emailStructure } from './emails/welcome-email';
+import { welcomeEmailHtml } from './templates/welcome';
 
 @Injectable()
 export class EmailService {
@@ -10,33 +12,19 @@ export class EmailService {
     private logger: LoggerService
   ) {}
 
-  async sendWelcomeEmail(data: { email: string }, context: RmqContext): Promise<void> {
-    const { email } = data;
+  async sendWelcomeEmail(data :{ email: string } , context: RmqContext): Promise<void> {
 
+    const {email}=data
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Welcome to our Platform!',
-      html: `
-      <html lang="">
-        <body>
-          <h1>Welcome to the E-Commerce Platform!</h1>
-          <p>We're excited to have you with us. Your registration is complete, and you can now start exploring the features and products available.</p>
-          <p>If you have any questions, feel free to reach out to our support team.</p>
-          <br />
-          <p>Best regards,</p>
-          <p>The E-Commerce Platform Team</p>
-        </body>
-      </html>
-    `,
-    };
+    const html = welcomeEmailHtml
+    const subject = 'Welcome to our Platform!'
+    const welcomeMail = emailStructure(email, subject, html)
 
     try {
       this.logger.log(`Sending welcome email to ${email}`);
-      await this.transporter.sendMail(mailOptions);
+      await this.transporter.sendMail(welcomeMail);
       this.logger.log(`Welcome email sent successfully to ${email}`);
       channel.ack(originalMessage);
     } catch (error) {
