@@ -8,5 +8,12 @@ export  function emailStructure (email: string, subject: string, html: string) {
     html: html,
   }
 
-  return mailOptions
+  return mailOptions;
 }
+
+
+export const EMAIL_SUBJECTS = {
+  WELCOME: 'Welcome to our Platform!',
+  EMAIL_UPDATED: 'Email Update Request',
+  RESET_PASSWORD: 'Password Reset Request',
+};
