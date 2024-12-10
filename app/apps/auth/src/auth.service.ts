@@ -273,7 +273,6 @@ export abstract class  BaseService<E> {
 
         this.logger.log(`emailVerificationCodeRepo: Saving the email code entity ...`);
         return from(this.emailVerificationCodeRepository.save(condition)).pipe(
-          // SEND AN EMAIL THAT CONTAINS THIS CODE TO THIS ADMIN -----------------------------------------------
           map(() => {
             this.logger.log(`${type + 'Repo'}: Email verification code sent successfully for email: ${thisEntity.email}`);
             return {
@@ -291,6 +290,20 @@ export abstract class  BaseService<E> {
             });
           })
         );
+      }),
+      // SEND AN EMAIL THAT CONTAINS THIS CODE TO THIS USER -----------------------------------------------
+
+      tap(()=>{
+        this.logger.log(`Emitting req_update_email_email event for ${requestEmailUpdateDto.email}...`)
+        this.client.emit('req_update_email_email', {email: requestEmailUpdateDto.email, verificationCode: code}).pipe(
+          tap(()=>{
+            this.logger.log(`Successfully emitted req_update_email_email event for ${requestEmailUpdateDto.email}.`);
+          }),
+          catchError((error)=>{
+            this.logger.error(`Failed to emit req_update_email_email event for ${requestEmailUpdateDto.email}. Error: ${error.message}`);
+            return of(null);
+          })
+        ).subscribe()
       })
     );
   }
@@ -498,6 +511,7 @@ export abstract class  BaseService<E> {
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
 
+    let token: string ;
     this.logger.log(`${type + 'Repo'}: Initiating password reset for email: ${email}...`);
 
     return from(repository.findOne({ where: { email } })).pipe(
@@ -514,17 +528,31 @@ export abstract class  BaseService<E> {
           id: thisEntity.id,
           type: type
         };
-        this.jwtTokenService.generateAccessToken(payload);
+        token = this.jwtTokenService.generateAccessToken(payload);
+        console.log('Generated Token:', token);
 
         this.logger.log(`${type + 'Repo'}: Password reset email sent for email: ${email}.`);
 
-        // SEND EMAIL--WILL DO WHEN I CREATE THE EMAIL SERVICE ------------------------------
         return {
           result: {
             status: HttpStatus.OK,
             message: messages.EMAIL.RESET_PASS_EMAIL_SENT
           }
         };
+      }),
+      // SEND EMAIL--WILL DO WHEN I CREATE THE EMAIL SERVICE ------------------------------
+
+      tap(()=>{
+        this.logger.log(`Emitting reset_pass_email event for ${email}...`)
+        this.client.emit('reset_pass_email', {email: email, token: token}).pipe(
+          tap(()=>{
+            this.logger.log(`Successfully emitted reset_pass_email event for ${email}.`);
+          }),
+          catchError((error)=>{
+            this.logger.error(`Failed to emit reset_pass_email event for ${email}. Error: ${error.message}`);
+            return of(null);
+          })
+        ).subscribe()
       })
     );
   }

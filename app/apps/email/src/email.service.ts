@@ -45,6 +45,8 @@ export class EmailService {
     const subject =  EMAIL_SUBJECTS.RESET_PASSWORD
     const resetPassMail = emailStructure( email, subject, html)
 
+    console.log('Email Content:', html);
+
     try {
       this.logger.log(`Sending resetPass email to ${email}`);
       await this.transporter.sendMail(resetPassMail)
