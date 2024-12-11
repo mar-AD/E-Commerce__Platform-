@@ -59,7 +59,7 @@ export class AdminController {
     return this.adminService.RequestEmailUpdate(requestUpdateEmailDto)
   }
 
-  @Get('admin/verifyEmailCode')
+  @Post('admin/verifyEmailCode')
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'] })
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
@@ -108,9 +108,8 @@ export class AdminController {
     return this.adminService.forgotPassword(forgotPassDto);
   }
 
-  @Post('admin/reset-password/token')
-  @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'] })
+  @Post('admin/reset-password/:token')
+  @isPublic()
   adminResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     const tokenDto : TokenDto = { token };
     const resetPasswordRequest: ResetPasswordRequest = {resetPasswordDto, tokenDto}

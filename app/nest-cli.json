@@ -67,6 +67,24 @@
         ],
         "watchAssets": true
       }
+    },
+    "users": {
+      "type": "application",
+      "root": "apps/users",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
+      "compilerOptions": {
+        "tsConfigPath": "apps/users/tsconfig.app.json"
+      }
+    },
+    "admins": {
+      "type": "application",
+      "root": "apps/admins",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
+      "compilerOptions": {
+        "tsConfigPath": "apps/admins/tsconfig.app.json"
+      }
     }
   }
 }

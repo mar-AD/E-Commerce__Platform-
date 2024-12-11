@@ -96,16 +96,12 @@ export class UserController {
   }
 
   @Post('user/forgot-password')
-  // @ApiBearerAuth()
-  // @PermissionsAndAccess({ accessType: ['user'] })
   @isPublic()
   userForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
     return this.userService.forgotPassword(forgotPassDto);
   }
 
   @Post('user/reset-password/:token')
-  // @ApiBearerAuth()
-  // @PermissionsAndAccess({ accessType: ['user'] })
   @isPublic()
   userResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     const tokenDto : TokenDto = { token };

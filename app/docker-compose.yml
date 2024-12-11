@@ -61,6 +61,38 @@ services:
       - /usr/src/app/node_modules
     command: sh -c "echo 'Starting email Service'; npm run start:dev email"
 
+  users:
+    build:
+      context: ./
+      dockerfile: ./apps/users/Dockerfile
+    env_file:
+      - ./apps/users/.env
+    depends_on:
+      - users-db
+    ports:
+      - '50054:50053'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "echo 'Starting users Service'; npm run start:dev users"
+
+
+  admins:
+    build:
+      context: ./
+      dockerfile: ./apps/admins/Dockerfile
+    env_file:
+      - ./apps/admins/.env
+    depends_on:
+      - admins-db
+    ports:
+      - '50056:50055'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "echo 'Starting admins Service'; npm run start:dev admins"
+
+
   auth-db:
     image: postgres:16
     env_file:
