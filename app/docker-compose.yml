@@ -103,6 +103,26 @@ services:
       - ./db/auth-data:/var/lib/postgresql/data
       - ./db/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
 
+  users-db:
+    image: postgres:16
+    env_file:
+      - ./apps/users/.env
+    ports:
+      - '5435:5434'
+    volumes:
+      - ./db/users-data:/var/lib/postgresql/data
+      - ./db/init-users.sql:/docker-entrypoint-initdb.d/init-users.sql
+
+  admins-db:
+    image: postgres:16
+    env_file:
+      - ./apps/admins/.env
+    ports:
+      - '5437:5436'
+    volumes:
+      - ./db/admins-data:/var/lib/postgresql/data
+      - ./db/init-admins.sql:/docker-entrypoint-initdb.d/init-admins.sql
+
   rabbitmq:
     image: rabbitmq:4.0.4-management
     container_name: rabbitmq
