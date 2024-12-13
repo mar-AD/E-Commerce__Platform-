@@ -17,19 +17,6 @@ import * as process from 'node:process';
     CommonModule,
     forwardRef(() => AuthModule),
      TypeOrmModule.forFeature([UserEntity,AdminEntity, RefreshTokenEntity, EmailVerificationCodeEntity]),
-    // ClientsModule.register([
-    //   {
-    //     name: 'RMQ_CLIENT',
-    //     transport: Transport.RMQ,
-    //     options:{
-    //       urls: [process.env.RABBITMQ_URL],
-    //       queue:process.env.RABBITMQ_EMAIL_QUEUE,
-    //       queueOptions: {
-    //         durable: true,
-    //       }
-    //     }
-    //   }
-    // ])
   ],
   controllers: [UsersController],
   providers: [UsersService],

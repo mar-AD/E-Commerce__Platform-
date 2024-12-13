@@ -4,7 +4,7 @@ import {
 } from '@nestjs/common';
 import {
   Admin,
-  AuthResponse, BooleanResponse, CronService,
+  AuthResponse, CronService,
   dateToTimestamp,
   Empty, FindOneDto, ForgotPasswordDto,
   JwtTokenService, LoggerService,
@@ -144,7 +144,7 @@ export class AdminsService extends BaseService<Admin>{
   }
 
   // for the autGuard ====
-  FindAdmin(findOneDto: FindOneDto): Observable<BooleanResponse>{
+  FindAdmin(findOneDto: FindOneDto): Observable<Admin>{
     const {id} = findOneDto;
     return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
       map((thisAdmin) => {
@@ -154,9 +154,7 @@ export class AdminsService extends BaseService<Admin>{
             message: messages.ADMIN.NOT_FOUND2
           })
         }
-        return {
-          result: true
-        };
+        return this.mapResponse(thisAdmin)
       })
     )
   }

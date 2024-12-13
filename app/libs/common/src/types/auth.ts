@@ -22,10 +22,6 @@ export enum Permissions {
   UNRECOGNIZED = -1,
 }
 
-export interface BooleanResponse {
-  result: boolean;
-}
-
 export interface Permission {
   permissions: Permissions[];
 }
@@ -330,7 +326,7 @@ export interface AdminServiceClient {
 
   removeAdmin(request: FindOneDto): Observable<Empty>;
 
-  findOneAdmin(request: FindOneDto): Observable<BooleanResponse>;
+  findOneAdmin(request: FindOneDto): Observable<Admin>;
 
   permissionsByRole(request: FindOneDto): Observable<Permission>;
 }
@@ -362,7 +358,7 @@ export interface AdminServiceController {
 
   removeAdmin(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  findOneAdmin(request: FindOneDto): Promise<BooleanResponse> | Observable<BooleanResponse> | BooleanResponse;
+  findOneAdmin(request: FindOneDto): Promise<Admin> | Observable<Admin> | Admin;
 
   permissionsByRole(request: FindOneDto): Promise<Permission> | Observable<Permission> | Permission;
 }

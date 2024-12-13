@@ -8,9 +8,6 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
 
   try {
-    // const app = await NestFactory.create(AuthModule);
-    // const configService = app.get(ConfigService);
-
     const app = await NestFactory.createMicroservice<MicroserviceOptions>(
       AuthModule,
       {
