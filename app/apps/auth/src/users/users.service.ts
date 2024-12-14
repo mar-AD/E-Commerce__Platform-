@@ -4,12 +4,12 @@ import {
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  User, LoggerService, FindOneDto, TokenDto, None, messages,
+  User, LoggerService, FindOneDto, TokenDto, messages,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { from, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, from, map, Observable } from 'rxjs';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
@@ -87,19 +87,34 @@ export class UsersService extends BaseService<User>{
 
   // fro the autGuard ====
   getUser(findOneDto: FindOneDto): Observable<User> {
-    return from(this.userRepository.findOne({where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
-      map((user) =>{
-      if (!user){
-        throw new RpcException({
-          code: status.NOT_FOUND,
-          message: messages.USER.NOT_FOUND2
-        })
-      }
+    console.log('TRYING TO FIND THE USER IN FINDUSER METHOD...');
+    return from(
+      this.userRepository.findOne({
+        where: {
+          id: findOneDto.id,
+          isActive: true,
+          isDeleted: false, // Ensure this excludes deleted users
+          isEmailVerified: false,
+        },
+      })
+    ).pipe(
+      map((user) => {
+        console.log('Query result:', user); // Log what was actually returned
+        if (!user) {
+          console.log('USER WAS NOT FOUND');
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.USER.NOT_FOUND2,
+          });
+        }
+        console.log('USER FOUND:', user);
         return this.mapResponse(user);
-
-    })
-    )
-
+      }),
+      catchError((err) => {
+        console.error('Error finding user:', err.message);
+        throw err;
+      })
+    );
   }
 
   @Cron("0 0 * * *")

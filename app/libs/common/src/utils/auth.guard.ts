@@ -61,12 +61,14 @@ export class PermissionsGuard implements CanActivate {
     }
 
     if (payload.type === 'user' && accessType.includes('user')) {
+      console.log('trying to find a USER');
       return from(this.userService.findUser(payload.id)).pipe(
         map(() => true),
       );
     }
 
     if (payload.type === 'admin' && accessType.includes('admin')) {
+      console.log('trying to find a ADMIN');
       return from(this.adminService.findOneAdmin(payload.id)).pipe(
         switchMap(() => {
           if (!permission) {
