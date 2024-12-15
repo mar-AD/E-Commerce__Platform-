@@ -145,18 +145,7 @@ export class AdminsService extends BaseService<Admin>{
 
   // for the autGuard ====
   FindAdmin(findOneDto: FindOneDto): Observable<Admin>{
-    const {id} = findOneDto;
-    return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
-      map((thisAdmin) => {
-        if (!thisAdmin) {
-          throw new RpcException({
-            code: status.NOT_FOUND,
-            message: messages.ADMIN.NOT_FOUND2
-          })
-        }
-        return this.mapResponse(thisAdmin)
-      })
-    )
+    return this.getAll(findOneDto, AuthConstants.admin)
   }
 
   GetPermissionsByRole(findOneDto: FindOneDto): Observable<Permission>{

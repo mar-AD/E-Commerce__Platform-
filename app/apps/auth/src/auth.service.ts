@@ -669,6 +669,23 @@ export abstract class  BaseService<E> {
     );
   }
 
+  getAll(findOneDto: FindOneDto, type: AuthConstants): Observable<E> {
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+
+    return from(repository.findOne({where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
+      map((thisEntity) => {
+        if (!thisEntity) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messageType.NOT_FOUND2
+          })
+        }
+        return this.mapResponse(thisEntity)
+      })
+    )
+  }
+
 
 
   protected getRepository(type: AuthConstants): Repository<AdminEntity | UserEntity> {

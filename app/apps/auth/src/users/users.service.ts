@@ -87,34 +87,7 @@ export class UsersService extends BaseService<User>{
 
   // fro the autGuard ====
   getUser(findOneDto: FindOneDto): Observable<User> {
-    console.log('TRYING TO FIND THE USER IN FINDUSER METHOD...');
-    return from(
-      this.userRepository.findOne({
-        where: {
-          id: findOneDto.id,
-          isActive: true,
-          isDeleted: false, // Ensure this excludes deleted users
-          isEmailVerified: false,
-        },
-      })
-    ).pipe(
-      map((user) => {
-        console.log('Query result:', user); // Log what was actually returned
-        if (!user) {
-          console.log('USER WAS NOT FOUND');
-          throw new RpcException({
-            code: status.NOT_FOUND,
-            message: messages.USER.NOT_FOUND2,
-          });
-        }
-        console.log('USER FOUND:', user);
-        return this.mapResponse(user);
-      }),
-      catchError((err) => {
-        console.error('Error finding user:', err.message);
-        throw err;
-      })
-    );
+    return this.getAll(findOneDto, AuthConstants.user)
   }
 
   @Cron("0 0 * * *")

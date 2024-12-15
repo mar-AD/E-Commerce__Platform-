@@ -8,9 +8,6 @@ import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 import { CommonModule } from '@app/common';
 import { AdminEntity } from '../admins/entities/admin.entity';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import * as process from 'node:process';
-// import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports:[
