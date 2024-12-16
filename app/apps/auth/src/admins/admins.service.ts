@@ -45,6 +45,10 @@ export class AdminsService extends BaseService<Admin>{
     @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
   ) {
     super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
+    console.log(this.logger instanceof LoggerService);
+    if (!this.logger || typeof this.logger.log !== 'function') {
+      throw new Error('Logger is not properly instantiated');
+    }
   }
   createAdmin(createAdminDto: CreateAdminDto): Observable<Admin> {
     const {role} = createAdminDto;

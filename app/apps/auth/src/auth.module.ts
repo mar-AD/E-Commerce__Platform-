@@ -10,7 +10,7 @@ import { UserEntity } from './users/entities/user.entity';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { CommonModule } from '@app/common';
+import { CommonModule, LoggerService } from '@app/common';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
@@ -72,7 +72,8 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
         })
       },
       inject:[ConfigService],
-    }
+    },
+    LoggerService
   ],
   exports:['RMQ_CLIENT']
 })

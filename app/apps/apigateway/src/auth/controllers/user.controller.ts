@@ -11,7 +11,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, isPublic, JwtAuthGuard, PermissionsGuard,
+  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, PermissionsGuard,
   RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto,
@@ -117,4 +117,12 @@ export class UserController {
     const findOneDto : FindOneDto = {id};
     return this.userService.remove(findOneDto);
   }
+
+//   @Get('user/:id')
+//   @ApiBearerAuth()
+//   @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+//   getUser(@Param('id') id : string) {
+//     const findOneDto : FindOneDto = {id};
+//     return this.userService.getUser(findOneDto);
+//   }
 }

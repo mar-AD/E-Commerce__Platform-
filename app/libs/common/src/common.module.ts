@@ -7,10 +7,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from '@app/common/services/global-cron.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '../../../apps/apigateway/src/auth/constants';
-import { AUTH_PACKAGE_NAME } from '@app/common/types';
-import { join } from 'path';
 
 
 @Module({

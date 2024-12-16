@@ -4,12 +4,12 @@ import {
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  User, LoggerService, FindOneDto, TokenDto, messages,
+  User, LoggerService, FindOneDto, TokenDto,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { catchError, from, map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
@@ -18,8 +18,7 @@ import { AdminEntity } from '../admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { status } from '@grpc/grpc-js';
+import { ClientProxy } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 
 
@@ -38,6 +37,10 @@ export class UsersService extends BaseService<User>{
     @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
   ) {
     super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
+    console.log(this.logger instanceof LoggerService);
+    if (!this.logger || typeof this.logger.log !== 'function') {
+      throw new Error('Logger is not properly instantiated');
+    }
   }
 
   createUser(createUserDto: CreateDto) : Observable<User> {
