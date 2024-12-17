@@ -7,9 +7,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from '@app/common/services/global-cron.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AUTH_PACKAGE_NAME } from '@app/common/types';
-import { join } from 'path';
 
 @Global()
 @Module({
@@ -22,15 +19,6 @@ import { join } from 'path';
 
       inject: [ConfigService],
     }),
-    ClientsModule.register([{
-      name: 'authService',
-      transport: Transport.GRPC,
-      options: {
-        package: AUTH_PACKAGE_NAME,
-        protoPath: join(__dirname, '../proto/auth.proto'),
-        url: 'auth:50051',
-      }
-    }])
   ],
   providers: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService],
   exports: [CommonService, JwtTokenService, LoggerService, JwtStrategy, CronService],

@@ -669,23 +669,29 @@ export abstract class  BaseService<E> {
     );
   }
 
-  // getAll(id: string, type: AuthConstants): Observable<E> {
-  //   const findOneDto: FindOneDto = {id}
-  //   const repository = this.getRepository(type);
-  //   const messageType = this.getMessageType(type);
-  //
-  //   return from(repository.findOne({where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
-  //     map((thisEntity) => {
-  //       if (!thisEntity) {
-  //         throw new RpcException({
-  //           code: status.NOT_FOUND,
-  //           message: messageType.NOT_FOUND2
-  //         })
-  //       }
-  //       return this.mapResponse(thisEntity)
-  //     })
-  //   )
-  // }
+  getAll(id: string, type: AuthConstants): Observable<E> {
+    const findOneDto: FindOneDto = {id}
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+    let conditioning: Record<string, any> = {where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false}};
+    if (type === AuthConstants.admin) {
+      conditioning = {
+        ...conditioning ,
+        relations: ['roleId']}
+    }
+
+    return from(repository.findOne(conditioning)).pipe(
+      map((thisEntity) => {
+        if (!thisEntity) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messageType.NOT_FOUND2
+          })
+        }
+        return this.mapResponse(thisEntity)
+      })
+    )
+  }
 
 
 
@@ -717,6 +723,7 @@ export abstract class  BaseService<E> {
     }
   }
 
+  //this is only for refreshtokenrepository
   protected getCondition(type: AuthConstants, condition: Record<string, any>, value: Object): Record<string, any> {
     this.logger.log(`getCondition called with type: ${type}, condition: ${JSON.stringify(condition)}, value: ${JSON.stringify(value)}`);
     if (type === AuthConstants.admin) {

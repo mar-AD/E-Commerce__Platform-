@@ -63,7 +63,7 @@ export class PermissionsGuard implements CanActivate {
     if (payload.type === 'user' && accessType.includes('user')) {
       console.log('trying to find a USER');
       const id : FindOneDto = { id: payload.id }
-      return from(this.userService.findUser(id)).pipe(
+      return from(this.userService.findOne(id)).pipe(
         map(() => true),
       );
     }
@@ -71,7 +71,7 @@ export class PermissionsGuard implements CanActivate {
     if (payload.type === 'admin' && accessType.includes('admin')) {
       console.log('trying to find a ADMIN');
       const id : FindOneDto = { id: payload.id }
-      return from(this.adminService.findOneAdmin(id)).pipe(
+      return from(this.adminService.findOne(id)).pipe(
         switchMap(() => {
           if (!permission) {
             return of(true);

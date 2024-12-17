@@ -69,7 +69,7 @@ export class UsersController implements UserServiceController{
     return this.usersService.deleteUser(findOneDto);
   }
 
-  findUser(findOneDto: FindOneDto) {
+  findOne(findOneDto: FindOneDto) {
     console.log('we are here at user controller ', findOneDto);
     return this.usersService.getUser(findOneDto);
   }

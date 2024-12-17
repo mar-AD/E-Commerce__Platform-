@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
@@ -10,13 +10,14 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, PermissionsGuard, RequestUpdateEmailRequest,
+  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto, UpdateAdminRoleRequest,
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
+import { PermissionsGuard } from '../guards/auth.guard';
 
 
 @ApiTags('AuthAdmins')

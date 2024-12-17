@@ -238,7 +238,7 @@ export interface UserServiceClient {
 
   removeUser(request: FindOneDto): Observable<Empty>;
 
-  findUser(request: FindOneDto): Observable<User>;
+  findOne(request: FindOneDto): Observable<User>;
 }
 
 /** users */
@@ -266,7 +266,7 @@ export interface UserServiceController {
 
   removeUser(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  findUser(request: FindOneDto): Promise<User> | Observable<User> | User;
+  findOne(request: FindOneDto): Promise<User> | Observable<User> | User;
 }
 
 export function UserServiceControllerMethods() {
@@ -283,7 +283,7 @@ export function UserServiceControllerMethods() {
       "userForgotPassword",
       "userResetPassword",
       "removeUser",
-      "findUser",
+      "findOne",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
@@ -326,7 +326,7 @@ export interface AdminServiceClient {
 
   removeAdmin(request: FindOneDto): Observable<Empty>;
 
-  findOneAdmin(request: FindOneDto): Observable<Admin>;
+  findOne(request: FindOneDto): Observable<Admin>;
 
   permissionsByRole(request: FindOneDto): Observable<Permission>;
 }
@@ -358,7 +358,7 @@ export interface AdminServiceController {
 
   removeAdmin(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
-  findOneAdmin(request: FindOneDto): Promise<Admin> | Observable<Admin> | Admin;
+  findOne(request: FindOneDto): Promise<Admin> | Observable<Admin> | Admin;
 
   permissionsByRole(request: FindOneDto): Promise<Permission> | Observable<Permission> | Permission;
 }
@@ -378,7 +378,7 @@ export function AdminServiceControllerMethods() {
       "adminForgotPassword",
       "adminResetPassword",
       "removeAdmin",
-      "findOneAdmin",
+      "findOne",
       "permissionsByRole",
     ];
     for (const method of grpcMethods) {

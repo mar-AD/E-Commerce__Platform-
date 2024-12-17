@@ -71,7 +71,7 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.deleteAdmin(findOneDto);
   }
 
-  findOneAdmin(findOneDto: FindOneDto) {
+  findOne(findOneDto: FindOneDto) {
     console.log('findOneAdmin received:', findOneDto);
     return this.adminsService.FindAdmin(findOneDto);
   }

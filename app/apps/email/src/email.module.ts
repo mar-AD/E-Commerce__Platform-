@@ -15,7 +15,7 @@ import { CommonModule } from '@app/common';
         './.env'
       ]
     }),
-    // CommonModule
+    CommonModule
   ],
   controllers: [EmailController],
   providers: [

@@ -147,46 +147,22 @@ export class AdminsService extends BaseService<Admin>{
     return this.remove(findOneDto, AuthConstants.admin);
   }
 
-  // for the autGuard ====
-  // FindAdmin(findOneDto: FindOneDto): Observable<Admin>{
-  //   const {id} = findOneDto;
-  //   console.log('Received findOneDto:', findOneDto);
-  //   console.log('here at admins', id);
-  //   if (!id) {
-  //     console.error('FindAdmin: Missing or invalid ID in request');
-  //     throw new RpcException({
-  //       code: status.INVALID_ARGUMENT,
-  //       message: 'ID is required to find an admin',
-  //     });
-  //   }
-  //   return from(this.adminRepository.findOne({where: {id: id}})).pipe(
-  //     map((thisEntity) => {
-  //       if (!thisEntity) {
-  //         throw new RpcException({
-  //           code: status.NOT_FOUND,
-  //           message: messages.ADMIN.NOT_FOUND2
-  //         })
-  //       }
-  //       return this.mapResponse(thisEntity)
-  //     })
-  //   )
-  // }
-
   FindAdmin(findOneDto: FindOneDto): Observable<Admin> {
-    const { id } = findOneDto;
-    console.log('here at FindAdmin METHOD', id);
-
-    return from(this.adminRepository.findOne({ where: { id: id, isDeleted: false, isActive: true, isEmailVerified: false} })).pipe(
-      map((thisEntity) => {
-        if (!thisEntity) {
-          throw new RpcException({
-            code: status.NOT_FOUND,
-            message: messages.ADMIN.NOT_FOUND2,
-          });
-        }
-        return this.mapResponse(thisEntity);
-      })
-    );
+    // const { id } = findOneDto;
+    // console.log('here at FindAdmin METHOD', id);
+    //
+    // return from(this.adminRepository.findOne({ where: { id: id, isDeleted: false, isActive: true, isEmailVerified: false}, relations: ['roleId'] })).pipe(
+    //   map((thisEntity) => {
+    //     if (!thisEntity) {
+    //       throw new RpcException({
+    //         code: status.NOT_FOUND,
+    //         message: messages.ADMIN.NOT_FOUND2,
+    //       });
+    //     }
+    //     return this.mapResponse(thisEntity);
+    //   })
+    // );
+    return this.getAll(findOneDto.id, AuthConstants.admin);
   }
 
 
