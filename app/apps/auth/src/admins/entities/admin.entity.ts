@@ -13,7 +13,7 @@ export class AdminEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => RoleEntity)
+  @ManyToOne(() => RoleEntity,{eager: true})
   @JoinColumn({ name: 'role_id' })
   roleId: RoleEntity;
 

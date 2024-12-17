@@ -40,15 +40,15 @@ export class AdminsService extends BaseService<Admin>{
     @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
     protected readonly jwtTokenService: JwtTokenService,
     private readonly cronService: CronService,
-    protected readonly logger: LoggerService,
+    @Inject(LoggerService) protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
     @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
   ) {
     super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
-    console.log(this.logger instanceof LoggerService);
-    if (!this.logger || typeof this.logger.log !== 'function') {
-      throw new Error('Logger is not properly instantiated');
-    }
+    console.log('AdminsService: LoggerService instance:', this.logger instanceof LoggerService);
+    console.log('AdminsService: LoggerService typeof:', typeof this.logger);
+    console.log('AdminsService: LoggerService:', this.logger);
+
   }
   createAdmin(createAdminDto: CreateAdminDto): Observable<Admin> {
     const {role} = createAdminDto;
@@ -148,12 +148,51 @@ export class AdminsService extends BaseService<Admin>{
   }
 
   // for the autGuard ====
-  FindAdmin(findOneDto: FindOneDto): Observable<Admin>{
-    return this.getAll(findOneDto, AuthConstants.admin)
+  // FindAdmin(findOneDto: FindOneDto): Observable<Admin>{
+  //   const {id} = findOneDto;
+  //   console.log('Received findOneDto:', findOneDto);
+  //   console.log('here at admins', id);
+  //   if (!id) {
+  //     console.error('FindAdmin: Missing or invalid ID in request');
+  //     throw new RpcException({
+  //       code: status.INVALID_ARGUMENT,
+  //       message: 'ID is required to find an admin',
+  //     });
+  //   }
+  //   return from(this.adminRepository.findOne({where: {id: id}})).pipe(
+  //     map((thisEntity) => {
+  //       if (!thisEntity) {
+  //         throw new RpcException({
+  //           code: status.NOT_FOUND,
+  //           message: messages.ADMIN.NOT_FOUND2
+  //         })
+  //       }
+  //       return this.mapResponse(thisEntity)
+  //     })
+  //   )
+  // }
+
+  FindAdmin(findOneDto: FindOneDto): Observable<Admin> {
+    const { id } = findOneDto;
+    console.log('here at FindAdmin METHOD', id);
+
+    return from(this.adminRepository.findOne({ where: { id: id, isDeleted: false, isActive: true, isEmailVerified: false} })).pipe(
+      map((thisEntity) => {
+        if (!thisEntity) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.ADMIN.NOT_FOUND2,
+          });
+        }
+        return this.mapResponse(thisEntity);
+      })
+    );
   }
+
 
   GetPermissionsByRole(findOneDto: FindOneDto): Observable<Permission>{
     const {id} = findOneDto;
+    console.log('here at GetPermissionsByRole METHOD', id);
     return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: false}, relations: ['roleId']})).pipe(
       switchMap((thisAdmin) => {
         if (!thisAdmin){

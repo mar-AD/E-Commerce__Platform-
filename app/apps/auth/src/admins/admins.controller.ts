@@ -10,8 +10,7 @@ import {
   UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
-import { CreateAdminDto } from '@app/common/dtos/create-admin.dto';
-import { LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos';
+import { CreateAdminDto, LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -73,10 +72,12 @@ export class AdminsController implements AdminServiceController{
   }
 
   findOneAdmin(findOneDto: FindOneDto) {
+    console.log('findOneAdmin received:', findOneDto);
     return this.adminsService.FindAdmin(findOneDto);
   }
 
   permissionsByRole(findOneDto: FindOneDto) {
+    console.log('findOneAdmin received IN permissionsByRole:', findOneDto);
     return this.adminsService.GetPermissionsByRole(findOneDto);
   }
 }
