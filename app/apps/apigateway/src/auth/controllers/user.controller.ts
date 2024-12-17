@@ -11,14 +11,16 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, isPublic, JwtAuthGuard, PermissionsGuard,
+  FindOneDto, getPermissionName, isPublic, JwtAuthGuard,
   RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto,
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
+  Permissions
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
+import { PermissionsGuard } from '../guards/auth.guard';
 
 
 @ApiTags('AuthUsers')
@@ -28,9 +30,9 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
-  // @ApiBearerAuth()
-  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
-  @isPublic()
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  // @isPublic()
   createUser(@Body() createUserDto: CreateDto) {
     return this.userService.create(createUserDto);
   }
@@ -96,16 +98,12 @@ export class UserController {
   }
 
   @Post('user/forgot-password')
-  // @ApiBearerAuth()
-  // @PermissionsAndAccess({ accessType: ['user'] })
   @isPublic()
   userForgotPassword(@Body() forgotPassDto: ForgotPasswordDto) {
     return this.userService.forgotPassword(forgotPassDto);
   }
 
   @Post('user/reset-password/:token')
-  // @ApiBearerAuth()
-  // @PermissionsAndAccess({ accessType: ['user'] })
   @isPublic()
   userResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     const tokenDto : TokenDto = { token };
@@ -121,4 +119,12 @@ export class UserController {
     const findOneDto : FindOneDto = {id};
     return this.userService.remove(findOneDto);
   }
+
+//   @Get('user/:id')
+//   @ApiBearerAuth()
+//   @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+//   getUser(@Param('id') id : string) {
+//     const findOneDto : FindOneDto = {id};
+//     return this.userService.getUser(findOneDto);
+//   }
 }

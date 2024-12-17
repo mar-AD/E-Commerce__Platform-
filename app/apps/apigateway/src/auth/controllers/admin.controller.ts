@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
@@ -10,13 +10,14 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, PermissionsGuard, RequestUpdateEmailRequest,
+  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto, UpdateAdminRoleRequest,
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
+import { PermissionsGuard } from '../guards/auth.guard';
 
 
 @ApiTags('AuthAdmins')
@@ -59,7 +60,7 @@ export class AdminController {
     return this.adminService.RequestEmailUpdate(requestUpdateEmailDto)
   }
 
-  @Get('admin/verifyEmailCode')
+  @Post('admin/verifyEmailCode')
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'] })
   verifyEmailCode(@Req() req: Request, @Body() verifyEmailCodeDto: VerifyEmailCodeDto) {
@@ -108,9 +109,8 @@ export class AdminController {
     return this.adminService.forgotPassword(forgotPassDto);
   }
 
-  @Post('admin/reset-password/token')
-  @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'] })
+  @Post('admin/reset-password/:token')
+  @isPublic()
   adminResetPassword(@Param('token') token: string, @Body() resetPasswordDto: ResetPasswordDto) {
     const tokenDto : TokenDto = { token };
     const resetPasswordRequest: ResetPasswordRequest = {resetPasswordDto, tokenDto}

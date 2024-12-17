@@ -4,12 +4,12 @@ import {
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  User, LoggerService, FindOneDto, TokenDto, None, messages,
+  User, LoggerService, FindOneDto, TokenDto, messages,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { from, map, Observable, of, switchMap } from 'rxjs';
+import { from, map, Observable } from 'rxjs';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
@@ -19,8 +19,8 @@ import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUp
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
 import { Cron } from '@nestjs/schedule';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { status } from '@grpc/grpc-js';
 import { ConfigService } from '@nestjs/config';
+import { status } from '@grpc/grpc-js';
 
 
 @Injectable()
@@ -38,6 +38,10 @@ export class UsersService extends BaseService<User>{
     @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
   ) {
     super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
+    // console.log(this.logger instanceof LoggerService);
+    // if (!this.logger || typeof this.logger.log !== 'function') {
+    //   throw new Error('Logger is not properly instantiated');
+    // }
   }
 
   createUser(createUserDto: CreateDto) : Observable<User> {
@@ -87,19 +91,21 @@ export class UsersService extends BaseService<User>{
 
   // fro the autGuard ====
   getUser(findOneDto: FindOneDto): Observable<User> {
-    return from(this.userRepository.findOne({where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
-      map((user) =>{
-      if (!user){
-        throw new RpcException({
-          code: status.NOT_FOUND,
-          message: messages.USER.NOT_FOUND2
-        })
-      }
-        return this.mapResponse(user);
-
-    })
-    )
-
+    // const {id} = findOneDto;
+    // console.log('here at users', id);
+    // return from(this.userRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
+    //   map((thisEntity) => {
+    //     if (!thisEntity) {
+    //       throw new RpcException({
+    //         code: status.NOT_FOUND,
+    //         message: messages.USER.NOT_FOUND2
+    //       })
+    //     }
+    //     console.log('user found', thisEntity);
+    //     return this.mapResponse(thisEntity)
+    //   })
+    // )
+    return this.getAll(findOneDto.id, AuthConstants.user);
   }
 
   @Cron("0 0 * * *")

@@ -1,6 +1,3 @@
-// import * as dotenv from 'dotenv';
-//
-// dotenv.config({ path: './apps/auth/.env' });
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as process from 'node:process';
 import { AdminEntity } from '../admins/entities/admin.entity';
@@ -16,15 +13,6 @@ const {
   POSTGRES_AUTH_DB,
   POSTGRES_AUTH_PORT,
 } = process.env;
-
-console.log({
-  POSTGRES_USER,
-  POSTGRES_PASSWORD,
-  POSTGRES_AUTH_HOST,
-  POSTGRES_AUTH_DB,
-  POSTGRES_AUTH_PORT,
-});
-
 
 const url = `postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_AUTH_HOST}:${POSTGRES_AUTH_PORT}/${POSTGRES_AUTH_DB}`;
 

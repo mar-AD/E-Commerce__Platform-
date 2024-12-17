@@ -58,14 +58,25 @@
       "entryFile": "src/main",
       "sourceRoot": "./",
       "compilerOptions": {
-        "tsConfigPath": "apps/email/tsconfig.app.json",
-        "assets": [
-          {
-            "include": "templates/**/*",
-            "outDir": "dist/apps/email"
-          }
-        ],
-        "watchAssets": true
+        "tsConfigPath": "apps/email/tsconfig.app.json"
+      }
+    },
+    "users": {
+      "type": "application",
+      "root": "apps/users",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
+      "compilerOptions": {
+        "tsConfigPath": "apps/users/tsconfig.app.json"
+      }
+    },
+    "admins": {
+      "type": "application",
+      "root": "apps/admins",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
+      "compilerOptions": {
+        "tsConfigPath": "apps/admins/tsconfig.app.json"
       }
     }
   }

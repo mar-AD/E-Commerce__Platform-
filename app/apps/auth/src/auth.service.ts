@@ -21,17 +21,16 @@ import {
   VerifyEmailCode,
   verifyPassword,
 } from '@app/common';
-import { catchError, from, map, mergeMap, Observable, of, switchMap, tap } from 'rxjs';
+import { catchError, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import { AuthConstants } from './constants';
 import { AdminEntity } from './admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
   ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
-import { ClientProxy, ClientProxyFactory, RpcException, Transport } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { RoleEntity } from './roles/entities/role.entity';
 import { ConfigService } from '@nestjs/config';
-import { tryCatchBlock } from 'ts-proto/build/src/utils';
 
 
 
@@ -468,7 +467,7 @@ export abstract class  BaseService<E> {
 
     this.logger.log(`${type + 'Repo'}: Decoding refresh token for logout with id: ${id}...`);
 
-    const whereConditions = this.getCondition(type, { token: refreshToken, expiresAt: MoreThan(new Date()) }, { id: id, isDeleted: false });
+    const whereConditions = this.getCondition(type, { token: refreshToken, expiresAt: MoreThan(new Date()) }, { id: id });
 
     this.logger.log(`refreshTokenRepo: Searching for refresh token for id: ${id}...`);
     return from(this.refreshTokenRepository.findOne({ where: whereConditions })).pipe(
@@ -514,7 +513,7 @@ export abstract class  BaseService<E> {
     let token: string ;
     this.logger.log(`${type + 'Repo'}: Initiating password reset for email: ${email}...`);
 
-    return from(repository.findOne({ where: { email } })).pipe(
+    return from(repository.findOne({ where: { email: email, isDeleted: false } })).pipe(
       map((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: User not found for email: ${email}.`);
@@ -567,7 +566,7 @@ export abstract class  BaseService<E> {
 
     this.logger.log(`${type + 'Repo'}: Initiating password reset for user ID: ${id}...`);
 
-    return from(repository.findOne({ where: { id: id } })).pipe(
+    return from(repository.findOne({ where: { id: id, isDeleted: false} })).pipe(
       switchMap((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: User not found for ID: ${id}.`);
@@ -670,6 +669,32 @@ export abstract class  BaseService<E> {
     );
   }
 
+  getAll(id: string, type: AuthConstants): Observable<E> {
+    const findOneDto: FindOneDto = {id}
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+    let conditioning: Record<string, any> = {where: {id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false}};
+    if (type === AuthConstants.admin) {
+      conditioning = {
+        ...conditioning ,
+        relations: ['roleId']}
+    }
+
+    return from(repository.findOne(conditioning)).pipe(
+      map((thisEntity) => {
+        if (!thisEntity) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messageType.NOT_FOUND2
+          })
+        }
+        return this.mapResponse(thisEntity)
+      })
+    )
+  }
+
+
+
   protected getRepository(type: AuthConstants): Repository<AdminEntity | UserEntity> {
     this.logger.log(`getRepository called with type: ${type}`);
     if (type === AuthConstants.admin) {
@@ -698,6 +723,7 @@ export abstract class  BaseService<E> {
     }
   }
 
+  //this is only for refreshtokenrepository
   protected getCondition(type: AuthConstants, condition: Record<string, any>, value: Object): Record<string, any> {
     this.logger.log(`getCondition called with type: ${type}, condition: ${JSON.stringify(condition)}, value: ${JSON.stringify(value)}`);
     if (type === AuthConstants.admin) {

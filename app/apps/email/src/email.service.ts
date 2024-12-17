@@ -11,6 +11,7 @@ import { emailUpdateRequestHtml } from './templates/req-email-update-email';
 export class EmailService {
   constructor(
     @Inject('MAIL_TRANSPORTER') private readonly transporter: nodemailer.Transporter,
+    // private logger: LoggerService
     private logger: LoggerService
   ) {}
 

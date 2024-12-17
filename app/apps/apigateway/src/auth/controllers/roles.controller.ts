@@ -7,10 +7,10 @@ import {
   getPermissionName,
   JwtAuthGuard,
   Permissions,
-  PermissionsGuard,
   UpdateRoleRequest,
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
+import { PermissionsGuard } from '../guards/auth.guard';
 
 @ApiTags('Roles')
 @UseGuards(JwtAuthGuard, PermissionsGuard)

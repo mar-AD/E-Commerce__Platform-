@@ -1,0 +1,1 @@
+CREATE DATABASE admins_db;

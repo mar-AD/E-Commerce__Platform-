@@ -11,7 +11,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { status } from '@grpc/grpc-js';
 import {
   ADMIN_SERVICE_NAME,
-  AdminServiceClient,
+  AdminServiceClient, FindOneDto,
   getPermissionName,
   isPublicKey,
   USER_SERVICE_NAME,
@@ -61,22 +61,28 @@ export class PermissionsGuard implements CanActivate {
     }
 
     if (payload.type === 'user' && accessType.includes('user')) {
-      return from(this.userService.findUser(payload.id)).pipe(
+      console.log('trying to find a USER');
+      const id : FindOneDto = { id: payload.id }
+      return from(this.userService.findOne(id)).pipe(
         map(() => true),
       );
     }
 
     if (payload.type === 'admin' && accessType.includes('admin')) {
-      return from(this.adminService.findOneAdmin(payload.id)).pipe(
+      console.log('trying to find a ADMIN');
+      const id : FindOneDto = { id: payload.id }
+      return from(this.adminService.findOne(id)).pipe(
         switchMap(() => {
           if (!permission) {
             return of(true);
           }
           console.log('idddd2',payload.id);
 
-          return from(this.adminService.permissionsByRole({ id: payload.id })).pipe(
+          console.log('admin found successfully. now trying to find the permisions');
+          return from(this.adminService.permissionsByRole( id )).pipe(
             switchMap(permissions => {
               if (!permissions) {
+                console.log('permission not found');
                 throw new RpcException({
                   code: status.NOT_FOUND,
                   message: 'No permissions found for the role assigned to this admin',
@@ -90,6 +96,7 @@ export class PermissionsGuard implements CanActivate {
                   message: 'You do not have sufficient permissions to access this resource.',
                 });
               }
+              console.log('permession found successfully', requiredPermissions);
               return of(true);
             })
           );

@@ -4,7 +4,7 @@ import {
 } from '@nestjs/common';
 import {
   Admin,
-  AuthResponse, BooleanResponse, CronService,
+  AuthResponse, CronService,
   dateToTimestamp,
   Empty, FindOneDto, ForgotPasswordDto,
   JwtTokenService, LoggerService,
@@ -40,11 +40,15 @@ export class AdminsService extends BaseService<Admin>{
     @InjectRepository(EmailVerificationCodeEntity) protected readonly emailVerificationCodeRepository: Repository<EmailVerificationCodeEntity>,
     protected readonly jwtTokenService: JwtTokenService,
     private readonly cronService: CronService,
-    protected readonly logger: LoggerService,
+    @Inject(LoggerService) protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
     @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
   ) {
     super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
+    console.log('AdminsService: LoggerService instance:', this.logger instanceof LoggerService);
+    console.log('AdminsService: LoggerService typeof:', typeof this.logger);
+    console.log('AdminsService: LoggerService:', this.logger);
+
   }
   createAdmin(createAdminDto: CreateAdminDto): Observable<Admin> {
     const {role} = createAdminDto;
@@ -143,26 +147,28 @@ export class AdminsService extends BaseService<Admin>{
     return this.remove(findOneDto, AuthConstants.admin);
   }
 
-  // for the autGuard ====
-  FindAdmin(findOneDto: FindOneDto): Observable<BooleanResponse>{
-    const {id} = findOneDto;
-    return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
-      map((thisAdmin) => {
-        if (!thisAdmin) {
-          throw new RpcException({
-            code: status.NOT_FOUND,
-            message: messages.ADMIN.NOT_FOUND2
-          })
-        }
-        return {
-          result: true
-        };
-      })
-    )
+  FindAdmin(findOneDto: FindOneDto): Observable<Admin> {
+    // const { id } = findOneDto;
+    // console.log('here at FindAdmin METHOD', id);
+    //
+    // return from(this.adminRepository.findOne({ where: { id: id, isDeleted: false, isActive: true, isEmailVerified: false}, relations: ['roleId'] })).pipe(
+    //   map((thisEntity) => {
+    //     if (!thisEntity) {
+    //       throw new RpcException({
+    //         code: status.NOT_FOUND,
+    //         message: messages.ADMIN.NOT_FOUND2,
+    //       });
+    //     }
+    //     return this.mapResponse(thisEntity);
+    //   })
+    // );
+    return this.getAll(findOneDto.id, AuthConstants.admin);
   }
+
 
   GetPermissionsByRole(findOneDto: FindOneDto): Observable<Permission>{
     const {id} = findOneDto;
+    console.log('here at GetPermissionsByRole METHOD', id);
     return from(this.adminRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: false}, relations: ['roleId']})).pipe(
       switchMap((thisAdmin) => {
         if (!thisAdmin){

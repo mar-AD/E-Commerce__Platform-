@@ -70,4 +70,8 @@ export class UserService implements OnModuleInit {
   remove(findOneDto: FindOneDto) {
     return this.userService.removeUser(findOneDto);
   }
+
+  // getUser(findOneDto: FindOneDto) {
+  //   return this.userService.findUser(findOneDto);
+  // }
 }

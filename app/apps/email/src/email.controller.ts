@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { EmailService } from './email.service';
 import { LoggerService } from '@app/common';
@@ -8,6 +8,7 @@ export class EmailController {
   constructor(
     private readonly emailService: EmailService,
     private logger: LoggerService
+    // private readonly logger: LoggerService
   ) {}
 
   @EventPattern('welcome_email')
