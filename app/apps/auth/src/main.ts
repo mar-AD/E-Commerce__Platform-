@@ -3,7 +3,6 @@ import { AuthModule } from './auth.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { AUTH_PACKAGE_NAME } from '@app/common';
-import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
 
