@@ -10,7 +10,7 @@ import {
   UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
-import { CreateAdminDto, LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos';
+import { CreateAdminDto, LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos/auth-dtos';
 
 @Controller()
 @AdminServiceControllerMethods()

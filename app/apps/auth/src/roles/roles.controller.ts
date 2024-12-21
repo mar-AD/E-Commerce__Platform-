@@ -5,7 +5,7 @@ import {
   RoleServiceController,
   RoleServiceControllerMethods, UpdateRoleRequest,
 } from '@app/common';
-import { CreateRoleDto } from '@app/common/dtos';
+import { CreateRoleDto } from '@app/common/dtos/auth-dtos';
 
 @Controller()
 @RoleServiceControllerMethods()

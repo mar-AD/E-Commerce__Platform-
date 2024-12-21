@@ -6,7 +6,7 @@ import {
   RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto,
   UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,
-} from '@app/common/dtos';
+} from '@app/common/dtos/auth-dtos';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {

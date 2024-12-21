@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RolesService } from '../services/roles.service';
-import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
+import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos/auth-dtos';
 import {
   FindOneDto,
   getPermissionName,

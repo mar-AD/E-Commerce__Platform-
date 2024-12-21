@@ -11,7 +11,7 @@ import {
   UserServiceControllerMethods,
   VerifyEmailCodeRequest,
 } from '@app/common';
-import { CreateDto, ForgotPasswordDto } from '@app/common/dtos';
+import { CreateDto, ForgotPasswordDto } from '@app/common/dtos/auth-dtos';
 
 @Controller()
 @UserServiceControllerMethods()

@@ -8,15 +8,15 @@ export class UsersEntity {
   @Column({unique: true})
   userId: string;
 
-  @Column()
-  firstName: string;
+  @Column({nullable: true})
+  firstName?: string;
 
-  @Column()
-  lastName: string;
+  @Column({nullable: true})
+  lastName?: string;
 
-  @Column()
-  phoneNumber: string;
+  @Column({nullable: true})
+  phoneNumber?: string;
 
-  @Column()
-  address: string;
+  @Column({nullable: true})
+  address?: string;
 }
