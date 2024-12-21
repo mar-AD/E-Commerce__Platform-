@@ -25,7 +25,7 @@ export class UsersController implements UsersServiceController{
     return this.usersService.getUsersProfile(request)
   }
 
-  getAllUsersProfiles(){
+  getAllUsersProfile(){
     return this.usersService.getAllUsersProfiles()
   }
 
@@ -33,6 +33,7 @@ export class UsersController implements UsersServiceController{
     return this.usersService.updateUsersProfile(request)
   }
 
+  //this for when the admin deletes the user
   deleteProfile(request: GetUserProfileRequest) {
     return this.usersService.removeUserProfile(request)
   }

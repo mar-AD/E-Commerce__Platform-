@@ -5,6 +5,7 @@ package users;
 
 service UsersService {
   rpc GetUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
+  rpc GetAllUsersProfile (Empty) returns (GetAllUserProfilesResponse);
   rpc UpdateUserProfile (UpdateUserProfileRequest) returns (Users);
   rpc DeleteProfile (GetUserProfileRequest) returns (Empty);
 }
@@ -39,6 +40,18 @@ message UpdateUserProfile {
 message UpdateUserProfileRequest {
   UpdateUserProfile updateUserProfile = 1;
   GetUserProfileRequest findOne = 2;
+}
+
+message UserProfile {
+  string userId = 1;
+  string firstname = 2;
+  string lastname = 3;
+  string phonenumber = 4;
+  string address = 5;
+}
+
+message GetAllUserProfilesResponse {
+  repeated UserProfile profiles = 1;
 }
 
 message Users {

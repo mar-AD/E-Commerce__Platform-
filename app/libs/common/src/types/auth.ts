@@ -119,6 +119,10 @@ export interface CreateUserDto {
   password: string;
 }
 
+export interface GetAllUsersResponse {
+  users: User[];
+}
+
 /** admin DTOs */
 export interface CreateAdminDto {
   email: string;
@@ -133,6 +137,10 @@ export interface UpdateAdminRoleDto {
 export interface UpdateAdminRoleRequest {
   updateAdminRoleDto: UpdateAdminRoleDto | undefined;
   findOneDto: FindOneDto | undefined;
+}
+
+export interface GetAllAdminsResponse {
+  users: Admin[];
 }
 
 /** role Dto */
@@ -239,6 +247,8 @@ export interface UserServiceClient {
   removeUser(request: FindOneDto): Observable<Empty>;
 
   findOne(request: FindOneDto): Observable<User>;
+
+  getAllUsers(request: Empty): Observable<GetAllUsersResponse>;
 }
 
 /** users */
@@ -267,6 +277,8 @@ export interface UserServiceController {
   removeUser(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
   findOne(request: FindOneDto): Promise<User> | Observable<User> | User;
+
+  getAllUsers(request: Empty): Promise<GetAllUsersResponse> | Observable<GetAllUsersResponse> | GetAllUsersResponse;
 }
 
 export function UserServiceControllerMethods() {
@@ -284,6 +296,7 @@ export function UserServiceControllerMethods() {
       "userResetPassword",
       "removeUser",
       "findOne",
+      "getAllUsers",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
@@ -329,6 +342,8 @@ export interface AdminServiceClient {
   findOne(request: FindOneDto): Observable<Admin>;
 
   permissionsByRole(request: FindOneDto): Observable<Permission>;
+
+  getAllAdmins(request: Empty): Observable<GetAllAdminsResponse>;
 }
 
 /** Admins */
@@ -361,6 +376,8 @@ export interface AdminServiceController {
   findOne(request: FindOneDto): Promise<Admin> | Observable<Admin> | Admin;
 
   permissionsByRole(request: FindOneDto): Promise<Permission> | Observable<Permission> | Permission;
+
+  getAllAdmins(request: Empty): Promise<GetAllAdminsResponse> | Observable<GetAllAdminsResponse> | GetAllAdminsResponse;
 }
 
 export function AdminServiceControllerMethods() {
@@ -380,6 +397,7 @@ export function AdminServiceControllerMethods() {
       "removeAdmin",
       "findOne",
       "permissionsByRole",
+      "getAllAdmins",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

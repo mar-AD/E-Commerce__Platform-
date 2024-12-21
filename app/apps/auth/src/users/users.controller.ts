@@ -70,7 +70,10 @@ export class UsersController implements UserServiceController{
   }
 
   findOne(findOneDto: FindOneDto) {
-    console.log('we are here at user controller ', findOneDto);
     return this.usersService.getUser(findOneDto);
+  }
+
+  getAllUsers(findOneDto: FindOneDto) {
+    return this.usersService.getAllUsers(findOneDto);
   }
 }

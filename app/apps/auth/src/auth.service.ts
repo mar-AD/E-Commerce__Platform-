@@ -1,6 +1,7 @@
 import {
   BadRequestException,
-  HttpStatus, Inject,
+  HttpStatus,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -12,26 +13,36 @@ import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
 import {
   AuthResponse,
-  Empty, FindOneDto,
+  Empty,
+  FindOneDto,
   generateEmailCode,
   getExpiryDate,
   hashPassword,
-  JwtTokenService, LoggerService,
-  messages, TokenDto,
+  JwtTokenService,
+  LoggerService,
+  messages,
+  TokenDto,
   VerifyEmailCode,
   verifyPassword,
 } from '@app/common';
 import { catchError, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import { AuthConstants } from './constants';
 import { AdminEntity } from './admins/entities/admin.entity';
-import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
+import {
+  CreateDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RefreshTokenDto,
+  RequestEmailUpdateDto,
   ResetPasswordDto,
-  UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos/auth-dtos';
+  UpdateEmailDto,
+  UpdatePasswordDto,
+  VerifyEmailCodeDto,
+} from '@app/common/dtos/auth-dtos';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { RoleEntity } from './roles/entities/role.entity';
 import { ConfigService } from '@nestjs/config';
-
 
 
 @Injectable()
@@ -76,10 +87,14 @@ export abstract class  BaseService<E> {
             this.logger.log(`${type+'Repo'}: Saving the new entity to the repository...`);
             return from(repository.save(newEntity)).pipe(
               map((createdUser) => {
+
+                if (type === AuthConstants.user){
+                  this.logger.log(`Emitting create_user_profile event for "${createdUser.id}".`);
+                  this.client.emit('create_user_profile', { userId: createdUser.id });
+                }
                 this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
                 return this.mapResponse(createdUser);
               }),
-
               catchError((err) => {
                 this.logger.error(`${type+'Repo'}: Failed to create and save the entity with email "${email}". Error: ${err.message}`);
                 throw new RpcException({
