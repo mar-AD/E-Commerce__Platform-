@@ -126,4 +126,13 @@ export class AdminController {
     return this.adminService.remove(findOneDto);
   }
 
+  @Patch('user/update-profile')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin']})
+  updateAdminProfile(@Req() req: Request) {
+    const id = req['user']['payload'].id
+    const findOneDto : FindOneDto = {id};
+    return this.adminService.updateAdminProfile(findOneDto);
+  }
+
 }

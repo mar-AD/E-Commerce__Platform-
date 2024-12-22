@@ -6,7 +6,6 @@ package users;
 service UsersService {
   rpc GetUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
   rpc GetAllUsersProfile (Empty) returns (GetAllUserProfilesResponse);
-  rpc UpdateUserProfile (UpdateUserProfileRequest) returns (Users);
   rpc DeleteProfile (GetUserProfileRequest) returns (Empty);
 }
 
@@ -28,26 +27,17 @@ message GetUserProfileResponse {
   string lastName = 2;
   string phoneNumber = 3;
   string address = 4;
+  string profilePic = 5;
 }
 
-message UpdateUserProfile {
-  optional string firstName = 1;
-  optional string lastName = 2;
-  optional string phoneNumber = 3;
-  optional string address = 4;
-}
-
-message UpdateUserProfileRequest {
-  UpdateUserProfile updateUserProfile = 1;
-  GetUserProfileRequest findOne = 2;
-}
 
 message UserProfile {
   string userId = 1;
-  string firstname = 2;
-  string lastname = 3;
-  string phonenumber = 4;
-  string address = 5;
+  string profilePic = 2;
+  string firstName = 3;
+  string lastName = 4;
+  string phoneNumber = 5;
+  string address = 6;
 }
 
 message GetAllUserProfilesResponse {
@@ -57,10 +47,11 @@ message GetAllUserProfilesResponse {
 message Users {
   string id = 1;
   string userId = 2;
-  string firstName = 3;
-  string lastName = 4;
-  string phoneNumber = 5;
-  string address =6;
+  string profilePic = 3;
+  string firstName = 4;
+  string lastName = 5;
+  string phoneNumber = 6;
+  string address = 7;
 }
 
 ///////// ill add create tomorrow inchallah====================================================

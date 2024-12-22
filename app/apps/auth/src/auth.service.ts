@@ -20,7 +20,7 @@ import {
   hashPassword,
   JwtTokenService,
   LoggerService,
-  messages,
+  messages, None,
   TokenDto,
   VerifyEmailCode,
   verifyPassword,
@@ -91,6 +91,8 @@ export abstract class  BaseService<E> {
                 if (type === AuthConstants.user){
                   this.logger.log(`Emitting create_user_profile event for "${createdUser.id}".`);
                   this.client.emit('create_user_profile', { userId: createdUser.id });
+                }else if (type === AuthConstants.admin){
+                  /////////////////////////////////////////// later //////////////////////////
                 }
                 this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
                 return this.mapResponse(createdUser);
@@ -684,7 +686,7 @@ export abstract class  BaseService<E> {
     );
   }
 
-  getAll(id: string, type: AuthConstants): Observable<E> {
+  getOne(id: string, type: AuthConstants): Observable<E> {
     const findOneDto: FindOneDto = {id}
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
@@ -708,6 +710,34 @@ export abstract class  BaseService<E> {
     )
   }
 
+
+  updateProfile(findOneDto: FindOneDto, type: AuthConstants): Observable<void>{
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+    return from(repository.findOne({ where: { id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false } })).pipe(
+      map((thisEntity)=>{
+        if (!thisEntity){
+          throw new RpcException({
+            status: status.NOT_FOUND,
+            message: messageType.NOT_FOUND2
+          })
+        }
+        if (type === AuthConstants.user){
+          this.logger.log(`Emitting update_user_profile event for "${thisEntity.id}".`);
+          this.client.emit('update_user_profile', {id: thisEntity.id})
+        }else if (type === AuthConstants.admin){
+          /////////////////////////////////////////// later //////////////////////////
+        }
+      }),
+      catchError((err)=>{
+        this.logger.error(`${type+'Repo'}: Failed to update the entity with id "${findOneDto.id}". Error: ${err.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messageType.FAILED_TO_CREATE,
+        });
+      })
+    )
+  }
 
 
   protected getRepository(type: AuthConstants): Repository<AdminEntity | UserEntity> {

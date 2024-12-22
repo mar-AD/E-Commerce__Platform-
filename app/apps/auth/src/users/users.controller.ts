@@ -73,7 +73,11 @@ export class UsersController implements UserServiceController{
     return this.usersService.getUser(findOneDto);
   }
 
-  getAllUsers(findOneDto: FindOneDto) {
-    return this.usersService.getAllUsers(findOneDto);
+  getAllUsers() {
+    return this.usersService.getAllUsers();
+  }
+
+  updateUserProfile(findOneDto: FindOneDto) {
+    return this.usersService.updateUserProfile(findOneDto);
   }
 }

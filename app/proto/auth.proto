@@ -18,7 +18,8 @@ service UserService {
   rpc userResetPassword (ResetPasswordRequest) returns (Empty);
   rpc removeUser (FindOneDto) returns (Empty);
   rpc findOne (FindOneDto) returns (User);
-  rpc GetAllUsers(Empty) returns (GetAllUsersResponse);
+  rpc GetAllUsers (Empty) returns (GetAllUsersResponse);
+  rpc updateUserProfile (FindOneDto) returns (None);
 }
 //Admins
 service AdminService {
@@ -35,8 +36,9 @@ service AdminService {
   rpc adminResetPassword (ResetPasswordRequest) returns (Empty);
   rpc removeAdmin (FindOneDto) returns (Empty);
   rpc findOne (FindOneDto) returns (Admin);
-  rpc permissionsByRole(FindOneDto) returns (Permission);
-  rpc GetAllAdmins(Empty) returns (GetAllAdminsResponse);
+  rpc permissionsByRole (FindOneDto) returns (Permission);
+  rpc GetAllAdmins (Empty) returns (GetAllAdminsResponse);
+  rpc updateAdminProfile (FindOneDto) returns (None);
 }
 
 //Roles

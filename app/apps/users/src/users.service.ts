@@ -1,17 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy, RmqContext, RpcException } from '@nestjs/microservices';
 import {
+  BaseResponse,
   GetAllUserProfilesResponse,
   GetUserProfileRequest,
   GetUserProfileResponse,
   LoggerService,
-  messages,
+  messages, UserProfile,
 } from '@app/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entities/users.entity';
 import { Repository } from 'typeorm';
 import { catchError, from, map, Observable } from 'rxjs';
 import { status } from '@grpc/grpc-js';
+import { UpdateUserProfileDto } from '@app/common/dtos';
 
 @Injectable()
 export class UsersService {
@@ -41,7 +43,7 @@ export class UsersService {
 
   getUsersProfile(request: GetUserProfileRequest): Observable<GetUserProfileResponse>{
     this.logger.log(`Getting users profile with ${request.userId}`);
-    return from(this.usersRepository.findOne({where: request.userId})).pipe(
+    return from(this.usersRepository.findOne({where: { userId: request.userId }})).pipe(
       map((thisUser)=>{
         if (!thisUser){
           this.logger.error(`user profile with "${request.userId}" not found`);
@@ -51,7 +53,7 @@ export class UsersService {
           })
         }
         this.logger.log('user profile fetched successfully');
-        return thisUser;
+        return this.mapUsersProfileResponce(thisUser);
       }),
       catchError((error) => {
         this.logger.error(`error fetching user profile "${request.userId}". Error: ${error.message}`);
@@ -68,7 +70,7 @@ export class UsersService {
     return from(this.usersRepository.find()).pipe(
       map((users) => {
         this.logger.log('All users profiles fetched successfully');
-        return users;
+        return { profiles: users.map(user => this.mapUsersProfilesResponce(user)) };
       }),
       catchError((error) => {
         this.logger.error(`Error fetching all users' profiles. Error: ${error.message}`);
@@ -80,5 +82,80 @@ export class UsersService {
     );
   }
 
+  async updateUserProfile( data:{id: string }, request: UpdateUserProfileDto, context: RmqContext): Promise<BaseResponse> {
+    this.logger.log('getting the user profile by userId')
+    const {id} = data;
+    const Channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+
+    try {
+      const thisUser = await this.usersRepository.findOne({where: { userId: id }});
+      if (!thisUser){
+        this.logger.log(`user profile with ${id} not found`);
+        throw new RpcException({
+          status: status.NOT_FOUND,
+          message: messages.USER.NOT_FOUND2
+        })
+      }
+      const updatedFields = {}
+      for (const key of ['profilePic', 'firstName', 'lastName', 'phoneNumber', 'address']) {
+        if (request[key] !== undefined && request[key] !== thisUser[key]) {
+          updatedFields[key] = request[key];
+        }
+      }
+
+      if (Object.keys(updatedFields).length > 0) {
+        Object.assign(thisUser, updatedFields);
+        await this.usersRepository.save(thisUser)
+        this.logger.log(`user profile updated successfully with ${id}`);
+      }else{
+        this.logger.log(`No changes detected for user profile with id: ${id}`);
+      }
+      Channel.ack(originalMessage)
+      return {
+        status: HttpStatus.OK,
+        message: messages.USER.USER_UPDATED_SUCCESSFULLY
+      }
+    }
+    catch(error) {
+      this.logger.error(`Failed to update user profile with ${id}: ${error}`);
+      Channel.nack(originalMessage, false, true);
+      throw new RpcException('User profile update failed');
+    }
+
+  }
+
+  // mapUsersResponce (users: UsersEntity): Users {
+  //   return {
+  //     id: users.id,
+  //     profilePic: users.profilePic,
+  //     userId: users.userId,
+  //     firstName: users.firstName,
+  //     lastName: users.lastName,
+  //     phoneNumber: users.phoneNumber,
+  //     address: users.address,
+  //   }
+  // }
+
+  mapUsersProfileResponce (users: UsersEntity): GetUserProfileResponse {
+    return {
+      profilePic: users.profilePic,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      phoneNumber: users.phoneNumber,
+      address: users.address,
+    }
+  }
+
+  mapUsersProfilesResponce (users: UsersEntity): UserProfile {
+    return {
+      userId: users.userId,
+      profilePic: users.profilePic,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      phoneNumber: users.phoneNumber,
+      address: users.address,
+    }
+  }
 
 }

@@ -28,25 +28,15 @@ export interface GetUserProfileResponse {
   lastName: string;
   phoneNumber: string;
   address: string;
-}
-
-export interface UpdateUserProfile {
-  firstName?: string | undefined;
-  lastName?: string | undefined;
-  phoneNumber?: string | undefined;
-  address?: string | undefined;
-}
-
-export interface UpdateUserProfileRequest {
-  updateUserProfile: UpdateUserProfile | undefined;
-  findOne: GetUserProfileRequest | undefined;
+  profilePic: string;
 }
 
 export interface UserProfile {
   userId: string;
-  firstname: string;
-  lastname: string;
-  phonenumber: string;
+  profilePic: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
   address: string;
 }
 
@@ -57,6 +47,7 @@ export interface GetAllUserProfilesResponse {
 export interface Users {
   id: string;
   userId: string;
+  profilePic: string;
   firstName: string;
   lastName: string;
   phoneNumber: string;
@@ -70,8 +61,6 @@ export interface UsersServiceClient {
 
   getAllUsersProfile(request: Empty): Observable<GetAllUserProfilesResponse>;
 
-  updateUserProfile(request: UpdateUserProfileRequest): Observable<Users>;
-
   deleteProfile(request: GetUserProfileRequest): Observable<Empty>;
 }
 
@@ -84,14 +73,12 @@ export interface UsersServiceController {
     request: Empty,
   ): Promise<GetAllUserProfilesResponse> | Observable<GetAllUserProfilesResponse> | GetAllUserProfilesResponse;
 
-  updateUserProfile(request: UpdateUserProfileRequest): Promise<Users> | Observable<Users> | Users;
-
   deleteProfile(request: GetUserProfileRequest): Promise<Empty> | Observable<Empty> | Empty;
 }
 
 export function UsersServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getUserProfile", "getAllUsersProfile", "updateUserProfile", "deleteProfile"];
+    const grpcMethods: string[] = ["getUserProfile", "getAllUsersProfile", "deleteProfile"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UsersService", method)(constructor.prototype[method], method, descriptor);

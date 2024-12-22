@@ -73,4 +73,8 @@ export class AdminService implements OnModuleInit{
   remove(findOneDto: FindOneDto) {
     return this.adminService.removeAdmin(findOneDto);
   }
+
+  updateAdminProfile(findOneDto: FindOneDto) {
+    return this.adminService.updateAdminProfile(findOneDto)
+  }
 }

@@ -8,6 +8,9 @@ export class UsersEntity {
   @Column({unique: true})
   userId: string;
 
+  @Column()
+  profilePic?: string;
+
   @Column({nullable: true})
   firstName?: string;
 

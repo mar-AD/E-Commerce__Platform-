@@ -127,4 +127,13 @@ export class UserController {
 //     const findOneDto : FindOneDto = {id};
 //     return this.userService.getUser(findOneDto);
 //   }
+
+  @Patch('user/update-profile')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user']})
+  updateUserProfile(@Req() req: Request) {
+    const id = req['user']['payload'].id
+    const findOneDto : FindOneDto = {id};
+     return this.userService.updateUserProfile(findOneDto);
+  }
 }

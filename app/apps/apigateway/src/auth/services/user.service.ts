@@ -74,4 +74,8 @@ export class UserService implements OnModuleInit {
   // getUser(findOneDto: FindOneDto) {
   //   return this.userService.findUser(findOneDto);
   // }
+
+  updateUserProfile(findOneDto: FindOneDto) {
+    return this.userService.updateUserProfile(findOneDto)
+  }
 }

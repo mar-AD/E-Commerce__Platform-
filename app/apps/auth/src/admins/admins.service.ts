@@ -148,21 +148,7 @@ export class AdminsService extends BaseService<Admin>{
   }
 
   FindAdmin(findOneDto: FindOneDto): Observable<Admin> {
-    // const { id } = findOneDto;
-    // console.log('here at FindAdmin METHOD', id);
-    //
-    // return from(this.adminRepository.findOne({ where: { id: id, isDeleted: false, isActive: true, isEmailVerified: false}, relations: ['roleId'] })).pipe(
-    //   map((thisEntity) => {
-    //     if (!thisEntity) {
-    //       throw new RpcException({
-    //         code: status.NOT_FOUND,
-    //         message: messages.ADMIN.NOT_FOUND2,
-    //       });
-    //     }
-    //     return this.mapResponse(thisEntity);
-    //   })
-    // );
-    return this.getAll(findOneDto.id, AuthConstants.admin);
+    return this.getOne(findOneDto.id, AuthConstants.admin);
   }
 
 
@@ -192,6 +178,10 @@ export class AdminsService extends BaseService<Admin>{
         )
       })
     )
+  }
+
+  updateAdminProfile(findOneDto: FindOneDto): Observable<void> {
+    return this.updateProfile(findOneDto, AuthConstants.admin);
   }
 
   @Cron('0 0 * * *')

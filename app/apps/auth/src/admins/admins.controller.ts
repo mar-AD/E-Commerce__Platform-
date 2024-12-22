@@ -11,6 +11,8 @@ import {
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { CreateAdminDto, LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos/auth-dtos';
+import { Observable } from 'rxjs';
+import { AuthConstants } from '../constants';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -79,5 +81,13 @@ export class AdminsController implements AdminServiceController{
   permissionsByRole(findOneDto: FindOneDto) {
     console.log('findOneAdmin received IN permissionsByRole:', findOneDto);
     return this.adminsService.GetPermissionsByRole(findOneDto);
+  }
+
+  getAllAdmins() {
+    return this.usersService.getAllAdmins();
+  }
+
+  updateAdminProfile(findOneDto: FindOneDto): Observable<void> {
+    return this.adminsService.updateAdminProfile(findOneDto);
   }
 }
