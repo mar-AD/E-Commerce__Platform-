@@ -4,12 +4,12 @@ import {
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  User, LoggerService, FindOneDto, TokenDto, messages, None,
+  User, LoggerService, FindOneDto, TokenDto, GetAllUsersResponse,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { from, map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
@@ -18,13 +18,12 @@ import { AdminEntity } from '../admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos/auth-dtos';
 import { Cron } from '@nestjs/schedule';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { status } from '@grpc/grpc-js';
 
 
 @Injectable()
-export class UsersService extends BaseService<User>{
+export class UsersService extends BaseService<User, GetAllUsersResponse>{
 
   constructor(
     @InjectRepository(UserEntity) protected readonly userRepository: Repository<UserEntity>,
@@ -96,6 +95,14 @@ export class UsersService extends BaseService<User>{
 
   updateUserProfile(findOneDto: FindOneDto): Observable<void> {
     return this.updateProfile(findOneDto, AuthConstants.user);
+  }
+
+  deleteUserProfile(findOneDto: FindOneDto): Observable<Empty> {
+    return this.removeProfile(findOneDto, AuthConstants.user);
+  }
+
+  getAllUsers(): Observable<GetAllUsersResponse>{
+    return this.getAllEntities(AuthConstants.user);
   }
 
   @Cron("0 0 * * *")

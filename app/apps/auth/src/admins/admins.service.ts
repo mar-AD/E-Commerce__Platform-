@@ -6,7 +6,7 @@ import {
   Admin,
   AuthResponse, CronService,
   dateToTimestamp,
-  Empty, FindOneDto, ForgotPasswordDto,
+  Empty, FindOneDto, ForgotPasswordDto, GetAllAdminsResponse,
   JwtTokenService, LoggerService,
   LoginDto,
   messages, Permission, RefreshTokenDto, RequestEmailUpdateDto, TokenDto, UpdateEmailDto,
@@ -31,7 +31,7 @@ import { status } from '@grpc/grpc-js';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class AdminsService extends BaseService<Admin>{
+export class AdminsService extends BaseService<Admin, GetAllAdminsResponse>{
   constructor(
     @InjectRepository(AdminEntity) protected readonly adminRepository: Repository<AdminEntity>,
     @InjectRepository(UserEntity) protected readonly userRepository: Repository<UserEntity>,
@@ -182,6 +182,14 @@ export class AdminsService extends BaseService<Admin>{
 
   updateAdminProfile(findOneDto: FindOneDto): Observable<void> {
     return this.updateProfile(findOneDto, AuthConstants.admin);
+  }
+
+  deleteAdminProfile(findOneDto: FindOneDto): Observable<Empty> {
+    return this.removeProfile(findOneDto, AuthConstants.admin);
+  }
+
+  getAllAdmins(): Observable<GetAllAdminsResponse>{
+    return this.getAllEntities(AuthConstants.admin);
   }
 
   @Cron('0 0 * * *')

@@ -1,9 +1,9 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
-  CreateUserDto,
+  CreateUserDto, Empty,
   FindOneDto,
   ForgotPasswordDto,
-  LoginDto,
+  LoginDto, None,
   RefreshTokenDto,
   RequestUpdateEmailRequest,
   ResetPasswordRequest,
@@ -77,5 +77,13 @@ export class UserService implements OnModuleInit {
 
   updateUserProfile(findOneDto: FindOneDto) {
     return this.userService.updateUserProfile(findOneDto)
+  }
+
+  deleteUserProfile(findOneDto: FindOneDto) {
+    return this.userService.deleteUserProfile(findOneDto);
+  }
+
+  getAllEntities(request: None){
+    return this.userService.getAllUsers(request)
   }
 }

@@ -80,4 +80,8 @@ export class UsersController implements UserServiceController{
   updateUserProfile(findOneDto: FindOneDto) {
     return this.usersService.updateUserProfile(findOneDto);
   }
+
+  deleteUserProfile(findOneDto: FindOneDto) {
+    return this.usersService.deleteUserProfile(findOneDto);
+  }
 }

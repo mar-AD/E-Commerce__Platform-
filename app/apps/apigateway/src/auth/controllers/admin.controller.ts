@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
@@ -10,7 +10,8 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, RequestUpdateEmailRequest,
+  Empty,
+  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, None, Permissions, RequestUpdateEmailRequest,
   ResetPasswordRequest,
   TokenDto, UpdateAdminRoleRequest,
   UpdateEmailRequest, UpdatePasswordRequest,
@@ -119,14 +120,14 @@ export class AdminController {
 
   @Delete('admin/remove')
   @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
+  @PermissionsAndAccess({ accessType: ['admin'] })
   remove(@Req() req: Request) {
     const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     return this.adminService.remove(findOneDto);
   }
 
-  @Patch('user/update-profile')
+  @Patch('admin/update-profile')
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin']})
   updateAdminProfile(@Req() req: Request) {
@@ -135,4 +136,18 @@ export class AdminController {
     return this.adminService.updateAdminProfile(findOneDto);
   }
 
+  @Delete('admin/remove-admin-profile/:id')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
+  deleteUserProfile(@Param('id') id: string) {
+    const findOneDto : FindOneDto = {id};
+    return this.adminService.deleteAdminProfile(findOneDto);
+  }
+
+  @Get('admin/getAll')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
+  getAll(request: None) {
+    return this.adminService.getAllEntities(request);
+  }
 }

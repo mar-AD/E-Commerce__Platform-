@@ -84,10 +84,14 @@ export class AdminsController implements AdminServiceController{
   }
 
   getAllAdmins() {
-    return this.usersService.getAllAdmins();
+    return this.adminsService.getAllAdmins();
   }
 
   updateAdminProfile(findOneDto: FindOneDto): Observable<void> {
     return this.adminsService.updateAdminProfile(findOneDto);
+  }
+
+  deleteAdminProfile(findOneDto: FindOneDto) {
+    return this.adminsService.deleteAdminProfile(findOneDto);
   }
 }

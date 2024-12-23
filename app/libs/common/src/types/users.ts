@@ -60,8 +60,6 @@ export interface UsersServiceClient {
   getUserProfile(request: GetUserProfileRequest): Observable<GetUserProfileResponse>;
 
   getAllUsersProfile(request: Empty): Observable<GetAllUserProfilesResponse>;
-
-  deleteProfile(request: GetUserProfileRequest): Observable<Empty>;
 }
 
 export interface UsersServiceController {
@@ -72,8 +70,6 @@ export interface UsersServiceController {
   getAllUsersProfile(
     request: Empty,
   ): Promise<GetAllUserProfilesResponse> | Observable<GetAllUserProfilesResponse> | GetAllUserProfilesResponse;
-
-  deleteProfile(request: GetUserProfileRequest): Promise<Empty> | Observable<Empty> | Empty;
 }
 
 export function UsersServiceControllerMethods() {

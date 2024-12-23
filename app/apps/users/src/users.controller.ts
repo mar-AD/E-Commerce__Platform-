@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import {
@@ -36,7 +36,9 @@ export class UsersController implements UsersServiceController{
   }
 
   //this for when the admin deletes the user
-  deleteProfile(request: GetUserProfileRequest) {
-    return this.usersService.removeUserProfile(request)
+  @EventPattern('delete_user_profile')
+  async deleteProfile(@Payload() data: {id: string}, @Ctx() context: RmqContext) {
+    this.logger.log(`Controller received 'delete_user_profile' event for ${data.id}`)
+    await this.usersService.removeUserProfile(data, context)
   }
 }

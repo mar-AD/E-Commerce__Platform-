@@ -18,8 +18,9 @@ service UserService {
   rpc userResetPassword (ResetPasswordRequest) returns (Empty);
   rpc removeUser (FindOneDto) returns (Empty);
   rpc findOne (FindOneDto) returns (User);
-  rpc GetAllUsers (Empty) returns (GetAllUsersResponse);
+  rpc GetAllUsers (None) returns (GetAllUsersResponse);
   rpc updateUserProfile (FindOneDto) returns (None);
+  rpc deleteUserProfile (FindOneDto) returns (Empty);
 }
 //Admins
 service AdminService {
@@ -37,8 +38,9 @@ service AdminService {
   rpc removeAdmin (FindOneDto) returns (Empty);
   rpc findOne (FindOneDto) returns (Admin);
   rpc permissionsByRole (FindOneDto) returns (Permission);
-  rpc GetAllAdmins (Empty) returns (GetAllAdminsResponse);
+  rpc GetAllAdmins (None) returns (GetAllAdminsResponse);
   rpc updateAdminProfile (FindOneDto) returns (None);
+  rpc deleteAdminProfile (FindOneDto) returns (Empty);
 }
 
 //Roles
@@ -146,7 +148,7 @@ message CreateUserDto {
 }
 
 message GetAllUsersResponse {
-  repeated User users = 1;
+  repeated User entities = 1;
 }
 
 //admin DTOs
@@ -166,7 +168,7 @@ message UpdateAdminRoleRequest {
 }
 
 message GetAllAdminsResponse {
-  repeated Admin users = 1;
+  repeated Admin entities = 1;
 }
 
 //role Dto

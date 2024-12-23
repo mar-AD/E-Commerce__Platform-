@@ -17,7 +17,7 @@ import {
   TokenDto,
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
-  Permissions
+  Permissions, Empty, None,
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
 import { PermissionsGuard } from '../guards/auth.guard';
@@ -135,5 +135,20 @@ export class UserController {
     const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
      return this.userService.updateUserProfile(findOneDto);
+  }
+
+  @Delete('user/remove-user-profile/:id')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  deleteUserProfile(@Param('id') id: string) {
+    const findOneDto : FindOneDto = {id};
+    return this.userService.deleteUserProfile(findOneDto);
+  }
+
+  @Get('user/getAll')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  getAll(request: None) {
+    return this.userService.getAllEntities(request);
   }
 }

@@ -46,7 +46,7 @@ import { ConfigService } from '@nestjs/config';
 
 
 @Injectable()
-export abstract class  BaseService<E> {
+export abstract class  BaseService<E,T extends { entities: E[] }> {
 
   protected constructor(
     @InjectRepository(AdminEntity) protected readonly adminRepository: Repository<AdminEntity>,
@@ -686,6 +686,7 @@ export abstract class  BaseService<E> {
     );
   }
 
+  //i need it for the authguard (internally)
   getOne(id: string, type: AuthConstants): Observable<E> {
     const findOneDto: FindOneDto = {id}
     const repository = this.getRepository(type);
@@ -709,7 +710,6 @@ export abstract class  BaseService<E> {
       })
     )
   }
-
 
   updateProfile(findOneDto: FindOneDto, type: AuthConstants): Observable<void>{
     const repository = this.getRepository(type);
@@ -737,6 +737,69 @@ export abstract class  BaseService<E> {
         });
       })
     )
+  }
+
+  removeProfile(findOneDto: FindOneDto, type: AuthConstants): Observable<Empty>{
+    const {id} = findOneDto;
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+
+    return from(repository.findOne({where: {id: id}})).pipe(
+      switchMap((thisEntity)=>{
+        if (!thisEntity){
+          this.logger.error(`${type + 'Repo'}: Entity not found for ID: ${findOneDto.id}.`);
+          throw new RpcException({
+            status: status.NOT_FOUND,
+            message: messageType.NOT_FOUND2
+          })
+        }
+        this.logger.log(`${type + 'Repo'}: Attempting to remove entity with ID: ${findOneDto.id}...`);this.logger.log(`${type + 'Repo'}: Attempting to remove entity with ID: ${findOneDto.id}...`);
+        return from(repository.remove(thisEntity)).pipe(
+          map(()=>{
+            this.logger.log(`${type + 'Repo'}: Entity with ID: ${findOneDto.id} removed successfully.`);
+
+            if (type === AuthConstants.user){
+              this.logger.log(`Emitting delete_user_profile event for "${thisEntity.id}".`);
+              this.client.emit('delete_user_profile', {id: thisEntity.id})
+            }else if (type === AuthConstants.admin){
+              /////////////////////////////////////////// later //////////////////////////
+            }
+            return {
+              result:{
+                status: HttpStatus.OK,
+                message: messageType.REMOVED_SUCCESSFULLY
+              }
+            }
+          }),
+          catchError((error) => {
+            this.logger.error(`${type + 'Repo'}: Failed to remove entity with ID: ${findOneDto.id}. Error: ${error.message}`);
+            throw new RpcException({
+              code: status.INTERNAL,
+              message: messageType.FAILED_REMOVE
+            });
+          })
+        )
+      })
+    )
+  }
+
+  getAllEntities(type: AuthConstants):Observable<T> {
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+    this.logger.log(`trying to get all Entities..`);
+    return from(repository.find()).pipe(
+      map((entities) => {
+        this.logger.log('All Entities profiles fetched successfully');
+        return {entities: entities.map(entity => this.mapResponse(entity))} as T;
+      }),
+      catchError((error) => {
+        this.logger.error(`Error fetching all Entities' profiles. Error: ${error.message}`);
+        throw new RpcException({
+          status: status.INTERNAL,
+          message: messages.USER.FAILED_FETCH,
+        });
+      })
+    );
   }
 
 
