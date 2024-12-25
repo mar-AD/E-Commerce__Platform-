@@ -14,7 +14,7 @@ import {
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '../constants';
+import { AUTH_SERVICE } from '../../constants';
 
 
 @Injectable()
@@ -83,7 +83,7 @@ export class UserService implements OnModuleInit {
     return this.userService.deleteUserProfile(findOneDto);
   }
 
-  getAllEntities(request: None){
-    return this.userService.getAllUsers(request)
-  }
+  // getAllEntities(request: None){
+  //   return this.userService.getAllUsers(request)
+  // }
 }

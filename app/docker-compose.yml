@@ -61,20 +61,20 @@ services:
       - /usr/src/app/node_modules
     command: sh -c "echo 'Starting email Service'; npm run start:dev email"
 
-#  users:
-#    build:
-#      context: ./
-#      dockerfile: ./apps/users/Dockerfile
-#    env_file:
-#      - ./apps/users/.env
-#    depends_on:
-#      - users-db
-#    ports:
-#      - '50054:50053'
-#    volumes:
-#      - .:/usr/src/app
-#      - /usr/src/app/node_modules
-#    command: sh -c "echo 'Starting users Service'; npm run start:dev users"
+  users:
+    build:
+      context: ./
+      dockerfile: ./apps/users/Dockerfile
+    env_file:
+      - ./apps/users/.env
+    depends_on:
+      - users-db
+    ports:
+      - '50054:50053'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "echo 'Starting users Service'; npm run start:dev users"
 #
 #
 #  admins:
@@ -103,16 +103,16 @@ services:
       - ./db/auth-data:/var/lib/postgresql/data
       - ./db/init-auth.sql:/docker-entrypoint-initdb.d/init-auth.sql
 
-#  users-db:
-#    image: postgres:16
-#    env_file:
-#      - ./apps/users/.env
-#    ports:
-#      - '5435:5434'
-#    volumes:
-#      - ./db/users-data:/var/lib/postgresql/data
-#      - ./db/init-users.sql:/docker-entrypoint-initdb.d/init-users.sql
-#
+  users-db:
+    image: postgres:16
+    env_file:
+      - ./apps/users/.env
+    ports:
+      - '5435:5434'
+    volumes:
+      - ./db/users-data:/var/lib/postgresql/data
+      - ./db/init-users.sql:/docker-entrypoint-initdb.d/init-users.sql
+
 #  admins-db:
 #    image: postgres:16
 #    env_file:

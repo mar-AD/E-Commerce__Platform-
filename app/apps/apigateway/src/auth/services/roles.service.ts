@@ -1,5 +1,5 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { AUTH_SERVICE } from '../constants';
+import { AUTH_SERVICE } from '../../constants';
 import { ClientGrpc } from '@nestjs/microservices';
 import { FindOneDto, ROLE_SERVICE_NAME, RoleServiceClient, UpdateRoleRequest } from '@app/common';
 import { CreateRoleDto } from '@app/common/dtos/auth-dtos';

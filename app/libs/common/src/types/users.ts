@@ -10,13 +10,7 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "users";
 
-export interface BaseResponse {
-  status: number;
-  message: string;
-}
-
-export interface Empty {
-  result: BaseResponse | undefined;
+export interface None {
 }
 
 export interface GetUserProfileRequest {
@@ -59,7 +53,7 @@ export const USERS_PACKAGE_NAME = "users";
 export interface UsersServiceClient {
   getUserProfile(request: GetUserProfileRequest): Observable<GetUserProfileResponse>;
 
-  getAllUsersProfile(request: Empty): Observable<GetAllUserProfilesResponse>;
+  getAllUsersProfile(request: None): Observable<GetAllUserProfilesResponse>;
 }
 
 export interface UsersServiceController {
@@ -68,13 +62,13 @@ export interface UsersServiceController {
   ): Promise<GetUserProfileResponse> | Observable<GetUserProfileResponse> | GetUserProfileResponse;
 
   getAllUsersProfile(
-    request: Empty,
+    request: None,
   ): Promise<GetAllUserProfilesResponse> | Observable<GetAllUserProfilesResponse> | GetAllUserProfilesResponse;
 }
 
 export function UsersServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["getUserProfile", "getAllUsersProfile", "deleteProfile"];
+    const grpcMethods: string[] = ["getUserProfile", "getAllUsersProfile"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UsersService", method)(constructor.prototype[method], method, descriptor);

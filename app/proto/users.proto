@@ -5,17 +5,10 @@ package users;
 
 service UsersService {
   rpc GetUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
-  rpc GetAllUsersProfile (Empty) returns (GetAllUserProfilesResponse);
+  rpc GetAllUsersProfile (None) returns (GetAllUserProfilesResponse);
 }
 
-message BaseResponse {
-  int32 status = 1;
-  string message = 2;
-}
-
-message Empty {
-  BaseResponse result = 1;
-}
+message None {}
 
 message GetUserProfileRequest {
   string userId = 1;

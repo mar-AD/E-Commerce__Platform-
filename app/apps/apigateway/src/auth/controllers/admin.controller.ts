@@ -144,10 +144,10 @@ export class AdminController {
     return this.adminService.deleteAdminProfile(findOneDto);
   }
 
-  @Get('admin/getAll')
-  @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
-  getAll(request: None) {
-    return this.adminService.getAllEntities(request);
-  }
+  // @Get('admin/getAll')
+  // @ApiBearerAuth()
+  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
+  // getAll(request: None) {
+  //   return this.adminService.getAllEntities(request);
+  // }
 }
