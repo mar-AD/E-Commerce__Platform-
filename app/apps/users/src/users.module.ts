@@ -44,23 +44,7 @@ import { UsersEntity } from './entities/users.entity';
     ])
   ],
   controllers: [UsersController],
-  providers: [
-    UsersService,
-    // {
-    //   provide: ,
-    //   useFactory: (configService: ConfigService) => {
-    //     return ClientProxyFactory.create({
-    //       transport: Transport.RMQ,
-    //       options: {
-    //         urls: [configService.get<string>('RABBITMQ_URL')],
-    //         queue: configService.get<string>('RABBITMQ_USERS_QUEUE'),
-    //         queueOptions: { durable: true },
-    //       }
-    //     })
-    //   },
-    //   inject: [ConfigService]
-    // }
-  ],
+  providers: [UsersService],
   exports:[]
 })
 export class UsersModule {}
