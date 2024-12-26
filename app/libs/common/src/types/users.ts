@@ -8,9 +8,9 @@
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 
-export const protobufPackage = "users";
+// export const protobufPackage = "users";
 
-export interface None {
+export interface Non {
 }
 
 export interface GetUserProfileRequest {
@@ -53,7 +53,7 @@ export const USERS_PACKAGE_NAME = "users";
 export interface UsersServiceClient {
   getUserProfile(request: GetUserProfileRequest): Observable<GetUserProfileResponse>;
 
-  getAllUsersProfile(request: None): Observable<GetAllUserProfilesResponse>;
+  getAllUsersProfile(request: Non): Observable<GetAllUserProfilesResponse>;
 }
 
 export interface UsersServiceController {
@@ -62,7 +62,7 @@ export interface UsersServiceController {
   ): Promise<GetUserProfileResponse> | Observable<GetUserProfileResponse> | GetUserProfileResponse;
 
   getAllUsersProfile(
-    request: None,
+    request: Non,
   ): Promise<GetAllUserProfilesResponse> | Observable<GetAllUserProfilesResponse> | GetAllUserProfilesResponse;
 }
 

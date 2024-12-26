@@ -4,7 +4,7 @@ import {
   FindOneDto,
   getPermissionName,
   GetUserProfileRequest,
-  JwtAuthGuard, None,
+  JwtAuthGuard, Non, None,
   Permissions,
   PermissionsAndAccess,
 } from '@app/common';
@@ -32,8 +32,8 @@ export class UsersController {
   @Get('user/all-profiles')
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS)})
-  getUsersProfiles(request: None) {
-    return this.usersService.getAllProfiles(request);
+  getUsersProfiles(request: None, request1: Non) {
+    return this.usersService.getAllProfiles(request, request1);
   }
 
   //for user to fetch his profile

@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { ClientProxyFactory, ClientsModule, Transport } from '@nestjs/microservices';
 import { CommonModule } from '@app/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersEntity } from './entities/users.entity';
 
 @Module({
   imports: [
@@ -12,26 +14,53 @@ import { CommonModule } from '@app/common';
       envFilePath: ['./apps/users/.env', './.env']
     }),
     CommonModule,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url: configService.get('POSTGRES_USERS_URI'),
+        autoLoadEntities: true,
+        synchronize: false,
+      }),
+      inject: [ConfigService],
+    }),
+    TypeOrmModule.forFeature([UsersEntity]),
 
-  ],
-  controllers: [UsersController],
-  providers: [
-    UsersService,
-    {
-      provide: 'RMQ_CONSUMER',
-      useFactory: (configService: ConfigService) => {
-        return ClientProxyFactory.create({
+    ClientsModule.registerAsync( [
+      {
+        name: 'RMQ_CONSUMER',
+        useFactory: (configService: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
             urls: [configService.get<string>('RABBITMQ_URL')],
             queue: configService.get<string>('RABBITMQ_USERS_QUEUE'),
             queueOptions: { durable: true },
-          }
-        })
-      },
-      inject: [ConfigService]
-    }
+            noAck: false, // Ensures messages are acknowledged only after successful processing
+            persistent: true,// Ensures that the messages are saved to disk, so they survive server restarts or crashes. This guarantees that messages will not be lost in case of failure.
+          },
+        }),
+        inject: [ConfigService]
+      }
+    ])
   ],
-  exports:[ 'RMQ_CONSUMER' ]
+  controllers: [UsersController],
+  providers: [
+    UsersService,
+    // {
+    //   provide: ,
+    //   useFactory: (configService: ConfigService) => {
+    //     return ClientProxyFactory.create({
+    //       transport: Transport.RMQ,
+    //       options: {
+    //         urls: [configService.get<string>('RABBITMQ_URL')],
+    //         queue: configService.get<string>('RABBITMQ_USERS_QUEUE'),
+    //         queueOptions: { durable: true },
+    //       }
+    //     })
+    //   },
+    //   inject: [ConfigService]
+    // }
+  ],
+  exports:[]
 })
 export class UsersModule {}

@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   FindOneDto,
-  GetUserProfileRequest, None,
+  GetUserProfileRequest, Non, None,
   USER_SERVICE_NAME,
   USERS_SERVICE_NAME,
   UserServiceClient,
@@ -37,10 +37,10 @@ export class UsersService implements OnModuleInit{
   }
 
 
-  getAllProfiles(request: None){
+  getAllProfiles(request: None, request1: Non){
     return forkJoin({
       authData: this.authService.getAllUsers(request),
-      profileData: this.usersService.getAllUsersProfile(request)
+      profileData: this.usersService.getAllUsersProfile(request1)
     }).pipe(
       map(({authData, profileData}) => ({
         ...authData,
