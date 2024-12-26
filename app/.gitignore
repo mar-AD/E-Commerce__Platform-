@@ -3,6 +3,7 @@
 /node_modules
 /build
 /db/auth-data
+/db/users-data
 
 # Logs
 logs
