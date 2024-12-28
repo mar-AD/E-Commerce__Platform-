@@ -42,9 +42,10 @@ export class AdminsService extends BaseService<Admin, GetAllAdminsResponse>{
     private readonly cronService: CronService,
     @Inject(LoggerService) protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
-    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
+    @Inject('RMQ_EMAIL_CLIENT') protected readonly clientEmail: ClientProxy,
+    @Inject('RMQ_USERS_CLIENT') protected readonly clientUser: ClientProxy,
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, clientEmail, clientUser)
     console.log('AdminsService: LoggerService instance:', this.logger instanceof LoggerService);
     console.log('AdminsService: LoggerService typeof:', typeof this.logger);
     console.log('AdminsService: LoggerService:', this.logger);

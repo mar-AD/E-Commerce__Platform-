@@ -30,9 +30,9 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
-  @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
-  // @isPublic()
+  // @ApiBearerAuth()
+  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  @isPublic()
   createUser(@Body() createUserDto: CreateDto) {
     return this.userService.create(createUserDto);
   }

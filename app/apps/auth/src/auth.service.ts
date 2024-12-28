@@ -20,7 +20,7 @@ import {
   hashPassword,
   JwtTokenService,
   LoggerService,
-  messages, None,
+  messages,
   TokenDto,
   VerifyEmailCode,
   verifyPassword,
@@ -56,7 +56,8 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
     protected readonly jwtTokenService: JwtTokenService,
     protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
-    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
+    @Inject('RMQ_EMAIL_CLIENT') protected readonly clientEmail: ClientProxy,
+    @Inject('RMQ_USERS_CLIENT') protected readonly clientUser: ClientProxy,
   ) {
   }
 
@@ -90,7 +91,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
 
                 if (type === AuthConstants.user){
                   this.logger.log(`Emitting create_user_profile event for "${createdUser.id}".`);
-                  this.client.emit('create_user_profile', { userId: createdUser.id });
+                  this.clientUser.emit('create_user_profile', { userId: createdUser.id });
                 }else if (type === AuthConstants.admin){
                   /////////////////////////////////////////// later //////////////////////////
                 }
@@ -114,7 +115,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
     tap(()=>{
       this.logger.log(`Emitting welcome_email event for ${email}...`);
 
-      this.client.emit('welcome_email', { email: email }).pipe(
+      this.clientEmail.emit('welcome_email', { email: email }).pipe(
 
         tap(()=>{
           this.logger.log(`Successfully emitted welcome_email event for ${email}.`);
@@ -311,7 +312,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
 
       tap(()=>{
         this.logger.log(`Emitting req_update_email_email event for ${requestEmailUpdateDto.email}...`)
-        this.client.emit('req_update_email_email', {email: requestEmailUpdateDto.email, verificationCode: code}).pipe(
+        this.clientEmail.emit('req_update_email_email', {email: requestEmailUpdateDto.email, verificationCode: code}).pipe(
           tap(()=>{
             this.logger.log(`Successfully emitted req_update_email_email event for ${requestEmailUpdateDto.email}.`);
           }),
@@ -560,7 +561,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
 
       tap(()=>{
         this.logger.log(`Emitting reset_pass_email event for ${email}...`)
-        this.client.emit('reset_pass_email', {email: email, token: token}).pipe(
+        this.clientEmail.emit('reset_pass_email', {email: email, token: token}).pipe(
           tap(()=>{
             this.logger.log(`Successfully emitted reset_pass_email event for ${email}.`);
           }),
@@ -724,7 +725,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
         }
         if (type === AuthConstants.user){
           this.logger.log(`Emitting update_user_profile event for "${thisEntity.id}".`);
-          this.client.emit('update_user_profile', {id: thisEntity.id})
+          this.clientEmail.emit('update_user_profile', {id: thisEntity.id})
         }else if (type === AuthConstants.admin){
           /////////////////////////////////////////// later //////////////////////////
         }
@@ -760,7 +761,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
 
             if (type === AuthConstants.user){
               this.logger.log(`Emitting delete_user_profile event for "${thisEntity.id}".`);
-              this.client.emit('delete_user_profile', {id: thisEntity.id})
+              this.clientEmail.emit('delete_user_profile', {id: thisEntity.id})
             }else if (type === AuthConstants.admin){
               /////////////////////////////////////////// later //////////////////////////
             }
@@ -796,7 +797,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
         this.logger.error(`Error fetching all Entities' profiles. Error: ${error.message}`);
         throw new RpcException({
           status: status.INTERNAL,
-          message: messages.USER.FAILED_FETCH,
+          message: messageType.FAILED_FETCH,
         });
       })
     );

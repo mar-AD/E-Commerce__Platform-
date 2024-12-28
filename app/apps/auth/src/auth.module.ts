@@ -150,7 +150,7 @@ import { CommonModule, CronService, JwtTokenService, LoggerService } from '@app/
     JwtTokenService,
     CronService,
     {
-      provide: 'RMQ_CLIENT',
+      provide: 'RMQ_EMAIL_CLIENT',
       useFactory: (configService: ConfigService) => {
         return ClientProxyFactory.create({
           transport: Transport.RMQ,
@@ -163,12 +163,27 @@ import { CommonModule, CronService, JwtTokenService, LoggerService } from '@app/
       },
       inject: [ConfigService],
     },
+    {
+      provide: 'RMQ_USERS_CLIENT',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_USERS_QUEUE'),
+            queueOptions: { durable: true },
+          },
+        });
+      },
+      inject: [ConfigService],
+    }
   ],
   exports: [
     LoggerService,
     JwtTokenService,
     CronService,
-    'RMQ_CLIENT',
+    'RMQ_EMAIL_CLIENT',
+    'RMQ_USERS_CLIENT'
   ],
 })
 export class AuthModule {}

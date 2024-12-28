@@ -34,9 +34,10 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
     private readonly cronService: CronService,
     protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
-    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
+    @Inject('RMQ_EMAIL_CLIENT') protected readonly clientEmail: ClientProxy,
+    @Inject('RMQ_USERS_CLIENT') protected readonly clientUser: ClientProxy,
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, clientEmail, clientUser)
     // console.log(this.logger instanceof LoggerService);
     // if (!this.logger || typeof this.logger.log !== 'function') {
     //   throw new Error('Logger is not properly instantiated');
