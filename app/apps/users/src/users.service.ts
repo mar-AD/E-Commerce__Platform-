@@ -19,7 +19,6 @@ import { UpdateUserProfileDto } from '@app/common/dtos';
 export class UsersService {
   constructor(
     @InjectRepository(UsersEntity) private readonly usersRepository: Repository<UsersEntity>,
-    // @Inject('RMQ_CONSUMER') private readonly client: ClientProxy,
     private readonly logger: LoggerService
   ) {
   }

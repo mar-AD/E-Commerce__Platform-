@@ -94,6 +94,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
                   this.clientUser.emit('create_user_profile', { userId: createdUser.id });
                 }else if (type === AuthConstants.admin){
                   /////////////////////////////////////////// later //////////////////////////
+                  console.log('this is fr admin');
                 }
                 this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
                 return this.mapResponse(createdUser);
