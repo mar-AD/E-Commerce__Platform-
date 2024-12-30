@@ -4,7 +4,7 @@ import {
   FindOneDto,
   LoginDto,
   RefreshTokenDto,
-  RequestUpdateEmailRequest, ResetPasswordRequest,
+  RequestUpdateEmailRequest, RequestUpdateProfile, ResetPasswordRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
   UserServiceController,
@@ -77,8 +77,9 @@ export class UsersController implements UserServiceController{
     return this.usersService.getAllUsers();
   }
 
-  updateUserProfile(findOneDto: FindOneDto) {
-    return this.usersService.updateUserProfile(findOneDto);
+  updateUserProfile(requestUpdateProfile : RequestUpdateProfile) {
+    const { userProfileUpdateDto, findOneDto } = requestUpdateProfile
+    return this.usersService.updateUserProfile(userProfileUpdateDto, findOneDto);
   }
 
   deleteUserProfile(findOneDto: FindOneDto) {

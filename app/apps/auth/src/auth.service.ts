@@ -43,6 +43,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { RoleEntity } from './roles/entities/role.entity';
 import { ConfigService } from '@nestjs/config';
+import { UpdateUserProfileDto } from '@app/common/dtos';
 
 
 @Injectable()
@@ -637,7 +638,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
 
     this.logger.log(`${type + 'Repo'}: Attempting to remove entity with ID: ${findOneDto.id}...`);
 
-    return from(repository.findOne({ where: { id: findOneDto.id } })).pipe(
+    return from(repository.findOne({ where: { id: findOneDto.id, isDeleted: false, isActive:true, isEmailVerified:false } })).pipe(
       switchMap((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: Entity not found for ID: ${findOneDto.id}.`);
@@ -713,7 +714,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
     )
   }
 
-  updateProfile(findOneDto: FindOneDto, type: AuthConstants): Observable<void>{
+  updateProfile(findOneDto: FindOneDto, userProfileUpdateDto: UpdateUserProfileDto, type: AuthConstants): Observable<void>{
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
     return from(repository.findOne({ where: { id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false } })).pipe(
@@ -726,7 +727,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
         }
         if (type === AuthConstants.user){
           this.logger.log(`Emitting update_user_profile event for "${thisEntity.id}".`);
-          this.clientEmail.emit('update_user_profile', {id: thisEntity.id})
+          this.clientEmail.emit('update_user_profile', {id: thisEntity.id, request: userProfileUpdateDto})
         }else if (type === AuthConstants.admin){
           /////////////////////////////////////////// later //////////////////////////
         }
@@ -742,11 +743,12 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
   }
 
   removeProfile(findOneDto: FindOneDto, type: AuthConstants): Observable<Empty>{
-    const {id} = findOneDto;
+    // const {id} = findOneDto;
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
+    this.logger.log(`Incoming ID for removal: ${findOneDto.id}`);
 
-    return from(repository.findOne({where: {id: id}})).pipe(
+    return from(repository.findOne({where: {id: findOneDto.id}})).pipe(
       switchMap((thisEntity)=>{
         if (!thisEntity){
           this.logger.error(`${type + 'Repo'}: Entity not found for ID: ${findOneDto.id}.`);
@@ -762,7 +764,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
 
             if (type === AuthConstants.user){
               this.logger.log(`Emitting delete_user_profile event for "${thisEntity.id}".`);
-              this.clientEmail.emit('delete_user_profile', {id: thisEntity.id})
+              this.clientUser.emit('delete_user_profile', {id: findOneDto.id})
             }else if (type === AuthConstants.admin){
               /////////////////////////////////////////// later //////////////////////////
             }

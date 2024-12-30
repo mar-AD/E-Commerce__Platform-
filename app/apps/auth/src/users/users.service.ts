@@ -20,6 +20,7 @@ import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUp
 import { Cron } from '@nestjs/schedule';
 import { ClientProxy } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
+import { UpdateUserProfileDto } from '@app/common/dtos';
 
 
 @Injectable()
@@ -94,8 +95,8 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
   }
 
 
-  updateUserProfile(findOneDto: FindOneDto): Observable<void> {
-    return this.updateProfile(findOneDto, AuthConstants.user);
+  updateUserProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<void> {
+    return this.updateProfile(findOneDto, userProfileUpdateDto, AuthConstants.user);
   }
 
   deleteUserProfile(findOneDto: FindOneDto): Observable<Empty> {

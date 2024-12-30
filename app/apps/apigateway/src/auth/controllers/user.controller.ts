@@ -17,10 +17,11 @@ import {
   TokenDto,
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
-  Permissions,
+  Permissions, RequestUpdateProfile,
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
 import { PermissionsGuard } from '../guards/auth.guard';
+import { UpdateUserProfileDto } from '@app/common/dtos';
 
 
 @ApiTags('AuthUsers')
@@ -123,10 +124,11 @@ export class UserController {
   @Patch('user/update-profile')
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user']})
-  updateUserProfile(@Req() req: Request) {
+  updateUserProfile(@Req() req: Request, @Body() userProfileUpdateDto: UpdateUserProfileDto) {
     const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
-     return this.userService.updateUserProfile(findOneDto);
+    const requestUpdateProfile : RequestUpdateProfile = { userProfileUpdateDto, findOneDto }
+     return this.userService.updateUserProfile(requestUpdateProfile);
   }
 
   @Delete('user/remove-user-profile/:id')

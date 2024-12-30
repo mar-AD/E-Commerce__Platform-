@@ -30,9 +30,9 @@ export class UsersController implements UsersServiceController{
   }
 
   @EventPattern('update_user_profile')
-  async updateUserProfile(@Payload() data: {id: string}, request: UpdateUserProfileDto, @Ctx() context: RmqContext) {
+  async updateUserProfile(@Payload() data: {id: string, request: UpdateUserProfileDto}, @Ctx() context: RmqContext) {
     this.logger.log(`Controller received 'update_user_profile' event for ${data.id}`)
-    await this.usersService.updateUserProfile(data, request, context)
+    await this.usersService.updateUserProfile(data, context)
   }
 
   //this for when the admin deletes the user

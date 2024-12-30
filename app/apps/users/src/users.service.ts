@@ -81,9 +81,9 @@ export class UsersService {
     );
   }
 
-  async updateUserProfile( data:{id: string }, request: UpdateUserProfileDto, context: RmqContext): Promise<BaseResponse> {
+  async updateUserProfile( data:{id: string, request: UpdateUserProfileDto }, context: RmqContext): Promise<BaseResponse> {
     this.logger.log('getting the user profile by userId')
-    const {id} = data;
+    const {id, request} = data;
     const Channel = context.getChannelRef();
     const originalMessage = context.getMessage();
 
@@ -124,31 +124,6 @@ export class UsersService {
 
   }
 
-  // async removeUserProfile( data: {id: string}, context: RmqContext): Promise<void> {
-  //   const {id} = data;
-  //   const channel = context.getChannelRef();
-  //   const originalMessage = context.getMessage();
-  //
-  //   try {
-  //     const thisUser = await this.usersRepository.findOne({where: { userId: id }});
-  //     if (!thisUser){
-  //       this.logger.log(`user profile with ${id} not found`);
-  //       throw new RpcException({
-  //         status: status.NOT_FOUND,
-  //         message: messages.USER.NOT_FOUND2
-  //       })
-  //     }
-  //     await this.usersRepository.remove(thisUser);
-  //     this.logger.log(`user profile deleted successfully with ${id}`);
-  //     channel.ack(originalMessage)
-  //   }
-  //   catch (err){
-  //     this.logger.error(`Failed to delete user profile with ${id}: ${err}`);
-  //     channel.nack(originalMessage, false, true);
-  //     throw new RpcException('User profile removal failed');
-  //   }
-  // }
-
   async removeUserProfile(data: { id: string }, context: RmqContext): Promise<void> {
     const { id } = data;
     const channel = context.getChannelRef();
@@ -162,10 +137,10 @@ export class UsersService {
           message: messages.USER.NOT_FOUND2,
         });
       }
-      console.log(`Successfully deleted user profile with userId: ${id}`);
+      this.logger.log(`Successfully deleted user profile with userId: ${id}`);
       channel.ack(originalMessage);
     } catch (error) {
-      console.error(`Failed to delete user profile with userId: ${id}:`, error);
+      this.logger.error(`Failed to delete user profile with userId: ${id}: ${error}`);
       channel.nack(originalMessage, false, true);
       throw new RpcException('User profile removal failed');
     }

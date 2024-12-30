@@ -5,7 +5,7 @@ import {
   ForgotPasswordDto,
   LoginDto, None,
   RefreshTokenDto,
-  RequestUpdateEmailRequest,
+  RequestUpdateEmailRequest, RequestUpdateProfile,
   ResetPasswordRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
@@ -75,8 +75,8 @@ export class UserService implements OnModuleInit {
   //   return this.userService.findUser(findOneDto);
   // }
 
-  updateUserProfile(findOneDto: FindOneDto) {
-    return this.userService.updateUserProfile(findOneDto)
+  updateUserProfile(requestUpdateProfile : RequestUpdateProfile) {
+    return this.userService.updateUserProfile(requestUpdateProfile)
   }
 
   deleteUserProfile(findOneDto: FindOneDto) {
