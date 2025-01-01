@@ -263,7 +263,7 @@ export interface UserServiceClient {
 
   getAllUsers(request: None): Observable<GetAllUsersResponse>;
 
-  updateUserProfile(request: RequestUpdateProfile): Observable<None>;
+  updateUserProfile(request: RequestUpdateProfile): Observable<BaseResponse>;
 
   deleteUserProfile(request: FindOneDto): Observable<Empty>;
 }
@@ -297,7 +297,7 @@ export interface UserServiceController {
 
   getAllUsers(request: None): Promise<GetAllUsersResponse> | Observable<GetAllUsersResponse> | GetAllUsersResponse;
 
-  updateUserProfile(request: RequestUpdateProfile): Promise<None> | Observable<None> | None;
+  updateUserProfile(request: RequestUpdateProfile): Promise<BaseResponse> | Observable<BaseResponse> | BaseResponse;
 
   deleteUserProfile(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 }

@@ -39,7 +39,7 @@ service AdminService {
   rpc findOne (FindOneDto) returns (Admin);
   rpc permissionsByRole (FindOneDto) returns (Permission);
   rpc GetAllAdmins (None) returns (GetAllAdminsResponse);
-  rpc updateAdminProfile (FindOneDto) returns (Empty);
+  rpc updateAdminProfile (FindOneDto) returns (None);
   rpc deleteAdminProfile (FindOneDto) returns (Empty);
 }
 

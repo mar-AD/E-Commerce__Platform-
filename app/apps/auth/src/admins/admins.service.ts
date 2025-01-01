@@ -29,6 +29,7 @@ import { Cron } from '@nestjs/schedule';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { ConfigService } from '@nestjs/config';
+import { UpdateUserProfileDto } from '@app/common/dtos';
 
 @Injectable()
 export class AdminsService extends BaseService<Admin, GetAllAdminsResponse>{
@@ -181,8 +182,8 @@ export class AdminsService extends BaseService<Admin, GetAllAdminsResponse>{
     )
   }
 
-  updateAdminProfile(findOneDto: FindOneDto): Observable<void> {
-    return this.updateProfile(findOneDto, AuthConstants.admin);
+  updateAdminProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<void> {
+    return this.updateProfile(findOneDto, userProfileUpdateDto, AuthConstants.admin);
   }
 
   deleteAdminProfile(findOneDto: FindOneDto): Observable<Empty> {

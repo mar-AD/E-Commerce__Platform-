@@ -84,7 +84,7 @@ export class UsersService {
   async updateUserProfile( data:{id: string, request: UpdateUserProfileDto }, context: RmqContext): Promise<BaseResponse> {
     this.logger.log('getting the user profile by userId')
     const {id, request} = data;
-    const Channel = context.getChannelRef();
+    const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
 
     try {
@@ -110,7 +110,7 @@ export class UsersService {
       }else{
         this.logger.log(`No changes detected for user profile with id: ${id}`);
       }
-      Channel.ack(originalMessage)
+      channel.ack(originalMessage)
       return {
         status: HttpStatus.OK,
         message: messages.USER.USER_UPDATED_SUCCESSFULLY
@@ -118,7 +118,7 @@ export class UsersService {
     }
     catch(error) {
       this.logger.error(`Failed to update user profile with ${id}: ${error}`);
-      Channel.nack(originalMessage, false, true);
+      channel.nack(originalMessage, false, true);
       throw new RpcException('User profile update failed');
     }
 

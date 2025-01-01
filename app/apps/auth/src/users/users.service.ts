@@ -4,7 +4,7 @@ import {
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  User, LoggerService, FindOneDto, TokenDto, GetAllUsersResponse,
+  User, LoggerService, FindOneDto, TokenDto, GetAllUsersResponse, BaseResponse,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
@@ -95,7 +95,7 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
   }
 
 
-  updateUserProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<void> {
+  updateUserProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<BaseResponse> {
     return this.updateProfile(findOneDto, userProfileUpdateDto, AuthConstants.user);
   }
 

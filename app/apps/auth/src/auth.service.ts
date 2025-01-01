@@ -12,7 +12,7 @@ import { MoreThan, Repository } from 'typeorm';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
 import {
-  AuthResponse,
+  AuthResponse, BaseResponse,
   Empty,
   FindOneDto,
   generateEmailCode,
@@ -714,33 +714,101 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
     )
   }
 
-  updateProfile(findOneDto: FindOneDto, userProfileUpdateDto: UpdateUserProfileDto, type: AuthConstants): Observable<void>{
+  // updateProfile(findOneDto: FindOneDto, userProfileUpdateDto: UpdateUserProfileDto, type: AuthConstants): Observable<any>{
+  //   const repository = this.getRepository(type);
+  //   const messageType = this.getMessageType(type);
+  //   return from(repository.findOne({ where: { id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false } })).pipe(
+  //     map((thisEntity)=>{
+  //       if (!thisEntity){
+  //         throw new RpcException({
+  //           status: status.NOT_FOUND,
+  //           message: messageType.NOT_FOUND2
+  //         })
+  //       }
+  //       if (type === AuthConstants.user){
+  //         this.logger.log(`Emitting update_user_profile event for "${thisEntity.id}".`);
+  //         return this.clientUser.send<BaseResponse>('update_user_profile', {id: thisEntity.id, request: userProfileUpdateDto}).pipe(
+  //           map((response) => {
+  //             if (!response) {
+  //               throw new RpcException('No response from Users service');
+  //             }
+  //             this.logger.log(`Received response: ${JSON.stringify(response)}`);
+  //             return {
+  //               status: response.status,
+  //               message: response.message
+  //             };
+  //           })
+  //         )
+  //       }else if (type === AuthConstants.admin){
+  //         /////////////////////////////////////////// later //////////////////////////
+  //       }
+  //     }),
+  //     catchError((err)=>{
+  //       this.logger.error(`${type+'Repo'}: Failed to update the entity with id "${findOneDto.id}". Error: ${err.message}`);
+  //       throw new RpcException({
+  //         code: status.INTERNAL,
+  //         message: messageType.FAILED_TO_CREATE,
+  //       });
+  //     })
+  //   )
+  // }
+
+  updateProfile(
+    findOneDto: FindOneDto,
+    userProfileUpdateDto: UpdateUserProfileDto,
+    type: AuthConstants
+  ): Observable<BaseResponse> {
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
-    return from(repository.findOne({ where: { id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false } })).pipe(
-      map((thisEntity)=>{
-        if (!thisEntity){
+
+    return from(
+      repository.findOne({
+        where: { id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false },
+      })
+    ).pipe(
+      switchMap((thisEntity) => {
+        if (!thisEntity) {
           throw new RpcException({
             status: status.NOT_FOUND,
-            message: messageType.NOT_FOUND2
-          })
+            message: messageType.NOT_FOUND2,
+          });
         }
-        if (type === AuthConstants.user){
+
+        if (type === AuthConstants.user) {
           this.logger.log(`Emitting update_user_profile event for "${thisEntity.id}".`);
-          this.clientEmail.emit('update_user_profile', {id: thisEntity.id, request: userProfileUpdateDto})
-        }else if (type === AuthConstants.admin){
-          /////////////////////////////////////////// later //////////////////////////
+
+          return this.clientUser.send<BaseResponse>('update_user_profile', {
+            id: thisEntity.id,
+            request: userProfileUpdateDto,
+          }).pipe(
+            map((response) => {
+              if (!response) {
+                throw new RpcException('No response from Users service');
+              }
+              this.logger.log(`Received response: ${JSON.stringify(response)}`);
+              return {
+                status: HttpStatus.OK,
+                message: messages.USER.USER_UPDATED_SUCCESSFULLY
+              };
+            })
+          );
+        } else if (type === AuthConstants.admin) {
+          // Handle admin logic here when needed
+          // return throwError(() => new Error('Admin profile update not implemented yet.'));
         }
       }),
-      catchError((err)=>{
-        this.logger.error(`${type+'Repo'}: Failed to update the entity with id "${findOneDto.id}". Error: ${err.message}`);
+      catchError((err) => {
+        this.logger.error(
+          `${type + 'Repo'}: Failed to update the entity with id "${findOneDto.id}". Error: ${err.message}`
+        );
         throw new RpcException({
           code: status.INTERNAL,
-          message: messageType.FAILED_TO_CREATE,
+          message: messageType.FAILED_TO_UPDATE,
         });
       })
-    )
+    );
   }
+
 
   removeProfile(findOneDto: FindOneDto, type: AuthConstants): Observable<Empty>{
     // const {id} = findOneDto;

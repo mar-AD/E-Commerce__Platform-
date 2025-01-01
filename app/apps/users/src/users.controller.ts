@@ -1,7 +1,8 @@
 import { Controller } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
+import { Ctx, EventPattern, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import {
+  BaseResponse,
   GetUserProfileRequest,
   LoggerService,
   UsersServiceController,
@@ -29,11 +30,19 @@ export class UsersController implements UsersServiceController{
     return this.usersService.getAllUsersProfiles()
   }
 
-  @EventPattern('update_user_profile')
-  async updateUserProfile(@Payload() data: {id: string, request: UpdateUserProfileDto}, @Ctx() context: RmqContext) {
-    this.logger.log(`Controller received 'update_user_profile' event for ${data.id}`)
-    await this.usersService.updateUserProfile(data, context)
+  @MessagePattern('update_user_profile')
+  async updateUserProfile(
+    @Payload() data: { id: string; request: UpdateUserProfileDto },
+    @Ctx() context: RmqContext,
+  ): Promise<BaseResponse> {  // Make sure the controller method also returns a response
+    this.logger.log(`Controller received 'update_user_profile' event for ${data.id}`);
+
+    const response = await this.usersService.updateUserProfile(data, context);
+
+    // Return the response back to the caller (e.g., Swagger)
+    return response;
   }
+
 
   //this for when the admin deletes the user
   @EventPattern('delete_user_profile')

@@ -13,6 +13,7 @@ import {
 import { CreateAdminDto, LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos/auth-dtos';
 import { Observable } from 'rxjs';
 import { AuthConstants } from '../constants';
+import { UpdateUserProfileDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -87,8 +88,8 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.getAllAdmins();
   }
 
-  updateAdminProfile(findOneDto: FindOneDto): Observable<void> {
-    return this.adminsService.updateAdminProfile(findOneDto);
+  updateAdminProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<void> {
+    return this.adminsService.updateAdminProfile(userProfileUpdateDto, findOneDto);
   }
 
   deleteAdminProfile(findOneDto: FindOneDto) {
