@@ -39,8 +39,9 @@ export class UsersController implements UsersServiceController{
 
     const response = await this.usersService.updateUserProfile(data, context);
 
+    this.logger.log(`Response sent: ${JSON.stringify(response)}`);
     // Return the response back to the caller (e.g., Swagger)
-    return response;
+    return { ... response };
   }
 
 
