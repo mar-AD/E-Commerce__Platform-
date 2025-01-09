@@ -9,7 +9,7 @@ import {
 } from '@app/common';
 import { AUTH_SERVICE, USERS_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
-import { forkJoin, map } from 'rxjs';
+import { forkJoin, map, tap } from 'rxjs';
 
 @Injectable()
 export class UsersService implements OnModuleInit{
@@ -32,7 +32,10 @@ export class UsersService implements OnModuleInit{
       map(({authData, profileData}) => ({
       ...authData,
       ...profileData
-      }))
+      })),
+      tap((combinedData) => {
+        console.log('Combined Profile Data:', combinedData);
+      })
     )
   }
 
@@ -40,7 +43,7 @@ export class UsersService implements OnModuleInit{
   getAllProfiles(request: None, request1: Non){
     return forkJoin({
       authData: this.authService.getAllUsers(request),
-      profileData: this.usersService.getAllUsersProfile(request1)
+      profileData: this.usersService.getAllUsersProfile(request1),
     }).pipe(
       map(({authData, profileData}) => ({
         ...authData,

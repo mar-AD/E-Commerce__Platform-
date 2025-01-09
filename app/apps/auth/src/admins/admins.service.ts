@@ -4,7 +4,7 @@ import {
 } from '@nestjs/common';
 import {
   Admin,
-  AuthResponse, CronService,
+  AuthResponse, BaseResponse, CronService,
   dateToTimestamp,
   Empty, FindOneDto, ForgotPasswordDto, GetAllAdminsResponse,
   JwtTokenService, LoggerService,
@@ -29,7 +29,7 @@ import { Cron } from '@nestjs/schedule';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { ConfigService } from '@nestjs/config';
-import { UpdateUserProfileDto } from '@app/common/dtos';
+import { UpdateAdminProfileDto, UpdateUserProfileDto } from '@app/common/dtos';
 
 @Injectable()
 export class AdminsService extends BaseService<Admin, GetAllAdminsResponse>{
@@ -182,8 +182,8 @@ export class AdminsService extends BaseService<Admin, GetAllAdminsResponse>{
     )
   }
 
-  updateAdminProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<void> {
-    return this.updateProfile(findOneDto, userProfileUpdateDto, AuthConstants.admin);
+  updateAdminProfile(adminProfileUpdateDto: UpdateAdminProfileDto, findOneDto: FindOneDto): Observable<BaseResponse> {
+    return this.updateProfile(findOneDto, adminProfileUpdateDto, AuthConstants.admin);
   }
 
   deleteAdminProfile(findOneDto: FindOneDto): Observable<Empty> {

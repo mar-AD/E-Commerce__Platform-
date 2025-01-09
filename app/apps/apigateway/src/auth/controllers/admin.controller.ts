@@ -11,14 +11,24 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
   Empty,
-  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, None, Permissions, RequestUpdateEmailRequest,
+  FindOneDto,
+  getPermissionName,
+  isPublic,
+  JwtAuthGuard,
+  None,
+  Permissions,
+  RequestUpdateAdminProfile,
+  RequestUpdateEmailRequest,
   ResetPasswordRequest,
-  TokenDto, UpdateAdminRoleRequest,
-  UpdateEmailRequest, UpdatePasswordRequest,
+  TokenDto,
+  UpdateAdminRoleRequest,
+  UpdateEmailRequest,
+  UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
 import { PermissionsGuard } from '../guards/auth.guard';
+import { UpdateAdminProfileDto } from '@app/common/dtos';
 
 
 @ApiTags('AuthAdmins')
@@ -130,10 +140,11 @@ export class AdminController {
   @Patch('admin/update-profile')
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin']})
-  updateAdminProfile(@Req() req: Request) {
+  updateAdminProfile(@Req() req: Request, @Body() adminProfileUpdateDto: UpdateAdminProfileDto) {
     const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
-    return this.adminService.updateAdminProfile(findOneDto);
+    const requestUpdateProfile : RequestUpdateAdminProfile = {adminProfileUpdateDto, findOneDto}
+    return this.adminService.updateAdminProfile(requestUpdateProfile);
   }
 
   @Delete('admin/remove-admin-profile/:id')

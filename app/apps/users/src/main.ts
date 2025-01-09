@@ -23,7 +23,7 @@ async function bootstrap() {
     });
 
     // Start RabbitMQ Microservice
-    await app.startAllMicroservices();
+    // await app.startAllMicroservices();
 
     const grpcMicroservice  = await NestFactory.createMicroservice<MicroserviceOptions>(
       UsersModule,

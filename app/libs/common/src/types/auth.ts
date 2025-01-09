@@ -124,11 +124,11 @@ export interface GetAllUsersResponse {
 }
 
 export interface UserProfileUpdateDto {
-  firstName?: string;
-  lastName?: string;
-  phoneNumber?: string;
-  address?: string;
-  profilePic?: string;
+  firstName?: string | undefined;
+  lastName?: string | undefined;
+  phoneNumber?: string | undefined;
+  address?: string | undefined;
+  profilePic?: string | undefined;
 }
 
 export interface RequestUpdateProfile {
@@ -154,6 +154,16 @@ export interface UpdateAdminRoleRequest {
 
 export interface GetAllAdminsResponse {
   entities: Admin[];
+}
+
+export interface AdminProfileUpdateDto {
+  fullName?: string | undefined;
+  profilePic?: string | undefined;
+}
+
+export interface RequestUpdateAdminProfile {
+  adminProfileUpdateDto: AdminProfileUpdateDto | undefined;
+  findOneDto: FindOneDto | undefined;
 }
 
 /** role Dto */
@@ -368,7 +378,7 @@ export interface AdminServiceClient {
 
   getAllAdmins(request: None): Observable<GetAllAdminsResponse>;
 
-  updateAdminProfile(request: FindOneDto): Observable<Empty>;
+  updateAdminProfile(request: RequestUpdateAdminProfile): Observable<BaseResponse>;
 
   deleteAdminProfile(request: FindOneDto): Observable<Empty>;
 }
@@ -406,7 +416,7 @@ export interface AdminServiceController {
 
   getAllAdmins(request: None): Promise<GetAllAdminsResponse> | Observable<GetAllAdminsResponse> | GetAllAdminsResponse;
 
-  updateAdminProfile(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
+  updateAdminProfile(request: RequestUpdateAdminProfile): Promise<BaseResponse> | Observable<BaseResponse> | BaseResponse;
 
   deleteAdminProfile(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 }

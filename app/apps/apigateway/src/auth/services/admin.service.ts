@@ -12,7 +12,7 @@ import {
   VerifyEmailCodeRequest,
   RequestUpdateEmailRequest,
   UpdatePasswordRequest,
-  UpdateAdminRoleRequest, Empty, None,
+  UpdateAdminRoleRequest, Empty, None, RequestUpdateAdminProfile,
 } from '@app/common';
 import { AUTH_SERVICE } from '../../constants';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -74,8 +74,8 @@ export class AdminService implements OnModuleInit{
     return this.adminService.removeAdmin(findOneDto);
   }
 
-  updateAdminProfile(findOneDto: FindOneDto) {
-    return this.adminService.updateAdminProfile(findOneDto)
+  updateAdminProfile(requestUpdateProfile : RequestUpdateAdminProfile) {
+    return this.adminService.updateAdminProfile(requestUpdateProfile)
   }
 
   deleteAdminProfile(findOneDto: FindOneDto) {

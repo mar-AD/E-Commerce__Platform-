@@ -1,0 +1,1 @@
+export * from '@app/common/dtos/admins-dtos/update-admin-profile.dto'

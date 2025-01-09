@@ -700,6 +700,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
         ...conditioning ,
         relations: ['roleId']}
     }
+    this.logger.log(`${type + 'Repo'}: Attempting to find entity with ID: ${findOneDto.id}...`);
 
     return from(repository.findOne(conditioning)).pipe(
       map((thisEntity) => {
@@ -709,6 +710,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
             message: messageType.NOT_FOUND2
           })
         }
+        this.logger.log(`${type + 'Repo'}: entity with ID: ${findOneDto.id} found successfully`);
         return this.mapResponse(thisEntity)
       })
     )
@@ -737,7 +739,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
         }
 
         if (type === AuthConstants.user) {
-          this.logger.log(`Emitting update_user_profile event for "${thisEntity.id}".`);
+          this.logger.log(`Sending update_user_profile event for "${thisEntity.id}".`);
 
           return this.clientUser.send<BaseResponse>('update_user_profile', {
             id: thisEntity.id,
@@ -747,7 +749,6 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
               if (!response) {
                 throw new RpcException('No response from Users service');
               }
-              this.logger.log(`Received response: ${JSON.stringify(response)}`);
               return {
                 ... response
               };

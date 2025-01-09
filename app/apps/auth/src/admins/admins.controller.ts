@@ -2,9 +2,9 @@ import { Controller } from '@nestjs/common';
 import { AdminsService } from './admins.service';
 import {
   AdminServiceController,
-  AdminServiceControllerMethods,
-  FindOneDto,
-  RequestUpdateEmailRequest, ResetPasswordRequest,
+  AdminServiceControllerMethods, BaseResponse,
+  FindOneDto, RequestUpdateAdminProfile,
+  RequestUpdateEmailRequest, RequestUpdateProfile, ResetPasswordRequest,
   UpdateAdminRoleRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
@@ -88,8 +88,9 @@ export class AdminsController implements AdminServiceController{
     return this.adminsService.getAllAdmins();
   }
 
-  updateAdminProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<void> {
-    return this.adminsService.updateAdminProfile(userProfileUpdateDto, findOneDto);
+  updateAdminProfile(requestUpdateProfile : RequestUpdateAdminProfile): Observable<BaseResponse> {
+    const { adminProfileUpdateDto, findOneDto } = requestUpdateProfile
+    return this.adminsService.updateAdminProfile(adminProfileUpdateDto, findOneDto);
   }
 
   deleteAdminProfile(findOneDto: FindOneDto) {

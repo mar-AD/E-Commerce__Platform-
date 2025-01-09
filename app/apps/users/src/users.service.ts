@@ -52,7 +52,7 @@ export class UsersService {
           })
         }
         this.logger.log('user profile fetched successfully');
-        return this.mapUsersProfileResponce(thisUser);
+        return this.mapUsersProfileResponse(thisUser);
       }),
       catchError((error) => {
         this.logger.error(`error fetching user profile "${request.userId}". Error: ${error.message}`);
@@ -69,7 +69,7 @@ export class UsersService {
     return from(this.usersRepository.find()).pipe(
       map((users) => {
         this.logger.log('All users profiles fetched successfully');
-        return { profiles: users.map(user => this.mapUsersProfilesResponce(user)) };
+        return { profiles: users.map(user => this.mapUsersProfilesResponse(user)) };
       }),
       catchError((error) => {
         this.logger.error(`Error fetching all users' profiles. Error: ${error.message}`);
@@ -109,6 +109,10 @@ export class UsersService {
         this.logger.log(`user profile updated successfully with ${id}`);
       }else{
         this.logger.log(`No changes detected for user profile with id: ${id}`);
+        return {
+          status: HttpStatus.OK,
+          message: 'No changes detected for user profile'
+        }
       }
       channel.ack(originalMessage)
       return {
@@ -147,7 +151,7 @@ export class UsersService {
   }
 
 
-  mapUsersProfileResponce (users: UsersEntity): GetUserProfileResponse {
+  mapUsersProfileResponse (users: UsersEntity): GetUserProfileResponse {
     return {
       profilePic: users.profilePic,
       firstName: users.firstName,
@@ -157,7 +161,7 @@ export class UsersService {
     }
   }
 
-  mapUsersProfilesResponce (users: UsersEntity): UserProfile {
+  mapUsersProfilesResponse (users: UsersEntity): UserProfile {
     return {
       userId: users.userId,
       profilePic: users.profilePic,
