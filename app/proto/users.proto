@@ -4,8 +4,8 @@ package users;
 
 
 service UsersService {
-  rpc GetUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
-  rpc GetAllUsersProfile (Non) returns (GetAllUserProfilesResponse);
+  rpc getUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
+  rpc getAllUsersProfile (Non) returns (GetAllUserProfilesResponse);
 }
 
 message Non {}

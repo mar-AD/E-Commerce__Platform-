@@ -11,7 +11,7 @@ async function bootstrap() {
     const app = await NestFactory.create(UsersModule);
     const configService = app.get(ConfigService);
 
-    const rabbitMqMicroservice = app.connectMicroservice<MicroserviceOptions>({
+    app.connectMicroservice<MicroserviceOptions>({
       transport: Transport.RMQ,
       options: {
         urls: [configService.get<string>('RABBITMQ_URL')],
@@ -22,11 +22,8 @@ async function bootstrap() {
       },
     });
 
-    // Start RabbitMQ Microservice
-    // await app.startAllMicroservices();
 
-    const grpcMicroservice  = await NestFactory.createMicroservice<MicroserviceOptions>(
-      UsersModule,
+    app.connectMicroservice<MicroserviceOptions>(
       {
         transport: Transport.GRPC,
         options: {
