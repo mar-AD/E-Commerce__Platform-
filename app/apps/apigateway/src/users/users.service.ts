@@ -22,22 +22,53 @@ export class UsersService implements OnModuleInit{
   onModuleInit() {
     this.usersService = this.usersClient.getService<UsersServiceClient>(USERS_SERVICE_NAME);
     this.authService = this.authClient.getService<UserServiceClient>(USER_SERVICE_NAME)
+
+    // Log to confirm gRPC clients and services
+    console.log('Users Client Connected:', !!this.usersService);
+    console.log('Auth Client Connected:', !!this.authService);
+
   }
 
-   getProfile(findOneDto:FindOneDto, request: GetUserProfileRequest){
+  //  getProfile(findOneDto:FindOneDto, request: GetUserProfileRequest){
+  //   return forkJoin({
+  //     authData: this.authService.findOne(findOneDto),
+  //     profileData: this.usersService.getUserProfile(request)
+  //   }).pipe(
+  //     map(({authData, profileData}) => ({
+  //     ...authData,
+  //     ...profileData
+  //     })),
+  //     tap((combinedData) => {
+  //       console.log('Combined Profile Data:', combinedData);
+  //     })
+  //   )
+  // }
+
+  getProfile(findOneDto: FindOneDto, request: GetUserProfileRequest) {
     return forkJoin({
-      authData: this.authService.findOne(findOneDto),
-      profileData: this.usersService.getUserProfile(request)
+      authData: this.authService.findOne(findOneDto).pipe(
+        tap({
+          next: (data) => console.log('Auth Data:', data),
+          error: (err) => console.error('Auth Service Error:', err),
+        }),
+      ),
+      profileData: this.usersService.getUserProfile(request).pipe(
+        tap({
+          next: (data) => console.log('Profile Data:', data),
+          error: (err) => console.error('Users Service Error:', err),
+        }),
+      ),
     }).pipe(
-      map(({authData, profileData}) => ({
-      ...authData,
-      ...profileData
+      map(({ authData, profileData }) => ({
+        ...authData,
+        ...profileData,
       })),
       tap((combinedData) => {
         console.log('Combined Profile Data:', combinedData);
-      })
-    )
+      }),
+    );
   }
+
 
 
   getAllProfiles(request: None, request1: Non){

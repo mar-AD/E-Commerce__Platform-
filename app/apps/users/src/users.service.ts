@@ -1,5 +1,5 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { ClientProxy, RmqContext, RpcException } from '@nestjs/microservices';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { GrpcMethod, RmqContext, RpcException } from '@nestjs/microservices';
 import {
   BaseResponse,
   GetAllUserProfilesResponse,
@@ -40,6 +40,7 @@ export class UsersService {
     }
   }
 
+  @GrpcMethod('UsersService', 'getUserProfile')
   getUsersProfile(request: GetUserProfileRequest): Observable<GetUserProfileResponse>{
     this.logger.log(`Getting users profile with ${request.userId}`);
     return from(this.usersRepository.findOne({where: { userId: request.userId }})).pipe(
