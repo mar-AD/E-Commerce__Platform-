@@ -3,7 +3,7 @@ syntax = "proto3";
 package users;
 
 
-service UsersService {
+service UsersProfileService {
   rpc getUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
   rpc getAllUsersProfile (Non) returns (GetAllUserProfilesResponse);
 }
@@ -45,5 +45,3 @@ message Users {
   string phoneNumber = 6;
   string address = 7;
 }
-
-///////// ill add create tomorrow inchallah====================================================

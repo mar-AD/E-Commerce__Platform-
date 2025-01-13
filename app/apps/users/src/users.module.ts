@@ -26,22 +26,6 @@ import { UsersEntity } from './entities/users.entity';
     }),
     TypeOrmModule.forFeature([UsersEntity]),
 
-    // ClientsModule.registerAsync( [
-    //   {
-    //     name: 'RMQ_CONSUMER',
-    //     useFactory: (configService: ConfigService) => ({
-    //       transport: Transport.RMQ,
-    //       options: {
-    //         urls: [configService.get<string>('RABBITMQ_URL')],
-    //         queue: configService.get<string>('RABBITMQ_USERS_QUEUE'),
-    //         queueOptions: { durable: true },
-    //         noAck: false, // Ensures messages are acknowledged only after successful processing
-    //         persistent: true,// Ensures that the messages are saved to disk, so they survive server restarts or crashes. This guarantees that messages will not be lost in case of failure.
-    //       },
-    //     }),
-    //     inject: [ConfigService]
-    //   }
-    // ])
   ],
   controllers: [UsersController],
   providers: [UsersService],

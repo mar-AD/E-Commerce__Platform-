@@ -11,7 +11,6 @@ import {
 import { PermissionsGuard } from '../auth/guards/auth.guard';
 import { UsersService } from './users.service';
 import { Request } from 'express';
-import { tap } from 'rxjs';
 
 @ApiTags('Users')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -24,8 +23,9 @@ export class UsersController {
   @Get('user/profile/:id')
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS)})
-  getProfile(@Param('id') id: string, userId: string) {
+  getProfile(@Param('id') id: string) {
     const findOneDto : FindOneDto = {id};
+    const userId = id
     const request: GetUserProfileRequest = {userId}
     return this.usersService.getProfile(findOneDto, request);
   }
@@ -38,17 +38,6 @@ export class UsersController {
   }
 
   //for user to fetch his profile
-  // @Get('user/profile')
-  // @ApiBearerAuth()
-  // @PermissionsAndAccess({ accessType: ['user']})
-  // getUserProfile(@Req() req: Request, userId: string) {
-  //   const id = req['user']['payload'].id
-  //   const findOneDto : FindOneDto = {id};
-  //   const request: GetUserProfileRequest = {userId}
-  //   return this.usersService.getProfile(findOneDto, request);
-  // }
-
-
   @Get('user/profile')
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['user'] })
@@ -57,20 +46,7 @@ export class UsersController {
     const userId = req['user']['payload'].id;
     const findOneDto: FindOneDto = { id };
     const request: GetUserProfileRequest = { userId };
-
-    console.log('request log:', req['user']['payload']);
-    console.log('Incoming Request to Get User Profile');
-    console.log('Request User ID:', id);
-    console.log('Request User Profile ID:', userId);
-    console.log('findOneDto:', findOneDto);
-    console.log('GetUserProfileRequest:', request);
-
-    return this.usersService.getProfile(findOneDto, request).pipe(
-      tap({
-        next: (data) => console.log('getUserProfile Response:', data),
-        error: (err) => console.error('getUserProfile Error:', err),
-      }),
-    );
+    return this.usersService.getProfile(findOneDto, request);
   }
 
 }

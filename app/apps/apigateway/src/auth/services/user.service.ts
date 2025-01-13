@@ -71,10 +71,6 @@ export class UserService implements OnModuleInit {
     return this.userService.removeUser(findOneDto);
   }
 
-  // getUser(findOneDto: FindOneDto) {
-  //   return this.userService.findUser(findOneDto);
-  // }
-
   updateUserProfile(requestUpdateProfile : RequestUpdateProfile) {
     return this.userService.updateUserProfile(requestUpdateProfile)
   }
@@ -83,7 +79,4 @@ export class UserService implements OnModuleInit {
     return this.userService.deleteUserProfile(findOneDto);
   }
 
-  // getAllEntities(request: None){
-  //   return this.userService.getAllUsers(request)
-  // }
 }

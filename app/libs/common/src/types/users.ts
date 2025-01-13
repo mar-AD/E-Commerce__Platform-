@@ -50,13 +50,13 @@ export interface Users {
 
 export const USERS_PACKAGE_NAME = "users";
 
-export interface UsersServiceClient {
+export interface UsersProfileServiceClient {
   getUserProfile(request: GetUserProfileRequest): Observable<GetUserProfileResponse>;
 
   getAllUsersProfile(request: Non): Observable<GetAllUserProfilesResponse>;
 }
 
-export interface UsersServiceController {
+export interface UsersProfileServiceController {
   getUserProfile(
     request: GetUserProfileRequest,
   ): Promise<GetUserProfileResponse> | Observable<GetUserProfileResponse> | GetUserProfileResponse;
@@ -66,19 +66,19 @@ export interface UsersServiceController {
   ): Promise<GetAllUserProfilesResponse> | Observable<GetAllUserProfilesResponse> | GetAllUserProfilesResponse;
 }
 
-export function UsersServiceControllerMethods() {
+export function UsersProfileServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = ["getUserProfile", "getAllUsersProfile"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("UsersService", method)(constructor.prototype[method], method, descriptor);
+      GrpcMethod("UsersProfileService", method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("UsersService", method)(constructor.prototype[method], method, descriptor);
+      GrpcStreamMethod("UsersProfileService", method)(constructor.prototype[method], method, descriptor);
     }
   };
 }
 
-export const USERS_SERVICE_NAME = "UsersService";
+export const USERS_PROFILE_SERVICE_NAME = "UsersProfileService";

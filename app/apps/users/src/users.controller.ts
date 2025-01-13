@@ -4,13 +4,13 @@ import { Ctx, EventPattern, MessagePattern, Payload, RmqContext } from '@nestjs/
 import {
   BaseResponse,
   GetUserProfileRequest,
-  LoggerService,
-  UsersServiceController,
+  LoggerService, UsersProfileServiceController, UsersProfileServiceControllerMethods,
 } from '@app/common';
 import { UpdateUserProfileDto } from '@app/common/dtos/users-dtos';
 
 @Controller()
-export class UsersController implements UsersServiceController{
+@UsersProfileServiceControllerMethods()
+export class UsersController implements UsersProfileServiceController{
   constructor(
     private readonly usersService: UsersService,
     private logger: LoggerService,
@@ -34,13 +34,12 @@ export class UsersController implements UsersServiceController{
   async updateUserProfile(
     @Payload() data: { id: string; request: UpdateUserProfileDto },
     @Ctx() context: RmqContext,
-  ): Promise<BaseResponse> {  // Make sure the controller method also returns a response
+  ): Promise<BaseResponse> {
     this.logger.log(`Controller received 'update_user_profile' event for ${data.id}`);
 
     const response = await this.usersService.updateUserProfile(data, context);
 
     this.logger.log(`Response sent: ${JSON.stringify(response)}`);
-    // Return the response back to the caller (e.g., Swagger)
     return { ... response };
   }
 

@@ -40,7 +40,6 @@ export class UsersService {
     }
   }
 
-  @GrpcMethod('UsersService', 'getUserProfile')
   getUsersProfile(request: GetUserProfileRequest): Observable<GetUserProfileResponse>{
     this.logger.log(`Getting users profile with ${request.userId}`);
     return from(this.usersRepository.findOne({where: { userId: request.userId }})).pipe(
