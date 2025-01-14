@@ -10,6 +10,7 @@ services:
     depends_on:
       - auth
       - users
+      - admins
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -77,22 +78,23 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     command: sh -c "echo 'Starting users Service'; npm run start:dev users"
-#
-#
-#  admins:
-#    build:
-#      context: ./
-#      dockerfile: ./apps/admins/Dockerfile
-#    env_file:
-#      - ./apps/admins/.env
-#    depends_on:
-#      - admins-db
-#    ports:
-#      - '50056:50055'
-#    volumes:
-#      - .:/usr/src/app
-#      - /usr/src/app/node_modules
-#    command: sh -c "echo 'Starting admins Service'; npm run start:dev admins"
+
+
+  admins:
+    build:
+      context: ./
+      dockerfile: ./apps/admins/Dockerfile
+    env_file:
+      - ./apps/admins/.env
+    depends_on:
+      - admins-db
+      - rabbitmq
+    ports:
+      - '50056:50055'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "echo 'Starting admins Service'; npm run start:dev admins"
 
 
   auth-db:
@@ -115,15 +117,15 @@ services:
       - ./db/users-data:/var/lib/postgresql/data
       - ./db/init-users.sql:/docker-entrypoint-initdb.d/init-users.sql
 
-#  admins-db:
-#    image: postgres:16
-#    env_file:
-#      - ./apps/admins/.env
-#    ports:
-#      - '5435:5432'
-#    volumes:
-#      - ./db/admins-data:/var/lib/postgresql/data
-#      - ./db/init-admins.sql:/docker-entrypoint-initdb.d/init-admins.sql
+  admins-db:
+    image: postgres:16
+    env_file:
+      - ./apps/admins/.env
+    ports:
+      - '5435:5432'
+    volumes:
+      - ./db/admins-data:/var/lib/postgresql/data
+      - ./db/init-admins.sql:/docker-entrypoint-initdb.d/init-admins.sql
 
   rabbitmq:
     image: rabbitmq:4.0.4-management
