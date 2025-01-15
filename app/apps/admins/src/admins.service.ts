@@ -5,7 +5,7 @@ import {
   GetAllAdminProfilesResponse,
   GetAdminProfileRequest,
   GetAdminProfileResponse, LoggerService,
-  messages,
+  messages, UserProfile, AdminProfile,
 } from '@app/common';
 import { catchError, from, map, Observable } from 'rxjs';
 import { status } from '@grpc/grpc-js';
@@ -13,6 +13,7 @@ import { UpdateAdminProfileDto } from '@app/common/dtos';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AdminsEntity } from './entities/admins.entity';
 import { Repository } from 'typeorm';
+import { UsersEntity } from '../../users/src/entities/users.entity';
 
 @Injectable()
 export class AdminsService {
@@ -67,7 +68,7 @@ export class AdminsService {
     return from(this.adminsRepository.find()).pipe(
       map((admins) => {
         this.logger.log('All admins profiles fetched successfully');
-        return { profiles: admins.map(admin => this.mapAdminsProfileResponse(admin)) };
+        return { profiles: admins.map(admin => this.mapAdminsProfilesResponse(admin)) };
       }),
       catchError((error) => {
         this.logger.error(`Error fetching all admins' profiles. Error: ${error.message}`);
@@ -95,7 +96,7 @@ export class AdminsService {
         })
       }
       const updatedFields = {}
-      for (const key of ['profilePic', 'firstName', 'lastName', 'phoneNumber', 'address']) {
+      for (const key of ['profilePic', 'fullName']) {
         if (request[key] !== undefined && request[key] !== thisAdmin[key]) {
           updatedFields[key] = request[key];
         }
@@ -151,6 +152,14 @@ export class AdminsService {
 
   mapAdminsProfileResponse (admins: AdminsEntity): GetAdminProfileResponse {
     return {
+      profilePic: admins.profilePic,
+      fullName: admins.fullName,
+    }
+  }
+
+  mapAdminsProfilesResponse (admins: AdminsEntity): AdminProfile {
+    return {
+      adminId: admins.adminId,
       profilePic: admins.profilePic,
       fullName: admins.fullName,
     }
