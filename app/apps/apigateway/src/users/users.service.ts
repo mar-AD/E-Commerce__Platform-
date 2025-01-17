@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   FindOneDto,
-  GetUserProfileRequest, Non, None,
+  GetUserProfileRequest, Non, None, timestampToDate,
   USER_SERVICE_NAME, USERS_PROFILE_SERVICE_NAME,
   UserServiceClient, UsersProfileServiceClient,
 } from '@app/common';
@@ -28,26 +28,22 @@ export class UsersService implements OnModuleInit{
 
   getProfile(findOneDto: FindOneDto, request: GetUserProfileRequest) {
     return forkJoin({
-      authData: this.authService.findOne(findOneDto).pipe(
-        tap({
-          next: (data) => console.log('Auth Data:', data),
-          error: (err) => console.error('Auth Service Error:', err),
-        }),
-      ),
-      profileData: this.usersService.getUserProfile(request).pipe(
-        tap({
-          next: (data) => console.log('Profile Data:', data),
-          error: (err) => console.error('Users Service Error:', err),
-        }),
-      ),
+      authData: this.authService.findOne(findOneDto),
+      profileData: this.usersService.getUserProfile(request),
     }).pipe(
-      map(({ authData, profileData }) => ({
-        ...authData,
-        ...profileData,
-      })),
-      tap((combinedData) => {
-        console.log('Combined Profile Data:', combinedData);
-      }),
+      map(({ authData, profileData }) => {
+        const createdAt = authData.createdAt ? timestampToDate(authData.createdAt) : null;
+        const updatedAt = authData.updatedAt ? timestampToDate(authData.updatedAt) : null;
+        const deletedAt = authData.deletedAt ? timestampToDate(authData.deletedAt) : null;
+
+        return {
+          ...authData,
+          ...profileData,
+          createdAt,
+          updatedAt,
+          deletedAt,
+        }
+      })
     );
   }
 
@@ -60,15 +56,19 @@ export class UsersService implements OnModuleInit{
         const mergedData = authData.entities.map(entity => {
           // Find the matching profile using the userId
           const profile = profileData.profiles.find(p => p.userId === entity.id);
-
-          // Merge the entity and profile data
+          const createdAt = entity.createdAt ? timestampToDate(entity.createdAt) : null;
+          const updatedAt = entity.updatedAt ? timestampToDate(entity.updatedAt) : null;
+          const deletedAt = entity.deletedAt? timestampToDate(entity.deletedAt) : null;
           return {
             ...entity,
             profilePic: profile?.profilePic,
             firstName: profile?.firstName,
             lastName: profile?.lastName,
             phoneNumber: profile?.phoneNumber,
-            address: profile?.address
+            address: profile?.address,
+            createdAt,
+            updatedAt,
+            deletedAt
           };
         });
 
