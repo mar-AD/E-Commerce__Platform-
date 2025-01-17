@@ -25,7 +25,7 @@ async function bootstrap() {
       {
         transport: Transport.RMQ,
         options: {
-          urls: [configService.get<string>('POSTGRES_ADMINS_URI')],
+          urls: [configService.get<string>('RABBITMQ_URL')],
           queue: configService.get<string>('RABBITMQ_ADMINS_QUEUE'),
           queueOptions: {durable: true },
           noAck: false,

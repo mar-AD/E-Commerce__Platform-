@@ -4,6 +4,7 @@
 /build
 /db/auth-data
 /db/users-data
+/db/admins-data
 
 # Logs
 logs

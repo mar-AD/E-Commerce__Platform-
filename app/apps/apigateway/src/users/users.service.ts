@@ -7,7 +7,7 @@ import {
 } from '@app/common';
 import { AUTH_SERVICE, USERS_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
-import { forkJoin, map, tap } from 'rxjs';
+import { forkJoin, map } from 'rxjs';
 
 @Injectable()
 export class UsersService implements OnModuleInit{
