@@ -4,14 +4,14 @@ import {
   FindOneDto,
   LoginDto,
   RefreshTokenDto,
-  RequestUpdateEmailRequest, ResetPasswordRequest,
+  RequestUpdateEmailRequest, RequestUpdateProfile, ResetPasswordRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
   UserServiceController,
   UserServiceControllerMethods,
   VerifyEmailCodeRequest,
 } from '@app/common';
-import { CreateDto, ForgotPasswordDto } from '@app/common/dtos';
+import { CreateDto, ForgotPasswordDto } from '@app/common/dtos/auth-dtos';
 
 @Controller()
 @UserServiceControllerMethods()
@@ -70,7 +70,19 @@ export class UsersController implements UserServiceController{
   }
 
   findOne(findOneDto: FindOneDto) {
-    console.log('we are here at user controller ', findOneDto);
     return this.usersService.getUser(findOneDto);
+  }
+
+  getAllUsers() {
+    return this.usersService.getAllUsers();
+  }
+
+  updateUserProfile(requestUpdateProfile : RequestUpdateProfile) {
+    const { userProfileUpdateDto, findOneDto } = requestUpdateProfile
+    return this.usersService.updateUserProfile(userProfileUpdateDto, findOneDto);
+  }
+
+  deleteUserProfile(findOneDto: FindOneDto) {
+    return this.usersService.deleteUserProfile(findOneDto);
   }
 }

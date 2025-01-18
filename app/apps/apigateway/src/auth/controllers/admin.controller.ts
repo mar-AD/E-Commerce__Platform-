@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from '../services/admin.service';
 import {
   CreateAdminDto, ForgotPasswordDto,
@@ -6,18 +6,29 @@ import {
   RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto,
   UpdatePasswordDto, UpdateAdminRoleDto, VerifyEmailCodeDto,
-} from '@app/common/dtos';
+} from '@app/common/dtos/auth-dtos';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
-  FindOneDto, getPermissionName, isPublic, JwtAuthGuard, Permissions, RequestUpdateEmailRequest,
+  Empty,
+  FindOneDto,
+  getPermissionName,
+  isPublic,
+  JwtAuthGuard,
+  None,
+  Permissions,
+  RequestUpdateAdminProfile,
+  RequestUpdateEmailRequest,
   ResetPasswordRequest,
-  TokenDto, UpdateAdminRoleRequest,
-  UpdateEmailRequest, UpdatePasswordRequest,
+  TokenDto,
+  UpdateAdminRoleRequest,
+  UpdateEmailRequest,
+  UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
 import { PermissionsGuard } from '../guards/auth.guard';
+import { UpdateAdminProfileDto } from '@app/common/dtos';
 
 
 @ApiTags('AuthAdmins')
@@ -119,11 +130,35 @@ export class AdminController {
 
   @Delete('admin/remove')
   @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
+  @PermissionsAndAccess({ accessType: ['admin'] })
   remove(@Req() req: Request) {
     const id = req['user']['payload'].id
     const findOneDto : FindOneDto = {id};
     return this.adminService.remove(findOneDto);
   }
 
+  @Patch('admin/update-profile')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin']})
+  updateAdminProfile(@Req() req: Request, @Body() adminProfileUpdateDto: UpdateAdminProfileDto) {
+    const id = req['user']['payload'].id
+    const findOneDto : FindOneDto = {id};
+    const requestUpdateProfile : RequestUpdateAdminProfile = {adminProfileUpdateDto, findOneDto}
+    return this.adminService.updateAdminProfile(requestUpdateProfile);
+  }
+
+  @Delete('admin/remove-admin-profile/:id')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
+  deleteUserProfile(@Param('id') id: string) {
+    const findOneDto : FindOneDto = {id};
+    return this.adminService.deleteAdminProfile(findOneDto);
+  }
+
+  // @Get('admin/getAll')
+  // @ApiBearerAuth()
+  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ADMINS) })
+  // getAll(request: None) {
+  //   return this.adminService.getAllEntities(request);
+  // }
 }

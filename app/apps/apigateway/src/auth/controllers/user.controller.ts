@@ -7,7 +7,7 @@ import {
   RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto,
   UpdatePasswordDto, VerifyEmailCodeDto,
-} from '@app/common/dtos' ;
+} from '@app/common/dtos/auth-dtos' ;
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import {
@@ -17,10 +17,11 @@ import {
   TokenDto,
   UpdateEmailRequest, UpdatePasswordRequest,
   VerifyEmailCodeRequest,
-  Permissions
+  Permissions, RequestUpdateProfile,
 } from '@app/common';
 import { PermissionsAndAccess } from '@app/common/utils/methadata';
 import { PermissionsGuard } from '../guards/auth.guard';
+import { UpdateUserProfileDto } from '@app/common/dtos';
 
 
 @ApiTags('AuthUsers')
@@ -30,9 +31,9 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('user/register')
-  @ApiBearerAuth()
-  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
-  // @isPublic()
+  // @ApiBearerAuth()
+  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  @isPublic()
   createUser(@Body() createUserDto: CreateDto) {
     return this.userService.create(createUserDto);
   }
@@ -120,11 +121,28 @@ export class UserController {
     return this.userService.remove(findOneDto);
   }
 
-//   @Get('user/:id')
-//   @ApiBearerAuth()
-//   @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
-//   getUser(@Param('id') id : string) {
-//     const findOneDto : FindOneDto = {id};
-//     return this.userService.getUser(findOneDto);
-//   }
+  @Patch('user/update-profile')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['user']})
+  updateUserProfile(@Req() req: Request, @Body() userProfileUpdateDto: UpdateUserProfileDto) {
+    const id = req['user']['payload'].id
+    const findOneDto : FindOneDto = {id};
+    const requestUpdateProfile : RequestUpdateProfile = { userProfileUpdateDto, findOneDto }
+     return this.userService.updateUserProfile(requestUpdateProfile);
+  }
+
+  @Delete('user/remove-user-profile/:id')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  deleteUserProfile(@Param('id') id: string) {
+    const findOneDto : FindOneDto = {id};
+    return this.userService.deleteUserProfile(findOneDto);
+  }
+
+  // @Get('user/getAll')
+  // @ApiBearerAuth()
+  // @PermissionsAndAccess({ accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_USERS) })
+  // getAll(request: None) {
+  //   return this.userService.getAllEntities(request);
+  // }
 }

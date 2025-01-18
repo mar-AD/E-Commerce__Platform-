@@ -11,7 +11,6 @@ import { emailUpdateRequestHtml } from './templates/req-email-update-email';
 export class EmailService {
   constructor(
     @Inject('MAIL_TRANSPORTER') private readonly transporter: nodemailer.Transporter,
-    // private logger: LoggerService
     private logger: LoggerService
   ) {}
 
@@ -37,7 +36,7 @@ export class EmailService {
     }
   }
 
-  async sendResetPasswordEmail(data:{email: string, token: string} , context: RmqContext) {
+  async sendResetPasswordEmail(data:{email: string, token: string} , context: RmqContext): Promise<void> {
     const {email, token}= data;
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
@@ -60,7 +59,7 @@ export class EmailService {
     }
   }
 
-  async sendEmailUpdateReqEmail(data:{email: string, verificationCode: string} , context: RmqContext){
+  async sendEmailUpdateReqEmail(data:{email: string, verificationCode: string} , context: RmqContext): Promise<void>{
     const {email, verificationCode}= data;
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();

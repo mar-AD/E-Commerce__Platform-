@@ -2,28 +2,46 @@ syntax = "proto3";
 
 package users;
 
-import "google/protobuf/timestamp.proto";
 
-service UsersService {
-  rpc GetUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
+service UsersProfileService {
+  rpc getUserProfile (GetUserProfileRequest) returns (GetUserProfileResponse);
+  rpc getAllUsersProfile (Non) returns (GetAllUserProfilesResponse);
 }
+
+message Non {}
 
 message GetUserProfileRequest {
   string userId = 1;
 }
 
 message GetUserProfileResponse {
-  string firstname = 1;
-  string lastname = 2;
-  string phonenumber = 3;
+  string firstName = 1;
+  string lastName = 2;
+  string phoneNumber = 3;
   string address = 4;
+  string profilePic = 5;
+}
+
+
+message UserProfile {
+  string userId = 1;
+  string profilePic = 2;
+  string firstName = 3;
+  string lastName = 4;
+  string phoneNumber = 5;
+  string address = 6;
+}
+
+message GetAllUserProfilesResponse {
+  repeated UserProfile profiles = 1;
 }
 
 message Users {
   string id = 1;
   string userId = 2;
-  string firstname = 3;
-  string lastname = 4;
-  string phonenumber = 5;
-  string address =6;
+  string profilePic = 3;
+  string firstName = 4;
+  string lastName = 5;
+  string phoneNumber = 6;
+  string address = 7;
 }

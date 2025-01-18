@@ -8,17 +8,16 @@ export class EmailController {
   constructor(
     private readonly emailService: EmailService,
     private logger: LoggerService
-    // private readonly logger: LoggerService
   ) {}
 
   @EventPattern('welcome_email')
-  async handleWelcomeEmail(@Payload() data: { email: string }, @Ctx() context: RmqContext): Promise<void> {
+  async handleWelcomeEmail(@Payload() data: { email: string }, @Ctx() context: RmqContext){
     this.logger.log(`Controller received 'welcome_email' event for ${data.email}`);
     await this.emailService.sendWelcomeEmail(data, context);
   }
 
   @EventPattern('reset_pass_email')
-  async handleResetPassEmail(@Payload() data: {email: string, token: string}, @Ctx() context: RmqContext): Promise<void> {
+  async handleResetPassEmail(@Payload() data: {email: string, token: string}, @Ctx() context: RmqContext){
     this.logger.log(`Controller received 'reset_pass_email' event for ${data.email}`)
     await this.emailService.sendResetPasswordEmail(data, context);
   }

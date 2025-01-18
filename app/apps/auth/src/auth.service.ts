@@ -1,6 +1,7 @@
 import {
   BadRequestException,
-  HttpStatus, Inject,
+  HttpStatus,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -11,31 +12,42 @@ import { MoreThan, Repository } from 'typeorm';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from './entities/email-verification-code.entity';
 import {
-  AuthResponse,
-  Empty, FindOneDto,
+  AuthResponse, BaseResponse,
+  Empty,
+  FindOneDto,
   generateEmailCode,
   getExpiryDate,
   hashPassword,
-  JwtTokenService, LoggerService,
-  messages, TokenDto,
+  JwtTokenService,
+  LoggerService,
+  messages,
+  TokenDto,
   VerifyEmailCode,
   verifyPassword,
 } from '@app/common';
 import { catchError, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import { AuthConstants } from './constants';
 import { AdminEntity } from './admins/entities/admin.entity';
-import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto,
+import {
+  CreateDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RefreshTokenDto,
+  RequestEmailUpdateDto,
   ResetPasswordDto,
-  UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
+  UpdateEmailDto,
+  UpdatePasswordDto,
+  VerifyEmailCodeDto,
+} from '@app/common/dtos/auth-dtos';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { RoleEntity } from './roles/entities/role.entity';
 import { ConfigService } from '@nestjs/config';
-
+import { UpdateAdminProfileDto, UpdateUserProfileDto } from '@app/common/dtos';
 
 
 @Injectable()
-export abstract class  BaseService<E> {
+export abstract class  BaseService<E,T extends { entities: E[] }> {
 
   protected constructor(
     @InjectRepository(AdminEntity) protected readonly adminRepository: Repository<AdminEntity>,
@@ -45,7 +57,9 @@ export abstract class  BaseService<E> {
     protected readonly jwtTokenService: JwtTokenService,
     protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
-    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
+    @Inject('RMQ_EMAIL_CLIENT') protected readonly clientEmail: ClientProxy,
+    @Inject('RMQ_USERS_CLIENT') protected readonly clientUser: ClientProxy,
+    @Inject('RMQ_ADMINS_CLIENT') protected readonly clientAdmin: ClientProxy
   ) {
   }
 
@@ -75,11 +89,18 @@ export abstract class  BaseService<E> {
 
             this.logger.log(`${type+'Repo'}: Saving the new entity to the repository...`);
             return from(repository.save(newEntity)).pipe(
-              map((createdUser) => {
-                this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
-                return this.mapResponse(createdUser);
-              }),
+              map((createdEntity) => {
 
+                if (type === AuthConstants.user){
+                  this.logger.log(`Emitting create_user_profile event for "${createdEntity.id}".`);
+                  this.clientUser.emit('create_user_profile', { userId: createdEntity.id });
+                }else if (type === AuthConstants.admin){
+                  this.logger.log(`Emitting create_admin_profile event for "${createdEntity.id}".`);
+                  this.clientAdmin.emit('create_admin_profile', { adminId: createdEntity.id });
+                }
+                this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
+                return this.mapResponse(createdEntity);
+              }),
               catchError((err) => {
                 this.logger.error(`${type+'Repo'}: Failed to create and save the entity with email "${email}". Error: ${err.message}`);
                 throw new RpcException({
@@ -97,7 +118,7 @@ export abstract class  BaseService<E> {
     tap(()=>{
       this.logger.log(`Emitting welcome_email event for ${email}...`);
 
-      this.client.emit('welcome_email', { email: email }).pipe(
+      this.clientEmail.emit('welcome_email', { email: email }).pipe(
 
         tap(()=>{
           this.logger.log(`Successfully emitted welcome_email event for ${email}.`);
@@ -294,7 +315,7 @@ export abstract class  BaseService<E> {
 
       tap(()=>{
         this.logger.log(`Emitting req_update_email_email event for ${requestEmailUpdateDto.email}...`)
-        this.client.emit('req_update_email_email', {email: requestEmailUpdateDto.email, verificationCode: code}).pipe(
+        this.clientEmail.emit('req_update_email_email', {email: requestEmailUpdateDto.email, verificationCode: code}).pipe(
           tap(()=>{
             this.logger.log(`Successfully emitted req_update_email_email event for ${requestEmailUpdateDto.email}.`);
           }),
@@ -543,7 +564,7 @@ export abstract class  BaseService<E> {
 
       tap(()=>{
         this.logger.log(`Emitting reset_pass_email event for ${email}...`)
-        this.client.emit('reset_pass_email', {email: email, token: token}).pipe(
+        this.clientEmail.emit('reset_pass_email', {email: email, token: token}).pipe(
           tap(()=>{
             this.logger.log(`Successfully emitted reset_pass_email event for ${email}.`);
           }),
@@ -618,7 +639,7 @@ export abstract class  BaseService<E> {
 
     this.logger.log(`${type + 'Repo'}: Attempting to remove entity with ID: ${findOneDto.id}...`);
 
-    return from(repository.findOne({ where: { id: findOneDto.id } })).pipe(
+    return from(repository.findOne({ where: { id: findOneDto.id, isDeleted: false, isActive:true, isEmailVerified:false } })).pipe(
       switchMap((thisEntity) => {
         if (!thisEntity) {
           this.logger.error(`${type + 'Repo'}: Entity not found for ID: ${findOneDto.id}.`);
@@ -669,7 +690,8 @@ export abstract class  BaseService<E> {
     );
   }
 
-  getAll(id: string, type: AuthConstants): Observable<E> {
+  //i need it for the authguard (internally)
+  getOne(id: string, type: AuthConstants): Observable<E> {
     const findOneDto: FindOneDto = {id}
     const repository = this.getRepository(type);
     const messageType = this.getMessageType(type);
@@ -679,6 +701,7 @@ export abstract class  BaseService<E> {
         ...conditioning ,
         relations: ['roleId']}
     }
+    this.logger.log(`${type + 'Repo'}: Attempting to find entity with ID: ${findOneDto.id}...`);
 
     return from(repository.findOne(conditioning)).pipe(
       map((thisEntity) => {
@@ -688,11 +711,144 @@ export abstract class  BaseService<E> {
             message: messageType.NOT_FOUND2
           })
         }
+        this.logger.log(`${type + 'Repo'}: entity with ID: ${findOneDto.id} found successfully`);
         return this.mapResponse(thisEntity)
       })
     )
   }
 
+
+  updateProfile(
+    findOneDto: FindOneDto,
+    profileUpdateDto,
+    type: AuthConstants
+  ): Observable<BaseResponse> {
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+
+    return from(
+      repository.findOne({
+        where: { id: findOneDto.id, isDeleted: false, isActive: true, isEmailVerified: false },
+      })
+    ).pipe(
+      switchMap((thisEntity) => {
+        if (!thisEntity) {
+          throw new RpcException({
+            status: status.NOT_FOUND,
+            message: messageType.NOT_FOUND2,
+          });
+        }
+
+        if (type === AuthConstants.user) {
+          this.logger.log(`Sending update_user_profile event for "${thisEntity.id}".`);
+
+          return this.clientUser.send<BaseResponse>('update_user_profile', {
+            id: thisEntity.id,
+            request: profileUpdateDto,
+          }).pipe(
+            map((response) => {
+              if (!response) {
+                throw new RpcException('No response from Users service');
+              }
+              return {
+                ... response
+              };
+            })
+          );
+        } else if (type === AuthConstants.admin) {
+          this.logger.log(`Sending update_admin_profile event for "${thisEntity.id}".`);
+
+          return this.clientAdmin.send<BaseResponse>('update_admin_profile', {
+            id: thisEntity.id,
+            request: profileUpdateDto,
+          }).pipe(
+            map((response) => {
+              if (!response) {
+                throw new RpcException('No response from Admins service');
+              }
+              return {
+                ... response
+              };
+            })
+          );
+        }
+      }),
+      catchError((err) => {
+        this.logger.error(
+          `${type + 'Repo'}: Failed to update the entity with id "${findOneDto.id}". Error: ${err.message}`
+        );
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messageType.FAILED_TO_UPDATE,
+        });
+      })
+    );
+  }
+
+
+  removeProfile(findOneDto: FindOneDto, type: AuthConstants): Observable<Empty>{
+    // const {id} = findOneDto;
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+    this.logger.log(`Incoming ID for removal: ${findOneDto.id}`);
+
+    return from(repository.findOne({where: {id: findOneDto.id}})).pipe(
+      switchMap((thisEntity)=>{
+        if (!thisEntity){
+          this.logger.error(`${type + 'Repo'}: Entity not found for ID: ${findOneDto.id}.`);
+          throw new RpcException({
+            status: status.NOT_FOUND,
+            message: messageType.NOT_FOUND2
+          })
+        }
+        this.logger.log(`${type + 'Repo'}: Attempting to remove entity with ID: ${findOneDto.id}...`);this.logger.log(`${type + 'Repo'}: Attempting to remove entity with ID: ${findOneDto.id}...`);
+        return from(repository.remove(thisEntity)).pipe(
+          map(()=>{
+            this.logger.log(`${type + 'Repo'}: Entity with ID: ${findOneDto.id} removed successfully.`);
+
+            if (type === AuthConstants.user){
+              this.logger.log(`Emitting delete_user_profile event for "${thisEntity.id}".`);
+              this.clientUser.emit('delete_user_profile', {id: findOneDto.id})
+            }else if (type === AuthConstants.admin){
+              /////////////////////////////////////////// later //////////////////////////
+            }
+            return {
+              result:{
+                status: HttpStatus.OK,
+                message: messageType.REMOVED_SUCCESSFULLY
+              }
+            }
+          }),
+          catchError((error) => {
+            this.logger.error(`${type + 'Repo'}: Failed to remove entity with ID: ${findOneDto.id}. Error: ${error.message}`);
+            throw new RpcException({
+              code: status.INTERNAL,
+              message: messageType.FAILED_REMOVE
+            });
+          })
+        )
+      })
+    )
+  }
+
+  getAllEntities(type: AuthConstants):Observable<T> {
+    const repository = this.getRepository(type);
+    const messageType = this.getMessageType(type);
+    this.logger.log(`trying to get all Entities..`);
+    return from(repository.find()).pipe(
+      map((entities) => {
+        this.logger.log('All Entities profiles fetched successfully');
+        return {entities: entities.map(entity => this.mapResponse(entity))} as T;
+      }),
+      catchError((error) => {
+        this.logger.error(`Error fetching all Entities' profiles. Error: ${error.message}`);
+        throw new RpcException({
+          status: status.INTERNAL,
+          message: messageType.FAILED_FETCH,
+        });
+      })
+    );
+  }
 
 
   protected getRepository(type: AuthConstants): Repository<AdminEntity | UserEntity> {

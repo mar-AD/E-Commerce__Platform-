@@ -67,7 +67,14 @@
       "entryFile": "src/main",
       "sourceRoot": "./",
       "compilerOptions": {
-        "tsConfigPath": "apps/users/tsconfig.app.json"
+        "tsConfigPath": "apps/users/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "proto/**/*.proto",
+            "outDir": "dist/apps/users/proto"
+          }
+        ],
+        "watchAssets": true
       }
     },
     "admins": {
@@ -76,7 +83,14 @@
       "entryFile": "src/main",
       "sourceRoot": "./",
       "compilerOptions": {
-        "tsConfigPath": "apps/admins/tsconfig.app.json"
+        "tsConfigPath": "apps/admins/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "proto/**/*.proto",
+            "outDir": "dist/apps/admins/proto"
+          }
+        ],
+        "watchAssets": true
       }
     }
   }

@@ -2,15 +2,30 @@ import { NestFactory } from '@nestjs/core';
 import { UsersModule } from './users.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-// import { USERS_PACKAGE_NAME } from '@app/common';
+import { USERS_PACKAGE_NAME } from '@app/common';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  // const app = await NestFactory.create(UsersModule);
+
   try {
-    const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-      UsersModule,
+    const app = await NestFactory.create(UsersModule);
+    const configService = app.get(ConfigService);
+
+    app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.RMQ,
+      options: {
+        urls: [configService.get<string>('RABBITMQ_URL')],
+        queue: configService.get<string>('RABBITMQ_USERS_QUEUE'),
+        queueOptions: { durable: true },
+        noAck: false, // Ensures messages are acknowledged only after successful processing
+        persistent: true,
+      },
+    });
+
+
+    app.connectMicroservice<MicroserviceOptions>(
       {
-        trasport: Transport.GRPC,
+        transport: Transport.GRPC,
         options: {
           protoPath: join(__dirname, '../proto/users.proto'),
           package: USERS_PACKAGE_NAME,
@@ -18,8 +33,9 @@ async function bootstrap() {
         }
       }
     )
-    await app.listen();
-    console.log('Users microservice is running on port 50053 (Grpc client)');
+    await app.startAllMicroservices();
+    // console.log('Users microservice is running on port 50053 (Grpc client)');
+    console.log('Users microservices are running (grpc, rmq)');
   }catch (err){
     console.log('Error starting the users microservice:', err)
   }

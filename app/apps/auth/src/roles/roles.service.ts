@@ -12,7 +12,7 @@ import { RoleEntity } from './entities/role.entity';
 import { Repository } from 'typeorm';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos';
+import { CreateRoleDto, UpdateRoleDto } from '@app/common/dtos/auth-dtos';
 import { arraysEqual, findDuplicates } from '../constants';
 
 @Injectable()

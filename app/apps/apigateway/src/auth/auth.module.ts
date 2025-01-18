@@ -6,22 +6,22 @@ import { UserController } from './controllers/user.controller';
 import { AdminController } from './controllers/admin.controller';
 import { RolesController } from './controllers/roles.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AUTH_PACKAGE_NAME, CommonModule } from '@app/common';
+import { AUTH_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
-import { AUTH_SERVICE } from './constants';
+import { AUTH_SERVICE } from '../constants';
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-      name: AUTH_SERVICE,
-      transport: Transport.GRPC,
-      options: {
-        package: AUTH_PACKAGE_NAME,
-        protoPath: join(__dirname, '../proto/auth.proto'),
-        url: 'auth:50051',
-      },
-      },
+        name: AUTH_SERVICE,
+        transport: Transport.GRPC,
+        options: {
+          package: AUTH_PACKAGE_NAME,
+          protoPath: join(__dirname, '../proto/auth.proto'),
+          url: 'auth:50051',
+        },
+      }
     ]),
   ],
   controllers: [UserController, AdminController, RolesController],

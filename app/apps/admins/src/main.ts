@@ -2,13 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { AdminsModule } from './admins.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path'
-// import { ADMINS_PACKAGE_NAME } from '@app/common';
+import { ADMINS_PACKAGE_NAME } from '@app/common';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
-  // const app = await NestFactory.create(AdminsModule);
   try {
-    const app = NestFactory.createMicroservice<MicroserviceOptions>(
-      AdminsModule,
+    const app = await NestFactory.create(AdminsModule);
+    const configService = app.get(ConfigService);
+
+    app.connectMicroservice<MicroserviceOptions>(
       {
         transport: Transport.GRPC,
         options: {
@@ -18,8 +20,21 @@ async function bootstrap() {
         }
       }
     )
-    await app.listen();
-    console.log('admins microservice is running on port 50055');
+
+    app.connectMicroservice<MicroserviceOptions>(
+      {
+        transport: Transport.RMQ,
+        options: {
+          urls: [configService.get<string>('RABBITMQ_URL')],
+          queue: configService.get<string>('RABBITMQ_ADMINS_QUEUE'),
+          queueOptions: {durable: true },
+          noAck: false,
+          persistent: true,
+        }
+      }
+    )
+    await app.startAllMicroservices()
+    console.log('admins microservice is running (grpc, rmq)');
   }catch (err){
     console.log('Error starting the admins microservice:', err);
   }

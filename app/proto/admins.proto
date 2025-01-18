@@ -1,0 +1,39 @@
+syntax = 'proto3';
+
+package admins;
+
+
+service AdminsProfileService {
+  rpc getAdminProfile (GetAdminProfileRequest) returns (GetAdminProfileResponse);
+  rpc getAllAdminsProfile (No) returns (GetAllAdminProfilesResponse);
+}
+
+message No {}
+
+message GetAdminProfileRequest {
+  string adminId = 1;
+}
+
+message GetAdminProfileResponse {
+  string fullName = 1;
+  string profilePic = 2;
+}
+
+
+message AdminProfile {
+  string adminId = 1;
+  string profilePic = 2;
+  string fullName = 3;
+}
+
+message GetAllAdminProfilesResponse {
+  repeated AdminProfile profiles = 1;
+}
+
+message Admins {
+  string id = 1;
+  string adminId = 2;
+  string profilePic = 3;
+  string fullName = 4;
+}
+

@@ -119,6 +119,23 @@ export interface CreateUserDto {
   password: string;
 }
 
+export interface GetAllUsersResponse {
+  entities: User[];
+}
+
+export interface UserProfileUpdateDto {
+  firstName?: string | undefined;
+  lastName?: string | undefined;
+  phoneNumber?: string | undefined;
+  address?: string | undefined;
+  profilePic?: string | undefined;
+}
+
+export interface RequestUpdateProfile {
+  userProfileUpdateDto: UserProfileUpdateDto | undefined;
+  findOneDto: FindOneDto | undefined;
+}
+
 /** admin DTOs */
 export interface CreateAdminDto {
   email: string;
@@ -132,6 +149,20 @@ export interface UpdateAdminRoleDto {
 
 export interface UpdateAdminRoleRequest {
   updateAdminRoleDto: UpdateAdminRoleDto | undefined;
+  findOneDto: FindOneDto | undefined;
+}
+
+export interface GetAllAdminsResponse {
+  entities: Admin[];
+}
+
+export interface AdminProfileUpdateDto {
+  fullName?: string | undefined;
+  profilePic?: string | undefined;
+}
+
+export interface RequestUpdateAdminProfile {
+  adminProfileUpdateDto: AdminProfileUpdateDto | undefined;
   findOneDto: FindOneDto | undefined;
 }
 
@@ -239,6 +270,12 @@ export interface UserServiceClient {
   removeUser(request: FindOneDto): Observable<Empty>;
 
   findOne(request: FindOneDto): Observable<User>;
+
+  getAllUsers(request: None): Observable<GetAllUsersResponse>;
+
+  updateUserProfile(request: RequestUpdateProfile): Observable<BaseResponse>;
+
+  deleteUserProfile(request: FindOneDto): Observable<Empty>;
 }
 
 /** users */
@@ -267,6 +304,12 @@ export interface UserServiceController {
   removeUser(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 
   findOne(request: FindOneDto): Promise<User> | Observable<User> | User;
+
+  getAllUsers(request: None): Promise<GetAllUsersResponse> | Observable<GetAllUsersResponse> | GetAllUsersResponse;
+
+  updateUserProfile(request: RequestUpdateProfile): Promise<BaseResponse> | Observable<BaseResponse> | BaseResponse;
+
+  deleteUserProfile(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 }
 
 export function UserServiceControllerMethods() {
@@ -284,6 +327,9 @@ export function UserServiceControllerMethods() {
       "userResetPassword",
       "removeUser",
       "findOne",
+      "getAllUsers",
+      "updateUserProfile",
+      "deleteUserProfile",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
@@ -329,6 +375,12 @@ export interface AdminServiceClient {
   findOne(request: FindOneDto): Observable<Admin>;
 
   permissionsByRole(request: FindOneDto): Observable<Permission>;
+
+  getAllAdmins(request: None): Observable<GetAllAdminsResponse>;
+
+  updateAdminProfile(request: RequestUpdateAdminProfile): Observable<BaseResponse>;
+
+  deleteAdminProfile(request: FindOneDto): Observable<Empty>;
 }
 
 /** Admins */
@@ -361,6 +413,12 @@ export interface AdminServiceController {
   findOne(request: FindOneDto): Promise<Admin> | Observable<Admin> | Admin;
 
   permissionsByRole(request: FindOneDto): Promise<Permission> | Observable<Permission> | Permission;
+
+  getAllAdmins(request: None): Promise<GetAllAdminsResponse> | Observable<GetAllAdminsResponse> | GetAllAdminsResponse;
+
+  updateAdminProfile(request: RequestUpdateAdminProfile): Promise<BaseResponse> | Observable<BaseResponse> | BaseResponse;
+
+  deleteAdminProfile(request: FindOneDto): Promise<Empty> | Observable<Empty> | Empty;
 }
 
 export function AdminServiceControllerMethods() {
@@ -380,6 +438,9 @@ export function AdminServiceControllerMethods() {
       "removeAdmin",
       "findOne",
       "permissionsByRole",
+      "getAllAdmins",
+      "updateAdminProfile",
+      "deleteAdminProfile",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

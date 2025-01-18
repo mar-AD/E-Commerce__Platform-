@@ -2,15 +2,18 @@ import { Controller } from '@nestjs/common';
 import { AdminsService } from './admins.service';
 import {
   AdminServiceController,
-  AdminServiceControllerMethods,
-  FindOneDto,
-  RequestUpdateEmailRequest, ResetPasswordRequest,
+  AdminServiceControllerMethods, BaseResponse,
+  FindOneDto, RequestUpdateAdminProfile,
+  RequestUpdateEmailRequest, RequestUpdateProfile, ResetPasswordRequest,
   UpdateAdminRoleRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
   VerifyEmailCodeRequest,
 } from '@app/common';
-import { CreateAdminDto, LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos';
+import { CreateAdminDto, LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos/auth-dtos';
+import { Observable } from 'rxjs';
+import { AuthConstants } from '../constants';
+import { UpdateUserProfileDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()
@@ -79,5 +82,18 @@ export class AdminsController implements AdminServiceController{
   permissionsByRole(findOneDto: FindOneDto) {
     console.log('findOneAdmin received IN permissionsByRole:', findOneDto);
     return this.adminsService.GetPermissionsByRole(findOneDto);
+  }
+
+  getAllAdmins() {
+    return this.adminsService.getAllAdmins();
+  }
+
+  updateAdminProfile(requestUpdateProfile : RequestUpdateAdminProfile): Observable<BaseResponse> {
+    const { adminProfileUpdateDto, findOneDto } = requestUpdateProfile
+    return this.adminsService.updateAdminProfile(adminProfileUpdateDto, findOneDto);
+  }
+
+  deleteAdminProfile(findOneDto: FindOneDto) {
+    return this.adminsService.deleteAdminProfile(findOneDto);
   }
 }

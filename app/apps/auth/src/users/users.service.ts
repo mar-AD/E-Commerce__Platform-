@@ -4,27 +4,27 @@ import {
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  User, LoggerService, FindOneDto, TokenDto, messages,
+  User, LoggerService, FindOneDto, TokenDto, GetAllUsersResponse, BaseResponse,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { from, map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { AuthConstants } from '../constants';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
 import { BaseService } from '../auth.service';
 import { AdminEntity } from '../admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
-  UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos';
+  UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos/auth-dtos';
 import { Cron } from '@nestjs/schedule';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { status } from '@grpc/grpc-js';
+import { UpdateUserProfileDto } from '@app/common/dtos';
 
 
 @Injectable()
-export class UsersService extends BaseService<User>{
+export class UsersService extends BaseService<User, GetAllUsersResponse>{
 
   constructor(
     @InjectRepository(UserEntity) protected readonly userRepository: Repository<UserEntity>,
@@ -35,9 +35,11 @@ export class UsersService extends BaseService<User>{
     private readonly cronService: CronService,
     protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
-    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
+    @Inject('RMQ_EMAIL_CLIENT') protected readonly clientEmail: ClientProxy,
+    @Inject('RMQ_USERS_CLIENT') protected readonly clientUser: ClientProxy,
+    @Inject('RMQ_ADMINS_CLIENT') protected readonly clientAdmin: ClientProxy
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, clientEmail, clientUser, clientAdmin)
     // console.log(this.logger instanceof LoggerService);
     // if (!this.logger || typeof this.logger.log !== 'function') {
     //   throw new Error('Logger is not properly instantiated');
@@ -88,24 +90,22 @@ export class UsersService extends BaseService<User>{
     return this.remove(findOneDto, AuthConstants.user);
   }
 
-
   // fro the autGuard ====
   getUser(findOneDto: FindOneDto): Observable<User> {
-    // const {id} = findOneDto;
-    // console.log('here at users', id);
-    // return from(this.userRepository.findOne({where: {id: id, isDeleted: false, isActive: true, isEmailVerified: false}})).pipe(
-    //   map((thisEntity) => {
-    //     if (!thisEntity) {
-    //       throw new RpcException({
-    //         code: status.NOT_FOUND,
-    //         message: messages.USER.NOT_FOUND2
-    //       })
-    //     }
-    //     console.log('user found', thisEntity);
-    //     return this.mapResponse(thisEntity)
-    //   })
-    // )
-    return this.getAll(findOneDto.id, AuthConstants.user);
+    return this.getOne(findOneDto.id, AuthConstants.user);
+  }
+
+
+  updateUserProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<BaseResponse> {
+    return this.updateProfile(findOneDto, userProfileUpdateDto, AuthConstants.user);
+  }
+
+  deleteUserProfile(findOneDto: FindOneDto): Observable<Empty> {
+    return this.removeProfile(findOneDto, AuthConstants.user);
+  }
+
+  getAllUsers(): Observable<GetAllUsersResponse>{
+    return this.getAllEntities(AuthConstants.user);
   }
 
   @Cron("0 0 * * *")

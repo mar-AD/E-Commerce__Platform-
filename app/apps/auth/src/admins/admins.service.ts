@@ -4,9 +4,9 @@ import {
 } from '@nestjs/common';
 import {
   Admin,
-  AuthResponse, CronService,
+  AuthResponse, BaseResponse, CronService,
   dateToTimestamp,
-  Empty, FindOneDto, ForgotPasswordDto,
+  Empty, FindOneDto, ForgotPasswordDto, GetAllAdminsResponse,
   JwtTokenService, LoggerService,
   LoginDto,
   messages, Permission, RefreshTokenDto, RequestEmailUpdateDto, TokenDto, UpdateEmailDto,
@@ -16,22 +16,23 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AdminEntity } from './entities/admin.entity';
 import { Repository } from 'typeorm';
 import { RoleEntity } from '../roles/entities/role.entity';
-import { CreateAdminDto } from '@app/common/dtos/create-admin.dto';
+import { CreateAdminDto } from '@app/common/dtos/auth-dtos/create-admin.dto';
 import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 import { AuthConstants } from '../constants';
 import { EmailVerificationCodeEntity } from '../entities/email-verification-code.entity';
-import { UpdateAdminRoleDto } from '@app/common/dtos/update-admin-role.dto';
+import { UpdateAdminRoleDto } from '@app/common/dtos/auth-dtos/update-admin-role.dto';
 import { BaseService } from '../auth.service';
 import { UserEntity } from '../users/entities/user.entity';
-import { ResetPasswordDto } from '@app/common/dtos';
+import { ResetPasswordDto } from '@app/common/dtos/auth-dtos';
 import { Cron } from '@nestjs/schedule';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { ConfigService } from '@nestjs/config';
+import { UpdateAdminProfileDto, UpdateUserProfileDto } from '@app/common/dtos';
 
 @Injectable()
-export class AdminsService extends BaseService<Admin>{
+export class AdminsService extends BaseService<Admin, GetAllAdminsResponse>{
   constructor(
     @InjectRepository(AdminEntity) protected readonly adminRepository: Repository<AdminEntity>,
     @InjectRepository(UserEntity) protected readonly userRepository: Repository<UserEntity>,
@@ -42,9 +43,11 @@ export class AdminsService extends BaseService<Admin>{
     private readonly cronService: CronService,
     @Inject(LoggerService) protected readonly logger: LoggerService,
     protected readonly configService: ConfigService,
-    @Inject('RMQ_CLIENT') protected readonly client: ClientProxy
+    @Inject('RMQ_EMAIL_CLIENT') protected readonly clientEmail: ClientProxy,
+    @Inject('RMQ_USERS_CLIENT') protected readonly clientUser: ClientProxy,
+    @Inject('RMQ_ADMINS_CLIENT') protected readonly clientAdmin: ClientProxy
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, client)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, clientEmail, clientUser, clientAdmin)
     console.log('AdminsService: LoggerService instance:', this.logger instanceof LoggerService);
     console.log('AdminsService: LoggerService typeof:', typeof this.logger);
     console.log('AdminsService: LoggerService:', this.logger);
@@ -148,21 +151,7 @@ export class AdminsService extends BaseService<Admin>{
   }
 
   FindAdmin(findOneDto: FindOneDto): Observable<Admin> {
-    // const { id } = findOneDto;
-    // console.log('here at FindAdmin METHOD', id);
-    //
-    // return from(this.adminRepository.findOne({ where: { id: id, isDeleted: false, isActive: true, isEmailVerified: false}, relations: ['roleId'] })).pipe(
-    //   map((thisEntity) => {
-    //     if (!thisEntity) {
-    //       throw new RpcException({
-    //         code: status.NOT_FOUND,
-    //         message: messages.ADMIN.NOT_FOUND2,
-    //       });
-    //     }
-    //     return this.mapResponse(thisEntity);
-    //   })
-    // );
-    return this.getAll(findOneDto.id, AuthConstants.admin);
+    return this.getOne(findOneDto.id, AuthConstants.admin);
   }
 
 
@@ -192,6 +181,18 @@ export class AdminsService extends BaseService<Admin>{
         )
       })
     )
+  }
+
+  updateAdminProfile(adminProfileUpdateDto: UpdateAdminProfileDto, findOneDto: FindOneDto): Observable<BaseResponse> {
+    return this.updateProfile(findOneDto, adminProfileUpdateDto, AuthConstants.admin);
+  }
+
+  deleteAdminProfile(findOneDto: FindOneDto): Observable<Empty> {
+    return this.removeProfile(findOneDto, AuthConstants.admin);
+  }
+
+  getAllAdmins(): Observable<GetAllAdminsResponse>{
+    return this.getAllEntities(AuthConstants.admin);
   }
 
   @Cron('0 0 * * *')

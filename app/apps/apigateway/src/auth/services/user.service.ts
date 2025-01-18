@@ -1,11 +1,11 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
-  CreateUserDto,
+  CreateUserDto, Empty,
   FindOneDto,
   ForgotPasswordDto,
-  LoginDto,
+  LoginDto, None,
   RefreshTokenDto,
-  RequestUpdateEmailRequest,
+  RequestUpdateEmailRequest, RequestUpdateProfile,
   ResetPasswordRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
@@ -14,7 +14,7 @@ import {
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '../constants';
+import { AUTH_SERVICE } from '../../constants';
 
 
 @Injectable()
@@ -71,7 +71,12 @@ export class UserService implements OnModuleInit {
     return this.userService.removeUser(findOneDto);
   }
 
-  // getUser(findOneDto: FindOneDto) {
-  //   return this.userService.findUser(findOneDto);
-  // }
+  updateUserProfile(requestUpdateProfile : RequestUpdateProfile) {
+    return this.userService.updateUserProfile(requestUpdateProfile)
+  }
+
+  deleteUserProfile(findOneDto: FindOneDto) {
+    return this.userService.deleteUserProfile(findOneDto);
+  }
+
 }
