@@ -85,7 +85,9 @@ export class AdminsService {
     const {id, request} = data;
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
-
+    if (!request) {
+      throw new RpcException('Invalid request payload');
+    }
     try {
       const thisAdmin = await this.adminsRepository.findOne({where: { adminId: id }});
       if (!thisAdmin){

@@ -1,17 +1,20 @@
-import { Controller, Get, Param, Req } from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   FindOneDto,
   getPermissionName,
   GetAdminProfileRequest, Non,
   None,
   Permissions,
-  PermissionsAndAccess,
+  PermissionsAndAccess, JwtAuthGuard,
 } from '@app/common';
 import { Request } from 'express';
 import { AdminsService } from './admins.service';
+import { PermissionsGuard } from '../auth/guards/auth.guard';
 
+@ApiTags('Admins')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('admins')
 export class AdminsController {
   constructor(private readonly adminsService: AdminsService) {
@@ -40,8 +43,8 @@ export class AdminsController {
   @ApiBearerAuth()
   @PermissionsAndAccess({ accessType: ['admin'] })
   getAdminProfile(@Req() req: Request) {
-    const id = req['admin']['payload'].id;
-    const adminId = req['admin']['payload'].id;
+    const id = req['user']['payload'].id;
+    const adminId = req['user']['payload'].id;
     const findOneDto: FindOneDto = { id };
     const request: GetAdminProfileRequest = { adminId };
     return this.adminsService.getProfile(findOneDto, request);

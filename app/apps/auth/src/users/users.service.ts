@@ -37,8 +37,9 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
     protected readonly configService: ConfigService,
     @Inject('RMQ_EMAIL_CLIENT') protected readonly clientEmail: ClientProxy,
     @Inject('RMQ_USERS_CLIENT') protected readonly clientUser: ClientProxy,
+    @Inject('RMQ_ADMINS_CLIENT') protected readonly clientAdmin: ClientProxy
   ) {
-    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, clientEmail, clientUser)
+    super(adminRepository, userRepository, refreshTokenRepository, emailVerificationCodeRepository, jwtTokenService, logger, configService, clientEmail, clientUser, clientAdmin)
     // console.log(this.logger instanceof LoggerService);
     // if (!this.logger || typeof this.logger.log !== 'function') {
     //   throw new Error('Logger is not properly instantiated');

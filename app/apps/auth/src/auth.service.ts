@@ -43,7 +43,7 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { RoleEntity } from './roles/entities/role.entity';
 import { ConfigService } from '@nestjs/config';
-import { UpdateUserProfileDto } from '@app/common/dtos';
+import { UpdateAdminProfileDto, UpdateUserProfileDto } from '@app/common/dtos';
 
 
 @Injectable()
@@ -59,6 +59,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
     protected readonly configService: ConfigService,
     @Inject('RMQ_EMAIL_CLIENT') protected readonly clientEmail: ClientProxy,
     @Inject('RMQ_USERS_CLIENT') protected readonly clientUser: ClientProxy,
+    @Inject('RMQ_ADMINS_CLIENT') protected readonly clientAdmin: ClientProxy
   ) {
   }
 
@@ -88,17 +89,17 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
 
             this.logger.log(`${type+'Repo'}: Saving the new entity to the repository...`);
             return from(repository.save(newEntity)).pipe(
-              map((createdUser) => {
+              map((createdEntity) => {
 
                 if (type === AuthConstants.user){
-                  this.logger.log(`Emitting create_user_profile event for "${createdUser.id}".`);
-                  this.clientUser.emit('create_user_profile', { userId: createdUser.id });
+                  this.logger.log(`Emitting create_user_profile event for "${createdEntity.id}".`);
+                  this.clientUser.emit('create_user_profile', { userId: createdEntity.id });
                 }else if (type === AuthConstants.admin){
-                  /////////////////////////////////////////// later //////////////////////////
-                  console.log('this is fr admin');
+                  this.logger.log(`Emitting create_admin_profile event for "${createdEntity.id}".`);
+                  this.clientAdmin.emit('create_admin_profile', { adminId: createdEntity.id });
                 }
                 this.logger.log(`${type+'Repo'}: Entity successfully created with email "${email}".`);
-                return this.mapResponse(createdUser);
+                return this.mapResponse(createdEntity);
               }),
               catchError((err) => {
                 this.logger.error(`${type+'Repo'}: Failed to create and save the entity with email "${email}". Error: ${err.message}`);
@@ -719,7 +720,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
 
   updateProfile(
     findOneDto: FindOneDto,
-    userProfileUpdateDto: UpdateUserProfileDto,
+    profileUpdateDto,
     type: AuthConstants
   ): Observable<BaseResponse> {
     const repository = this.getRepository(type);
@@ -743,7 +744,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
 
           return this.clientUser.send<BaseResponse>('update_user_profile', {
             id: thisEntity.id,
-            request: userProfileUpdateDto,
+            request: profileUpdateDto,
           }).pipe(
             map((response) => {
               if (!response) {
@@ -755,8 +756,21 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
             })
           );
         } else if (type === AuthConstants.admin) {
-          // Handle admin logic here when needed
-          // return throwError(() => new Error('Admin profile update not implemented yet.'));
+          this.logger.log(`Sending update_admin_profile event for "${thisEntity.id}".`);
+
+          return this.clientAdmin.send<BaseResponse>('update_admin_profile', {
+            id: thisEntity.id,
+            request: profileUpdateDto,
+          }).pipe(
+            map((response) => {
+              if (!response) {
+                throw new RpcException('No response from Admins service');
+              }
+              return {
+                ... response
+              };
+            })
+          );
         }
       }),
       catchError((err) => {

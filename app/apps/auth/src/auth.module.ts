@@ -176,6 +176,20 @@ import { CommonModule, CronService, JwtTokenService, LoggerService } from '@app/
         });
       },
       inject: [ConfigService],
+    },
+    {
+      provide: 'RMQ_ADMINS_CLIENT',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_ADMINS_QUEUE'),
+            queueOptions: { durable: true },
+          },
+        });
+      },
+      inject: [ConfigService],
     }
   ],
   exports: [
@@ -183,7 +197,8 @@ import { CommonModule, CronService, JwtTokenService, LoggerService } from '@app/
     JwtTokenService,
     CronService,
     'RMQ_EMAIL_CLIENT',
-    'RMQ_USERS_CLIENT'
+    'RMQ_USERS_CLIENT',
+    'RMQ_ADMINS_CLIENT'
   ],
 })
 export class AuthModule {}

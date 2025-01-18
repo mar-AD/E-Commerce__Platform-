@@ -4,7 +4,7 @@ import { ClientGrpc } from '@nestjs/microservices';
 import {
   ADMIN_SERVICE_NAME,
   ADMINS_PROFILE_SERVICE_NAME, AdminServiceClient, AdminsProfileServiceClient,
-  FindOneDto, GetAdminProfileRequest, Non, None, UserServiceClient, UsersProfileServiceClient,
+  FindOneDto, GetAdminProfileRequest, Non, None, timestampToDate, UserServiceClient, UsersProfileServiceClient,
 } from '@app/common';
 import { forkJoin, map, tap } from 'rxjs';
 
@@ -20,33 +20,25 @@ onModuleInit() {
   this.adminsService = this.adminsClient.getService<AdminsProfileServiceClient>(ADMINS_PROFILE_SERVICE_NAME);
   this.authService = this.authClient.getService<AdminServiceClient>(ADMIN_SERVICE_NAME)
 
-  // console.log('Admins Client Connected:', !!this.usersService);
-  // console.log('Auth Client Connected:', !!this.authService);
-
 }
 
 getProfile(findOneDto: FindOneDto, request: GetAdminProfileRequest) {
   return forkJoin({
-    authData: this.authService.findOne(findOneDto).pipe(
-      tap({
-        next: (data) => console.log('Auth Data:', data),
-        error: (err) => console.error('Auth Service Error:', err),
-      }),
-    ),
-    profileData: this.adminsService.getAdminProfile(request).pipe(
-      tap({
-        next: (data) => console.log('Profile Data:', data),
-        error: (err) => console.error('Admins Service Error:', err),
-      }),
-    ),
+    authData: this.authService.findOne(findOneDto),
+    profileData: this.adminsService.getAdminProfile(request)
   }).pipe(
-    map(({ authData, profileData }) => ({
-      ...authData,
-      ...profileData,
-    })),
-    tap((combinedData) => {
-      console.log('Combined Profile Data:', combinedData);
-    }),
+    map(({ authData, profileData }) => {
+      const createdAt = authData.createdAt ? timestampToDate(authData.createdAt) : null;
+      const updatedAt = authData.updatedAt ? timestampToDate(authData.updatedAt) : null;
+      const deletedAt = authData.deletedAt? timestampToDate(authData.deletedAt) : null;
+      return {
+        ...authData,
+        ...profileData,
+        createdAt,
+        updatedAt,
+        deletedAt
+      }
+    })
   );
 }
 
@@ -57,14 +49,18 @@ getAllProfiles(request: None, request1: Non){
   }).pipe(
     map(({ authData, profileData }) => {
       const mergedData = authData.entities.map(entity => {
-        // Find the matching profile using the adminId
         const profile = profileData.profiles.find(p => p.adminId === entity.id);
-
+        const createdAt = entity.createdAt ? timestampToDate(entity.createdAt) : null;
+        const updatedAt = entity.updatedAt ? timestampToDate(entity.updatedAt) : null;
+        const deletedAt = entity.deletedAt? timestampToDate(entity.deletedAt) : null;
         // Merge the entity and profile data
         return {
           ...entity,
           profilePic: profile?.profilePic,
           fullName: profile?.fullName,
+          createdAt,
+          updatedAt,
+          deletedAt
         };
       });
 
