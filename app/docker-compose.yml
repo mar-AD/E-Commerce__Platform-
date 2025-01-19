@@ -11,6 +11,7 @@ services:
       - auth
       - users
       - admins
+      - products
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -97,6 +98,22 @@ services:
     command: sh -c "echo 'Starting admins Service'; npm run start:dev admins"
 
 
+  products:
+    build:
+      context: ./
+      dockerfile: ./apps/products/Dockerfile
+    env_file:
+      - ./apps/products/.env
+    depends_on:
+      - products-db
+    ports:
+      - '50058:50057'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command:
+      - sh -c "echo 'Starting products Service'; npm run start:dev products"
+
   auth-db:
     image: postgres:16
     env_file:
@@ -126,6 +143,16 @@ services:
     volumes:
       - ./db/admins-data:/var/lib/postgresql/data
       - ./db/init-admins.sql:/docker-entrypoint-initdb.d/init-admins.sql
+
+  products-db:
+    image: postgres:16
+    env_file:
+      - ./apps/products/.env
+    ports:
+      - '5436:5432'
+    volumes:
+      - ./db/products-data:/var/lib/postgresql/data
+      - ./db/init-products.sql:/docker-entrypoint-initdb.d/init-products.sql
 
   rabbitmq:
     image: rabbitmq:4.0.4-management

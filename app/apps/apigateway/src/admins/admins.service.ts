@@ -4,9 +4,9 @@ import { ClientGrpc } from '@nestjs/microservices';
 import {
   ADMIN_SERVICE_NAME,
   ADMINS_PROFILE_SERVICE_NAME, AdminServiceClient, AdminsProfileServiceClient,
-  FindOneDto, GetAdminProfileRequest, Non, None, timestampToDate, UserServiceClient, UsersProfileServiceClient,
+  FindOneDto, GetAdminProfileRequest, Non, None, timestampToDate,
 } from '@app/common';
-import { forkJoin, map, tap } from 'rxjs';
+import { forkJoin, map } from 'rxjs';
 
 @Injectable()
 export class AdminsService implements OnModuleInit{

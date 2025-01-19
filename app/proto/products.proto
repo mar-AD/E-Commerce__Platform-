@@ -1,0 +1,10 @@
+syntax= "proto3";
+
+package products;
+
+import "google/protobuf/timestamp.proto";
+
+
+service productService {
+  rpc
+}
