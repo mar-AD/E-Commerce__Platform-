@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ProductsModule } from './products.module';
 import { join } from 'path';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-// import { PRODUCTS_PACKAGE_NAME } from '@app/common';
+import { PRODUCTS_PACKAGE_NAME } from '@app/common';
 
 async function bootstrap() {
   try {

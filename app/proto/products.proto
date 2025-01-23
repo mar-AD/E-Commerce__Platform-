@@ -5,6 +5,171 @@ package products;
 import "google/protobuf/timestamp.proto";
 
 
-service productService {
-  rpc
+service ProductService {
+  // Base Product Management
+  rpc GetProducts (EmptyRequest) returns (ProductListResponse);
+  rpc GetProductById (GetOne) returns (ProductResponse);
+  rpc CreateProduct (CreateProductRequest) returns (ProductResponse);
+  rpc UpdateProduct (UpdateProductRequest) returns (ProductResponse);
+  rpc DeleteProduct (GetOne) returns (EmptyResponse);
+
+  // Custom Product Management
+  rpc CreateCustomProduct (CreateCustomProductRequest) returns (CustomProductResponse);
+  rpc GetCustomProductById (GetOne) returns (CustomProductResponse);
+  rpc GetCustomProductsByUser (CustomProductsByUserRequest) returns (CustomProductListResponse);
+  rpc UpdateCustomProduct (UpdateCustomProductRequest) returns (CustomProductResponse);
+  rpc DeleteCustomProduct (GetOne) returns (EmptyResponse);
+
+  // Store Management
+  rpc CreateStore (CreateStoreRequest) returns (StoreResponse);
+  rpc GetStoreById (GetOne) returns (StoreResponse);
+  rpc GetStoresByUser (StoresByUserRequest) returns (StoreListResponse);
+  rpc UpdateStore (UpdateStoreRequest) returns (StoreResponse);
+  rpc DeleteStore (GetOne) returns (EmptyResponse);
+
+  // Optional Features
+  rpc GetProductsByStore (StoresByUserRequest) returns (ProductListResponse);
+//  rpc GetTrendingDesigns (EmptyRequest) returns (DesignListResponse);
 }
+
+message EmptyResponse {}
+
+message GetOne {
+  string id = 1;
+}
+
+// Base Product Management
+message EmptyRequest {}
+
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  double price = 3;
+  string image = 4;
+  string template = 5;
+}
+
+message UpdateProduct {
+  optional string name = 1;
+  optional string description = 2;
+  optional double price = 3;
+  optional string image = 4;
+  optional string template = 5;
+  optional bool isActive = 6;
+}
+
+message UpdateProductRequest {
+  GetOne getOne = 1;
+  UpdateProduct updateProduct = 2;
+}
+
+message ProductResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  string image = 5;
+  string template = 6;
+  bool isActive = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+}
+
+message ProductListResponse {
+  repeated ProductResponse products = 1;
+}
+
+    //Custom Product Management
+
+message CreateCustomProductRequest {
+  string productId = 1;
+  string userId = 2;
+  string design = 3;
+  string placement = 4;
+  double finalPrice = 5;
+}
+
+message CustomProductsByUserRequest {
+  string userId = 1;
+}
+
+message UpdateCustomProduct {
+  optional string design = 1;
+  optional string placement = 2;
+  optional bool isPublished = 3;
+}
+
+message UpdateCustomProductRequest {
+  GetOne getOne = 1;
+  UpdateCustomProduct updateCustomProduct = 2;
+}
+
+message CustomProductResponse {
+  string id = 1;
+  string productId = 2;
+  string userId = 3;
+  string design = 4;
+  string placement = 5;
+  double finalPrice = 6;
+  bool isPublished = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+}
+
+message CustomProductListResponse {
+  repeated CustomProductResponse customProducts = 1;
+}
+
+//store management
+
+message CreateStoreRequest {
+  string userId = 1;
+  string storeName = 2;
+  string storeDescription = 3;
+}
+
+message StoresByUserRequest {
+  string userId = 1;
+}
+
+message UpdateStore {
+  optional string storeName = 1;
+  optional string storeDescription = 2;
+  optional bool isActive = 3;
+}
+
+message UpdateStoreRequest {
+  GetOne getOne = 1;
+  UpdateStore updateStore = 2;
+}
+
+message StoreResponse {
+  string id = 1;
+  string userId = 2;
+  string storeName = 3;
+  string storeDescription = 4;
+  bool isActive = 5;
+  google.protobuf.Timestamp createdAt = 6;
+  google.protobuf.Timestamp updatedAt = 7;
+}
+
+message StoreListResponse {
+  repeated StoreResponse stores = 1;
+}
+
+//optional
+
+message PublishCustomProductRequest {
+  string customProductId = 1;
+}
+
+//message DesignListResponse {
+//  repeated DesignResponse designs = 1;
+//}
+//
+//message DesignResponse {
+//  string id = 1;
+//  string designUrl = 2;
+//  int32 likes = 3;
+//  string createdAt = 4;
+//}

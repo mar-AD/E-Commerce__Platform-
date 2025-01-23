@@ -2,12 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CategoryEntity } from './categories.entity';
 
 @Entity('products')
 export class ProductEntity {
@@ -17,15 +14,20 @@ export class ProductEntity {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @ManyToOne(() => CategoryEntity)
-  @JoinColumn({ name: 'category_id' })
-  categoryId: CategoryEntity;
+  @Column({ type: 'varchar', nullable: false })
+  image: string;
+
+  @Column({ type: 'varchar', nullable: false })
+  template: string;
 
   @Column({ type: 'text', nullable: true })
   description: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
+
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
