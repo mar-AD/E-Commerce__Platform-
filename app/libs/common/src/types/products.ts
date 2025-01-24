@@ -140,9 +140,9 @@ export interface PublishCustomProductRequest {
 
 export const PRODUCTS_PACKAGE_NAME = "products";
 
-export interface ProductServiceClient {
-  /** Base Product Management */
+/** Base Product Management */
 
+export interface ProductServiceClient {
   getProducts(request: EmptyRequest): Observable<ProductListResponse>;
 
   getProductById(request: GetOne): Observable<ProductResponse>;
@@ -152,39 +152,11 @@ export interface ProductServiceClient {
   updateProduct(request: UpdateProductRequest): Observable<ProductResponse>;
 
   deleteProduct(request: GetOne): Observable<EmptyResponse>;
-
-  /** Custom Product Management */
-
-  createCustomProduct(request: CreateCustomProductRequest): Observable<CustomProductResponse>;
-
-  getCustomProductById(request: GetOne): Observable<CustomProductResponse>;
-
-  getCustomProductsByUser(request: CustomProductsByUserRequest): Observable<CustomProductListResponse>;
-
-  updateCustomProduct(request: UpdateCustomProductRequest): Observable<CustomProductResponse>;
-
-  deleteCustomProduct(request: GetOne): Observable<EmptyResponse>;
-
-  /** Store Management */
-
-  createStore(request: CreateStoreRequest): Observable<StoreResponse>;
-
-  getStoreById(request: GetOne): Observable<StoreResponse>;
-
-  getStoresByUser(request: StoresByUserRequest): Observable<StoreListResponse>;
-
-  updateStore(request: UpdateStoreRequest): Observable<StoreResponse>;
-
-  deleteStore(request: GetOne): Observable<EmptyResponse>;
-
-  /** Optional Features */
-
-  getProductsByStore(request: StoresByUserRequest): Observable<ProductListResponse>;
 }
 
-export interface ProductServiceController {
-  /** Base Product Management */
+/** Base Product Management */
 
+export interface ProductServiceController {
   getProducts(
     request: EmptyRequest,
   ): Promise<ProductListResponse> | Observable<ProductListResponse> | ProductListResponse;
@@ -200,68 +172,11 @@ export interface ProductServiceController {
   ): Promise<ProductResponse> | Observable<ProductResponse> | ProductResponse;
 
   deleteProduct(request: GetOne): Promise<EmptyResponse> | Observable<EmptyResponse> | EmptyResponse;
-
-  /** Custom Product Management */
-
-  createCustomProduct(
-    request: CreateCustomProductRequest,
-  ): Promise<CustomProductResponse> | Observable<CustomProductResponse> | CustomProductResponse;
-
-  getCustomProductById(
-    request: GetOne,
-  ): Promise<CustomProductResponse> | Observable<CustomProductResponse> | CustomProductResponse;
-
-  getCustomProductsByUser(
-    request: CustomProductsByUserRequest,
-  ): Promise<CustomProductListResponse> | Observable<CustomProductListResponse> | CustomProductListResponse;
-
-  updateCustomProduct(
-    request: UpdateCustomProductRequest,
-  ): Promise<CustomProductResponse> | Observable<CustomProductResponse> | CustomProductResponse;
-
-  deleteCustomProduct(request: GetOne): Promise<EmptyResponse> | Observable<EmptyResponse> | EmptyResponse;
-
-  /** Store Management */
-
-  createStore(request: CreateStoreRequest): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
-
-  getStoreById(request: GetOne): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
-
-  getStoresByUser(
-    request: StoresByUserRequest,
-  ): Promise<StoreListResponse> | Observable<StoreListResponse> | StoreListResponse;
-
-  updateStore(request: UpdateStoreRequest): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
-
-  deleteStore(request: GetOne): Promise<EmptyResponse> | Observable<EmptyResponse> | EmptyResponse;
-
-  /** Optional Features */
-
-  getProductsByStore(
-    request: StoresByUserRequest,
-  ): Promise<ProductListResponse> | Observable<ProductListResponse> | ProductListResponse;
 }
 
 export function ProductServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = [
-      "getProducts",
-      "getProductById",
-      "createProduct",
-      "updateProduct",
-      "deleteProduct",
-      "createCustomProduct",
-      "getCustomProductById",
-      "getCustomProductsByUser",
-      "updateCustomProduct",
-      "deleteCustomProduct",
-      "createStore",
-      "getStoreById",
-      "getStoresByUser",
-      "updateStore",
-      "deleteStore",
-      "getProductsByStore",
-    ];
+    const grpcMethods: string[] = ["getProducts", "getProductById", "createProduct", "updateProduct", "deleteProduct"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("ProductService", method)(constructor.prototype[method], method, descriptor);
@@ -275,3 +190,116 @@ export function ProductServiceControllerMethods() {
 }
 
 export const PRODUCT_SERVICE_NAME = "ProductService";
+
+/** Custom Product Management */
+
+export interface CustomProductsClient {
+  createCustomProduct(request: CreateCustomProductRequest): Observable<CustomProductResponse>;
+
+  getCustomProductById(request: GetOne): Observable<CustomProductResponse>;
+
+  getCustomProductsByUser(request: CustomProductsByUserRequest): Observable<CustomProductListResponse>;
+
+  getProductsByStore(request: StoresByUserRequest): Observable<CustomProductListResponse>;
+
+  updateCustomProduct(request: UpdateCustomProductRequest): Observable<CustomProductResponse>;
+
+  deleteCustomProduct(request: GetOne): Observable<EmptyResponse>;
+}
+
+/** Custom Product Management */
+
+export interface CustomProductsController {
+  createCustomProduct(
+    request: CreateCustomProductRequest,
+  ): Promise<CustomProductResponse> | Observable<CustomProductResponse> | CustomProductResponse;
+
+  getCustomProductById(
+    request: GetOne,
+  ): Promise<CustomProductResponse> | Observable<CustomProductResponse> | CustomProductResponse;
+
+  getCustomProductsByUser(
+    request: CustomProductsByUserRequest,
+  ): Promise<CustomProductListResponse> | Observable<CustomProductListResponse> | CustomProductListResponse;
+
+  getProductsByStore(
+    request: StoresByUserRequest,
+  ): Promise<CustomProductListResponse> | Observable<CustomProductListResponse> | CustomProductListResponse;
+
+  updateCustomProduct(
+    request: UpdateCustomProductRequest,
+  ): Promise<CustomProductResponse> | Observable<CustomProductResponse> | CustomProductResponse;
+
+  deleteCustomProduct(request: GetOne): Promise<EmptyResponse> | Observable<EmptyResponse> | EmptyResponse;
+}
+
+export function CustomProductsControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = [
+      "createCustomProduct",
+      "getCustomProductById",
+      "getCustomProductsByUser",
+      "getProductsByStore",
+      "updateCustomProduct",
+      "deleteCustomProduct",
+    ];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod("CustomProducts", method)(constructor.prototype[method], method, descriptor);
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod("CustomProducts", method)(constructor.prototype[method], method, descriptor);
+    }
+  };
+}
+
+export const CUSTOM_PRODUCTS_SERVICE_NAME = "CustomProducts";
+
+/** Store Management */
+
+export interface UserStoreClient {
+  createStore(request: CreateStoreRequest): Observable<StoreResponse>;
+
+  getStoreById(request: GetOne): Observable<StoreResponse>;
+
+  getStoresByUser(request: StoresByUserRequest): Observable<StoreListResponse>;
+
+  updateStore(request: UpdateStoreRequest): Observable<StoreResponse>;
+
+  deleteStore(request: GetOne): Observable<EmptyResponse>;
+}
+
+/** Store Management */
+
+export interface UserStoreController {
+  createStore(request: CreateStoreRequest): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
+
+  getStoreById(request: GetOne): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
+
+  getStoresByUser(
+    request: StoresByUserRequest,
+  ): Promise<StoreListResponse> | Observable<StoreListResponse> | StoreListResponse;
+
+  updateStore(request: UpdateStoreRequest): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
+
+  deleteStore(request: GetOne): Promise<EmptyResponse> | Observable<EmptyResponse> | EmptyResponse;
+}
+
+export function UserStoreControllerMethods() {
+  return function (constructor: Function) {
+    const grpcMethods: string[] = ["createStore", "getStoreById", "getStoresByUser", "updateStore", "deleteStore"];
+    for (const method of grpcMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcMethod("UserStore", method)(constructor.prototype[method], method, descriptor);
+    }
+    const grpcStreamMethods: string[] = [];
+    for (const method of grpcStreamMethods) {
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      GrpcStreamMethod("UserStore", method)(constructor.prototype[method], method, descriptor);
+    }
+  };
+}
+
+export const USER_STORE_SERVICE_NAME = "UserStore";

@@ -73,7 +73,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
     return from(repository.findOne({ where: { email } })).pipe(
       switchMap((existingEntity)=>{
         if(existingEntity){
-          this.logger.error(`${type+'Repo'}: entity with email "${email}" already exists.`);
+          this.logger.log(`${type+'Repo'}: entity with email "${email}" already exists.`);
           throw new RpcException({
             code: status.ALREADY_EXISTS,
             message: `${type} with email: ${email} already exists.`,

@@ -1,12 +1,16 @@
 import { Module } from '@nestjs/common';
-import { ProductsService } from './products.service';
-import { ProductsController } from './products.controller';
+import { ProductsService } from './core-products/products.service';
+import { ProductsController } from './core-products/products.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CommonModule } from '@app/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductEntity } from './entities/products.entity';
-import { CustomProductsEntity } from './entities/Custom_Products.entity';
-import { UserStoreEntity } from './entities/user_store.entity';
+import { ProductEntity } from './core-products/entities/products.entity';
+import { CustomProductsEntity } from './custom-products/entities/Custom_Products.entity';
+import { UserStoreEntity } from './user-stores/entities/user_store.entity';
+import { CustomProductsController } from './custom-products/custom-products.controller';
+import { UserStoresController } from './user-stores/user-stores.controller';
+import { CustomProductsService } from './custom-products/custom-products.service';
+import { UserStoresService } from './user-stores/user-stores.service';
 
 @Module({
   imports: [
@@ -27,7 +31,7 @@ import { UserStoreEntity } from './entities/user_store.entity';
     }),
     TypeOrmModule.forFeature([ProductEntity, CustomProductsEntity, UserStoreEntity]),
   ],
-  controllers: [ProductsController],
-  providers: [ProductsService],
+  controllers: [ProductsController, CustomProductsController, UserStoresController],
+  providers: [ProductsService, CustomProductsService, UserStoresService],
 })
 export class ProductsModule {}

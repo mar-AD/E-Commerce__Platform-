@@ -83,5 +83,41 @@ export const messages = {
     FAILED_TO_GENERATE_REF_TOKEN: "Error generating refresh token",
     FAILED_TO_GENERATE_ACC_TOKEN: "Error generating access token",
     INVALID_OR_EXPIRED_TOKEN:"Invalid or expired token"
+  },
+  PRODUCTS: {
+    // General Product Messages
+    PRODUCT_ALREADY_EXISTS: "Product with this name already exists",
+    PRODUCT_NOT_FOUND: "Product not found or unavailable",
+    PRODUCT_ADDED_SUCCESSFULLY: "Product added successfully",
+    PRODUCT_UPDATED_SUCCESSFULLY: "Product updated successfully",
+    PRODUCT_DELETED_SUCCESSFULLY: "Product deleted successfully",
+    FAILED_TO_ADD_PRODUCT: "Failed to add product",
+    FAILED_TO_UPDATE_PRODUCT: "Failed to update product",
+    FAILED_TO_DELETE_PRODUCT: "Failed to delete product",
+    FAILED_TO_FETCH_FOR_UPDATE: "Failed to fetch product for update",
+    FAILED_TO_FETCH_FOR_DELETE: "Failed to fetch product for delete",
+
+    // Custom Product Messages
+    CUSTOM_PRODUCT_CREATED_SUCCESSFULLY: "Custom product created successfully",
+    CUSTOM_PRODUCT_UPDATED_SUCCESSFULLY: "Custom product updated successfully",
+    CUSTOM_PRODUCT_DELETED_SUCCESSFULLY: "Custom product deleted successfully",
+    FAILED_TO_CREATE_CUSTOM_PRODUCT: "Failed to create custom product",
+    FAILED_TO_UPDATE_CUSTOM_PRODUCT: "Failed to update custom product",
+    FAILED_TO_DELETE_CUSTOM_PRODUCT: "Failed to delete custom product",
+
+    // User Store Messages
+    USER_STORE_NOT_FOUND: "User store not found or unavailable",
+    USER_STORE_CREATED_SUCCESSFULLY: "User store created successfully",
+    USER_STORE_UPDATED_SUCCESSFULLY: "User store updated successfully",
+    USER_STORE_DELETED_SUCCESSFULLY: "User store deleted successfully",
+    FAILED_TO_CREATE_USER_STORE: "Failed to create user store",
+    FAILED_TO_UPDATE_USER_STORE: "Failed to update user store",
+    FAILED_TO_DELETE_USER_STORE: "Failed to delete user store",
+
+    // Validation and Error Messages
+    INVALID_PRODUCT_DETAILS: "Invalid product details provided",
+    INVALID_STORE_DETAILS: "Invalid store details provided"
   }
+
+
 }

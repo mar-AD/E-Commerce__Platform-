@@ -11,7 +11,7 @@ export class ProductEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, unique: true })
   name: string;
 
   @Column({ type: 'varchar', nullable: false })
