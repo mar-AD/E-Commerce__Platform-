@@ -87,7 +87,9 @@ message CreateCustomProductRequest {
   string userId = 2;
   string design = 3;
   string placement = 4;
-  double finalPrice = 5;
+  string color = 5;
+  string size = 6;
+  double totalPrice = 7;
 }
 
 message CustomProductsByUserRequest {
@@ -97,7 +99,10 @@ message CustomProductsByUserRequest {
 message UpdateCustomProduct {
   optional string design = 1;
   optional string placement = 2;
-  optional bool isPublished = 3;
+  optional string color = 3;
+  optional string size = 4;
+  optional double totalPrice = 5;
+  optional bool isPublished = 6;
 }
 
 message UpdateCustomProductRequest {
@@ -111,10 +116,12 @@ message CustomProductResponse {
   string userId = 3;
   string design = 4;
   string placement = 5;
-  double finalPrice = 6;
-  bool isPublished = 7;
-  google.protobuf.Timestamp createdAt = 8;
-  google.protobuf.Timestamp updatedAt = 9;
+  string color = 6;
+  string size = 7;
+  double totalPrice = 8;
+  bool isPublished = 9;
+  google.protobuf.Timestamp createdAt = 10;
+  google.protobuf.Timestamp updatedAt = 11;
 }
 
 message CustomProductListResponse {

@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ProductEntity } from './products.entity';
+import { ProductEntity } from '../../core-products/entities/products.entity';
 
 @Entity('custom_products')
 export class CustomProductsEntity {
@@ -26,6 +26,15 @@ export class CustomProductsEntity {
 
   @Column({ type: 'json', nullable: false })
   placement: Record<string, any>;
+
+  @Column({ type: 'varchar', nullable: false })
+  color: string;
+
+  @Column({ type: 'varchar', nullable: false })
+  size: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  total_price: number;
 
   @Column({type: 'boolean',default: false})
   isPublished: boolean;

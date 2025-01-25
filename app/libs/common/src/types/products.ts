@@ -65,7 +65,9 @@ export interface CreateCustomProductRequest {
   userId: string;
   design: string;
   placement: string;
-  finalPrice: number;
+  color: string;
+  size: string;
+  totalPrice: number;
 }
 
 export interface CustomProductsByUserRequest {
@@ -75,6 +77,9 @@ export interface CustomProductsByUserRequest {
 export interface UpdateCustomProduct {
   design?: string | undefined;
   placement?: string | undefined;
+  color?: string | undefined;
+  size?: string | undefined;
+  totalPrice?: number | undefined;
   isPublished?: boolean | undefined;
 }
 
@@ -89,7 +94,9 @@ export interface CustomProductResponse {
   userId: string;
   design: string;
   placement: string;
-  finalPrice: number;
+  color: string;
+  size: string;
+  totalPrice: number;
   isPublished: boolean;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
