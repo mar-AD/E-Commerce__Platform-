@@ -9,7 +9,7 @@ import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 import { Timestamp } from "google/protobuf/timestamp";
 
-export const protobufPackage = "products";
+// export const protobufPackage = "products";
 
 export interface GetOne {
   id: string;

@@ -8,4 +8,6 @@ RUN npm install
 
 COPY . .
 
+EXPOSE 50057
+
 CMD ["node", "dist/apps/products/src/main"]
