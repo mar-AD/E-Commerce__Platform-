@@ -11,15 +11,16 @@ import { Timestamp } from "google/protobuf/timestamp";
 
 export const protobufPackage = "products";
 
-export interface EmptyResponse {
-}
-
 export interface GetOne {
   id: string;
 }
 
-/** Base Product Management */
 export interface EmptyRequest {
+}
+
+export interface BaseProductsResponse {
+  status: number;
+  message: string;
 }
 
 export interface CreateProductRequest {
@@ -158,7 +159,7 @@ export interface ProductServiceClient {
 
   updateProduct(request: UpdateProductRequest): Observable<ProductResponse>;
 
-  deleteProduct(request: GetOne): Observable<EmptyResponse>;
+  deleteProduct(request: GetOne): Observable<BaseProductsResponse>;
 }
 
 /** Base Product Management */
@@ -178,7 +179,9 @@ export interface ProductServiceController {
     request: UpdateProductRequest,
   ): Promise<ProductResponse> | Observable<ProductResponse> | ProductResponse;
 
-  deleteProduct(request: GetOne): Promise<EmptyResponse> | Observable<EmptyResponse> | EmptyResponse;
+  deleteProduct(
+    request: GetOne,
+  ): Promise<BaseProductsResponse> | Observable<BaseProductsResponse> | BaseProductsResponse;
 }
 
 export function ProductServiceControllerMethods() {
@@ -211,7 +214,7 @@ export interface CustomProductsClient {
 
   updateCustomProduct(request: UpdateCustomProductRequest): Observable<CustomProductResponse>;
 
-  deleteCustomProduct(request: GetOne): Observable<EmptyResponse>;
+  deleteCustomProduct(request: GetOne): Observable<BaseProductsResponse>;
 }
 
 /** Custom Product Management */
@@ -237,7 +240,9 @@ export interface CustomProductsController {
     request: UpdateCustomProductRequest,
   ): Promise<CustomProductResponse> | Observable<CustomProductResponse> | CustomProductResponse;
 
-  deleteCustomProduct(request: GetOne): Promise<EmptyResponse> | Observable<EmptyResponse> | EmptyResponse;
+  deleteCustomProduct(
+    request: GetOne,
+  ): Promise<BaseProductsResponse> | Observable<BaseProductsResponse> | BaseProductsResponse;
 }
 
 export function CustomProductsControllerMethods() {
@@ -275,7 +280,7 @@ export interface UserStoreClient {
 
   updateStore(request: UpdateStoreRequest): Observable<StoreResponse>;
 
-  deleteStore(request: GetOne): Observable<EmptyResponse>;
+  deleteStore(request: GetOne): Observable<BaseProductsResponse>;
 }
 
 /** Store Management */
@@ -291,7 +296,7 @@ export interface UserStoreController {
 
   updateStore(request: UpdateStoreRequest): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
 
-  deleteStore(request: GetOne): Promise<EmptyResponse> | Observable<EmptyResponse> | EmptyResponse;
+  deleteStore(request: GetOne): Promise<BaseProductsResponse> | Observable<BaseProductsResponse> | BaseProductsResponse;
 }
 
 export function UserStoreControllerMethods() {

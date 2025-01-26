@@ -1,10 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/products.entity';
 import { Repository } from 'typeorm';
-import { dateToTimestamp, GetOne, LoggerService, messages, ProductResponse } from '@app/common';
+import {
+  BaseProductsResponse,
+  dateToTimestamp,
+  GetOne,
+  LoggerService,
+  messages,
+  ProductListResponse,
+  ProductResponse,
+} from '@app/common';
 import { CreateProductDto, UpdateProductDto } from '@app/common/dtos';
-import { catchError, from, map, Observable, pipe, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 
@@ -17,7 +25,7 @@ export class ProductsService {
   }
 
   CreateProduct(createProductDto: CreateProductDto): Observable<ProductResponse> {
-    const {name, description, price} = createProductDto;
+    const {name} = createProductDto;
     this.logger.log(`ProductRepo: Searching for entity by name "${name}" in repository...'`);
     return from(this.productsRepository.findOne({where: { name: name, isActive: true }})).pipe(
       switchMap(product => {
@@ -91,6 +99,74 @@ export class ProductsService {
         )
       })
 
+    )
+  }
+
+  GetAllProducts(): Observable<ProductListResponse>{
+    this.logger.log(`ProductRepo: Searching for products ...`);
+    return from(this.productsRepository.find({where: {isActive: true}})).pipe(
+      map((products)=>{
+        this.logger.log(`ProductRepo: products fetched successfully`);
+        return { products: products.map(product => this.mappedResponse(product)) }
+      }),
+      catchError((error)=>{
+        this.logger.error(`ProductRepo: Failed to fetch products. Error: ${error.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.PRODUCTS.FAILED_TO_FETCH_ALL_PRODUCTS
+        })
+      })
+    )
+  }
+
+  GetProduct(getOne: GetOne): Observable<ProductResponse> {
+    const{id} = getOne;
+    this.logger.log(`ProductRepo: Searching for entity by ID "${id}" in repository...'`);
+    return from(this.productsRepository.findOne({where: {id}})).pipe(
+      map((product)=>{
+        if (!product){
+          this.logger.error(`ProductRepo: product with ID "${id}" not found'`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.PRODUCTS.PRODUCT_NOT_FOUND
+          })
+        }
+        this.logger.log(`ProductRepo: product with ID "${id}" found successfully `);
+        return this.mappedResponse(product)
+      }),
+      catchError((error)=>{
+        this.logger.error(`ProductRepo: Failed to fetch product with ID "${id}". Error: ${error.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.PRODUCTS.FAILED_TO_FETCH_PRODUCT
+        })
+      })
+    )
+  }
+
+  DeleteProduct(getOne: GetOne) : Observable<BaseProductsResponse> {
+    const{id} = getOne;
+    return from(this.productsRepository.delete({id})).pipe(
+      map((result)=>{
+        if (result.affected === 0) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.PRODUCTS.PRODUCT_NOT_FOUND,
+          });
+        }
+        this.logger.log(`ProductRepo: product with ID "${id}" deleted successfully `);
+        return {
+          status: HttpStatus.OK,
+          message: messages.PRODUCTS.PRODUCT_DELETED_SUCCESSFULLY
+        }
+      }),
+      catchError((error)=>{
+        this.logger.error(`ProductRepo: failed to delete product with ID "${id}". Error: ${error.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.PRODUCTS.FAILED_TO_DELETE_PRODUCT
+        })
+      })
     )
   }
 

@@ -96,6 +96,8 @@ export const messages = {
     FAILED_TO_DELETE_PRODUCT: "Failed to delete product",
     FAILED_TO_FETCH_FOR_UPDATE: "Failed to fetch product for update",
     FAILED_TO_FETCH_FOR_DELETE: "Failed to fetch product for delete",
+    FAILED_TO_FETCH_ALL_PRODUCTS: "Failed to fetch all products",
+    FAILED_TO_FETCH_PRODUCT: "Failed to fetch product",
 
     // Custom Product Messages
     CUSTOM_PRODUCT_CREATED_SUCCESSFULLY: "Custom product created successfully",

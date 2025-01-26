@@ -10,7 +10,7 @@ service ProductService {
   rpc GetProductById (GetOne) returns (ProductResponse);
   rpc CreateProduct (CreateProductRequest) returns (ProductResponse);
   rpc UpdateProduct (UpdateProductRequest) returns (ProductResponse);
-  rpc DeleteProduct (GetOne) returns (EmptyResponse);
+  rpc DeleteProduct (GetOne) returns (BaseProductsResponse);
 }
   // Custom Product Management
 service CustomProducts{
@@ -19,7 +19,7 @@ service CustomProducts{
   rpc GetCustomProductsByUser (CustomProductsByUserRequest) returns (CustomProductListResponse);
   rpc GetProductsByStore (StoresByUserRequest) returns (CustomProductListResponse);
   rpc UpdateCustomProduct (UpdateCustomProductRequest) returns (CustomProductResponse);
-  rpc DeleteCustomProduct (GetOne) returns (EmptyResponse);
+  rpc DeleteCustomProduct (GetOne) returns (BaseProductsResponse);
 }
   // Store Management
 service UserStore{
@@ -27,20 +27,24 @@ service UserStore{
   rpc GetStoreById (GetOne) returns (StoreResponse);
   rpc GetStoresByUser (StoresByUserRequest) returns (StoreListResponse);
   rpc UpdateStore (UpdateStoreRequest) returns (StoreResponse);
-  rpc DeleteStore (GetOne) returns (EmptyResponse);
+  rpc DeleteStore (GetOne) returns (BaseProductsResponse);
 
   // Optional Features
 //  rpc GetTrendingDesigns (EmptyRequest) returns (DesignListResponse);
 }
 
-message EmptyResponse {}
 
 message GetOne {
   string id = 1;
 }
-
-// Base Product Management
 message EmptyRequest {}
+
+message BaseProductsResponse {
+  int32 status = 1;
+  string message = 2;
+}
+// Base Product Management
+
 
 message CreateProductRequest {
   string name = 1;

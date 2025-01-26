@@ -18,7 +18,7 @@ export class CreateProductDto {
   })
   @IsString()
   @IsOptional()
-  description?: string;
+  description: string;
 
   @ApiProperty({
     required: true,

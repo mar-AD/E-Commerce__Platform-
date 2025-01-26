@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { GrpcMethod, RmqContext, RpcException } from '@nestjs/microservices';
+import { RmqContext, RpcException } from '@nestjs/microservices';
 import {
   BaseResponse,
   GetAllUserProfilesResponse,

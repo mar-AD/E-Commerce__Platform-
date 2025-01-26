@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
 import {
+  GetOne,
   LoggerService,
   ProductServiceController,
   ProductServiceControllerMethods,
@@ -23,6 +24,18 @@ export class ProductsController implements ProductServiceController{
   updateProduct(updateProductRequest: UpdateProductRequest) {
     const { getOne, updateProduct} = updateProductRequest;
     return this.productService.UpdateProduct(getOne, updateProduct)
+  }
+
+  getProducts() {
+    return this.productService.GetAllProducts()
+  }
+
+  getProductById(request: GetOne){
+    return this.productService.GetProduct(request)
+  }
+
+  deleteProduct(request: GetOne) {
+    return this.productService.DeleteProduct(request)
   }
 
 }
