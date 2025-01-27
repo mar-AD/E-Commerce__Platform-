@@ -13,12 +13,12 @@ async function bootstrap() {
         options: {
           protoPath: join(__dirname, '../proto/products.proto'),
           package: PRODUCTS_PACKAGE_NAME,
-          url: '0.0.0.0:50056',
+          url: '0.0.0.0:50057',
         }
       }
     );
     await app.listen();
-    console.log('products microservice is running on port 50056 (Grpc client)');
+    console.log('products microservice is running on port 50057 (Grpc client)');
 
   } catch (error) {
     console.error('Error starting the products microservice:', error);

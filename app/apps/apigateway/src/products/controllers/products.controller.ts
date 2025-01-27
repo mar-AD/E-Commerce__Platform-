@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   EmptyRequest,
   GetOne,
@@ -12,6 +12,7 @@ import {
 import { PermissionsGuard } from '../../auth/guards/auth.guard';
 import { ProductsService } from '../services/products.service';
 import { CreateProductDto, UpdateProductDto } from '@app/common/dtos';
+
 @ApiTags('Products')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('products')
@@ -20,12 +21,14 @@ export class ProductsController {
   }
 
   @Post('create/product')
+  @ApiBearerAuth()
   @PermissionsAndAccess({accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_PRODUCTS)})
   createProduct(@Body() createProductDto: CreateProductDto) {
     return this.productsService.CreateProduct(createProductDto);
   }
 
   @Patch('/:id')
+  @ApiBearerAuth()
   @PermissionsAndAccess({accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_PRODUCTS)})
   updateProduct(@Param('id') id: string, @Body() updateProduct: UpdateProductDto) {
     const getOne: GetOne = {id};
@@ -47,6 +50,7 @@ export class ProductsController {
   }
 
   @Delete('remove/:id')
+  @ApiBearerAuth()
   @PermissionsAndAccess({accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_PRODUCTS)})
   deleteProduct(@Param('id') id: string) {
     const getOne: GetOne = {id};

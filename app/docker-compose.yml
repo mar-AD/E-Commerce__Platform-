@@ -111,8 +111,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    command:
-      - sh -c "echo 'Starting products Service'; npm run start:dev products"
+    command: sh -c "echo 'Starting products Service'; npm run start:dev products"
 
   auth-db:
     image: postgres:16

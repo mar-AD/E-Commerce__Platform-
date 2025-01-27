@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { PRODUCTS_SERVICE } from '../constants';
-import { PRODUCTS_PACKAGE_NAME } from '@app/common';
+import { AUTH_SERVICE, PRODUCTS_SERVICE } from '../constants';
+import { AUTH_PACKAGE_NAME, PRODUCTS_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
 import { ProductsController } from './controllers/products.controller';
 import { ProductsService } from './services/products.service';
@@ -13,10 +13,20 @@ import { ProductsService } from './services/products.service';
       transport: Transport.GRPC,
       options: {
         package: PRODUCTS_PACKAGE_NAME,
-        protoPath: join(__dirname, './proto/products.proto'),
+        protoPath: join(__dirname, '../proto/products.proto'),
         url: 'products:50057',
       }
-    }])
+    },
+    {
+      name: AUTH_SERVICE,
+      transport: Transport.GRPC,
+      options: {
+        package: AUTH_PACKAGE_NAME,
+        protoPath: join(__dirname, '../proto/auth.proto'),
+        url: 'auth:50051',
+      },
+    },
+    ])
   ],
   controllers: [ProductsController],
   providers: [ProductsService],
