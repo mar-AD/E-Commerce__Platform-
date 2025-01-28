@@ -67,22 +67,63 @@ export class ProductsService {
           })
         }
 
+        // const updatedProduct = {};
+        // for (const key of Object.keys(updateProduct)) {
+        //   if (updateProduct[key] !== undefined){
+        //     if (Array.isArray(updateProduct[key] && Array.isArray(product[key]))){
+        //       if (!this.arraysAreEqual(updateProduct[key], product[key])) {
+        //         updatedProduct[key] = updateProduct[key];
+        //       }
+        //     }
+        //     else if (updateProduct[key] !== product[key]) {
+        //       updatedProduct[key] = updateProduct[key];
+        //     }
+        //   }
+        // }
+        //
+        // if(Object.keys(updatedProduct).length>0){
+        //   Object.assign(product, updatedProduct);
+        // }else {
+        //   this.logger.log(`ProductRepo: No changes detected for product with ID "${id}".`);
+        //   throw new RpcException({
+        //     code: status.INVALID_ARGUMENT,
+        //     message: 'No changes detected for product to update.'
+        //   });
+        // }
+
         const updatedProduct = {};
         for (const key of Object.keys(updateProduct)) {
-          if (updateProduct[key] !== undefined && updateProduct[key] !== product[key]) {
-            updatedProduct[key] = updateProduct[key];
+          if (updateProduct[key] !== undefined) {
+
+            if (Array.isArray(updateProduct[key]) && Array.isArray(product[key])) {
+              // Compare arrays
+              if (!this.arraysAreEqual(updateProduct[key], product[key])) {
+                updatedProduct[key] = updateProduct[key];
+              }
+            } else if (typeof updateProduct[key] === 'number' && typeof product[key] === 'string') {
+              // Convert string to number for price or similar fields
+              product[key] = parseFloat(product[key]);
+              if (updateProduct[key] !== product[key]) {
+                updatedProduct[key] = updateProduct[key];
+              }
+
+            } else if (updateProduct[key] !== product[key]) {
+              updatedProduct[key] = updateProduct[key];
+            }
           }
         }
 
-        if(Object.keys(updatedProduct).length>0){
+// Update product if changes were detected
+        if (Object.keys(updatedProduct).length > 0) {
           Object.assign(product, updatedProduct);
-        }else {
+        } else {
           this.logger.log(`ProductRepo: No changes detected for product with ID "${id}".`);
           throw new RpcException({
             code: status.INVALID_ARGUMENT,
-            message: 'No changes detected for product to update.'
+            message: 'No changes detected for product to update.',
           });
         }
+
         this.logger.log(`ProductRepo: Saving the updated entity to the repository...`);
         return from(this.productsRepository.save(product)).pipe(
           map((saveProduct)=>{
@@ -183,4 +224,10 @@ export class ProductsService {
       updatedAt: dateToTimestamp(product.updatedAt),
     }
   }
+
+  private arraysAreEqual(arr1: any[], arr2: any[]): boolean {
+    if (arr1.length !== arr2.length) return false;
+    return arr1.every((item, index) => item === arr2[index]);
+  }
+
 }

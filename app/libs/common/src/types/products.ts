@@ -27,16 +27,16 @@ export interface CreateProductRequest {
   name: string;
   description: string;
   price: number;
-  image: string;
-  template: string;
+  image: string[];
+  template: string[];
 }
 
 export interface UpdateProduct {
   name?: string | undefined;
   description?: string | undefined;
   price?: number | undefined;
-  image?: string | undefined;
-  template?: string | undefined;
+  image?: string[];
+  template?: string[];
   isActive?: boolean | undefined;
 }
 
@@ -50,8 +50,8 @@ export interface ProductResponse {
   name: string;
   description: string;
   price: number;
-  image: string;
-  template: string;
+  image: string[];
+  template: string[];
   isActive: boolean;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;

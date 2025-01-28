@@ -50,16 +50,16 @@ message CreateProductRequest {
   string name = 1;
   string description = 2;
   double price = 3;
-  string image = 4;
-  string template = 5;
+  repeated string image = 4;
+  repeated string template = 5;
 }
 
 message UpdateProduct {
   optional string name = 1;
   optional string description = 2;
   optional double price = 3;
-  optional string image = 4;
-  optional string template = 5;
+  repeated string image = 4;
+  repeated string template = 5;
   optional bool isActive = 6;
 }
 
@@ -73,8 +73,8 @@ message ProductResponse {
   string name = 2;
   string description = 3;
   double price = 4;
-  string image = 5;
-  string template = 6;
+  repeated string image = 5;
+  repeated string template = 6;
   bool isActive = 7;
   google.protobuf.Timestamp createdAt = 8;
   google.protobuf.Timestamp updatedAt = 9;

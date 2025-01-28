@@ -14,11 +14,11 @@ export class ProductEntity {
   @Column({ type: 'varchar', length: 255, unique: true })
   name: string;
 
-  @Column({ type: 'varchar', nullable: false })
-  image: string;
+  @Column({ type: 'simple-array', nullable: false })
+  image: string[];
 
-  @Column({ type: 'varchar', nullable: false })
-  template: string;
+  @Column({ type: 'simple-array', nullable: false })
+  template: string[];
 
   @Column({ type: 'text', nullable: true })
   description: string;
