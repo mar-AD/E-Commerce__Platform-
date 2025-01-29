@@ -66,42 +66,15 @@ export class ProductsService {
             message: messages.PRODUCTS.FAILED_TO_FETCH_FOR_UPDATE
           })
         }
-
-        // const updatedProduct = {};
-        // for (const key of Object.keys(updateProduct)) {
-        //   if (updateProduct[key] !== undefined){
-        //     if (Array.isArray(updateProduct[key] && Array.isArray(product[key]))){
-        //       if (!this.arraysAreEqual(updateProduct[key], product[key])) {
-        //         updatedProduct[key] = updateProduct[key];
-        //       }
-        //     }
-        //     else if (updateProduct[key] !== product[key]) {
-        //       updatedProduct[key] = updateProduct[key];
-        //     }
-        //   }
-        // }
-        //
-        // if(Object.keys(updatedProduct).length>0){
-        //   Object.assign(product, updatedProduct);
-        // }else {
-        //   this.logger.log(`ProductRepo: No changes detected for product with ID "${id}".`);
-        //   throw new RpcException({
-        //     code: status.INVALID_ARGUMENT,
-        //     message: 'No changes detected for product to update.'
-        //   });
-        // }
-
         const updatedProduct = {};
         for (const key of Object.keys(updateProduct)) {
           if (updateProduct[key] !== undefined) {
 
             if (Array.isArray(updateProduct[key]) && Array.isArray(product[key])) {
-              // Compare arrays
               if (!this.arraysAreEqual(updateProduct[key], product[key])) {
                 updatedProduct[key] = updateProduct[key];
               }
             } else if (typeof updateProduct[key] === 'number' && typeof product[key] === 'string') {
-              // Convert string to number for price or similar fields
               product[key] = parseFloat(product[key]);
               if (updateProduct[key] !== product[key]) {
                 updatedProduct[key] = updateProduct[key];
@@ -113,7 +86,6 @@ export class ProductsService {
           }
         }
 
-// Update product if changes were detected
         if (Object.keys(updatedProduct).length > 0) {
           Object.assign(product, updatedProduct);
         } else {

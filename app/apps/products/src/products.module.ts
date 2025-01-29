@@ -7,7 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductEntity } from './core-products/entities/products.entity';
 import { CustomProductsEntity } from './custom-products/entities/Custom_Products.entity';
 import { UserStoreEntity } from './user-stores/entities/user_store.entity';
-import { CustomProductsController } from './custom-products/custom-products.controller';
+import { CustomProductController } from './custom-products/custom-products.controller';
 import { UserStoresController } from './user-stores/user-stores.controller';
 import { CustomProductsService } from './custom-products/custom-products.service';
 import { UserStoresService } from './user-stores/user-stores.service';
@@ -30,8 +30,23 @@ import { UserStoresService } from './user-stores/user-stores.service';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([ProductEntity, CustomProductsEntity, UserStoreEntity]),
+
+    {
+      provide: 'RMQ_PRODUCTS_CLIENT',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_PRODUCTS_QUEUE'),
+            queueOptions: { durable: true },
+          },
+        });
+      },
+      inject: [ConfigService],
+    }
   ],
-  controllers: [ProductsController, CustomProductsController, UserStoresController],
-  providers: [ProductsService, CustomProductsService, UserStoresService],
+  controllers: [ProductsController, CustomProductController, UserStoresController],
+  providers: [ProductsService, CustomProductsService, UserStoresService, 'RMQ_PRODUCTS_CLIENT'],
 })
 export class ProductsModule {}

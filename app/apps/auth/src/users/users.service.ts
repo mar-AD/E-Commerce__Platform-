@@ -1,10 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   AuthResponse,
   dateToTimestamp,
   Empty, CronService,
   JwtTokenService,
-  User, LoggerService, FindOneDto, TokenDto, GetAllUsersResponse, BaseResponse,
+  User, LoggerService, FindOneDto, TokenDto, GetAllUsersResponse, BaseResponse, messages,
 } from '@app/common';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
@@ -18,9 +18,10 @@ import { AdminEntity } from '../admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos/auth-dtos';
 import { Cron } from '@nestjs/schedule';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { UpdateUserProfileDto } from '@app/common/dtos';
+import { status } from '@grpc/grpc-js';
 
 
 @Injectable()
@@ -95,6 +96,29 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
     return this.getOne(findOneDto.id, AuthConstants.user);
   }
 
+  async getOneUser(data: {id: string}, context: RmqContext): Promise<boolean> {
+    const {id} = data;
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+     try {
+       const thisUser = this.userRepository.findOne({where: {id: id}});
+       if (!thisUser){
+         this.logger.log(`user with ${id} not found`);
+         throw new RpcException({
+           status: status.NOT_FOUND,
+           message: messages.USER.NOT_FOUND2
+         })
+       }
+       channel.ack(originalMessage)
+       return true
+
+     }
+     catch(error) {
+       this.logger.error(`Failed to fetch user with ${id}: ${error}`);
+       channel.nack(originalMessage, false, true);
+       throw new RpcException('User fetch failed');
+     }
+  }
 
   updateUserProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<BaseResponse> {
     return this.updateProfile(findOneDto, userProfileUpdateDto, AuthConstants.user);
