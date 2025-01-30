@@ -25,7 +25,7 @@ export class CustomProductsEntity {
   design: string;
 
   @Column({ type: 'json', nullable: false })
-  placement: Record<string, any>;
+  placement: Record<string, string>;
 
   @Column({ type: 'varchar', nullable: false })
   color: string;
@@ -34,7 +34,7 @@ export class CustomProductsEntity {
   size: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
-  total_price: number;
+  totalPrice: number;
 
   @Column({type: 'boolean',default: false})
   isPublished: boolean;

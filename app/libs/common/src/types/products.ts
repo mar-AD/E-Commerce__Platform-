@@ -65,10 +65,15 @@ export interface CreateCustomProductRequest {
   productId: string;
   userId: string;
   design: string;
-  placement: string;
+  placement: { [key: string]: string };
   color: string;
   size: string;
   totalPrice: number;
+}
+
+export interface CreateCustomProductRequest_PlacementEntry {
+  key: string;
+  value: string;
 }
 
 export interface CustomProductsByUserRequest {
@@ -77,11 +82,16 @@ export interface CustomProductsByUserRequest {
 
 export interface UpdateCustomProduct {
   design?: string | undefined;
-  placement?: string | undefined;
+  placement?: { [key: string]: string };
   color?: string | undefined;
   size?: string | undefined;
   totalPrice?: number | undefined;
   isPublished?: boolean | undefined;
+}
+
+export interface UpdateCustomProduct_PlacementEntry {
+  key: string;
+  value: string;
 }
 
 export interface UpdateCustomProductRequest {
@@ -94,13 +104,18 @@ export interface CustomProductResponse {
   productId: string;
   userId: string;
   design: string;
-  placement: string;
+  placement: { [key: string]: string };
   color: string;
   size: string;
   totalPrice: number;
   isPublished: boolean;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
+}
+
+export interface CustomProductResponse_PlacementEntry {
+  key: string;
+  value: string;
 }
 
 export interface CustomProductListResponse {

@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomProductsEntity } from './entities/Custom_Products.entity';
 import { Repository } from 'typeorm';
-import { LoggerService, messages } from '@app/common';
-import { CreateCustomProductDto } from '@app/common/dtos';
-import { from, switchMap } from 'rxjs';
+import { CustomProductResponse, dateToTimestamp, GetOne, LoggerService, messages } from '@app/common';
+import { CreateCustomProductDto, UpdateCustomProductDto } from '@app/common/dtos';
+import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import { ProductEntity } from '../core-products/entities/products.entity';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
@@ -21,23 +21,27 @@ export class CustomProductsService {
 
   createCustomProduct(createCustomProduct: CreateCustomProductDto) :Observable<CustomProductResponse> {
     const {productId, userId} = createCustomProduct;
+    this.logger.log(`ProductRepo: Searching for entity by ID "${productId}" in repository...'`);
     return from(this.ProductRepository.findOne({where: {id: productId}})).pipe(
       switchMap((product)=> {
         if (!product) {
           this.logger.log(`ProductRepo: entity with ID "${productId}" do not exist.`);
           throw new RpcException({
             code: status.NOT_FOUND,
-            message: messages.PRODUCTS.FAILED_TO_FETCH_FOR_UPDATE
+            message: messages.PRODUCTS.PRODUCT_NOT_FOUND
           })
         }
-        return this.clientProducts.send<string>('get_user_id', {id: userId}).pipe(
-          switchMap((response) =>{
-            if(response !== true){
+        this.logger.log(`clientProducts: sending get_user_id message... '`);
+        return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
+          switchMap((userExists) =>{
+            if(!userExists){
+              this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
               throw new RpcException({
                 code: status.NOT_FOUND,
                 message: messages.USER.NOT_FOUND2
               });
             }
+            this.logger.log(`CustomProductRepo: entity with ID "${productId}" created successfully .`);
             return from(this.CustomProductRepository.save(product)).pipe(
               map((created)=>{
                 return this.mappedResponse(created)
@@ -45,23 +49,93 @@ export class CustomProductsService {
             )
           })
         )
-      }
+      })
     )
+  }
+
+  updateCustomProduct(getOne: GetOne, updateCustomProduct: UpdateCustomProductDto) :Observable<CustomProductResponse> {
+    const{ id} = getOne;
+    const{  } = updateCustomProduct;
+    this.logger.log(`CustomProductRepo: Searching for entity by ID "${id}" in repository...'`);
+    return from(this.CustomProductRepository.findOne({where: {id}})).pipe(
+      switchMap((product) =>{
+        if (!product){
+          this.logger.log(`CustomProductRepo: entity with ID "${id}" do not exist.`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.PRODUCTS.CUSTOM_PRODUCT_NOT_FOUND
+          })
+        }
+        const updatedCustomProduct = {};
+        this.logger.log(`CustomProductRepo: created a loop to loop over the updateCustomProduct keys.`);
+        for (const key of Object.keys(updateCustomProduct)) {
+          if (updateCustomProduct[key] !== undefined){
+            if (typeof (updateCustomProduct[key] === 'object' && typeof (product[key]=== 'object'))){
+
+              if (!this.isEqual(updateCustomProduct[key], product[key])){
+                this.logger.log(`CustomProductRepo: the object key in the CustomProduct was updated successfully .`);
+                updatedCustomProduct[key] = updateCustomProduct[key]
+              }
+            }
+            // else if(typeof updateCustomProduct[key] === 'number' && typeof product[key] === 'string'){
+            //   product[key] = parseFloat(product[key]);
+            //   if (updatedCustomProduct[key] !== product[key]){
+            //    this.logger.log(`CustomProductRepo: the number key in the CustomProduct was updated successfully .`);
+            //     updatedCustomProduct[key] = updateCustomProduct[key]
+            //   }
+            // }
+            else if (updatedCustomProduct[key] !== product[key]){
+              this.logger.log(`CustomProductRepo: every other key was updated successfully .`);
+              updatedCustomProduct[key] = updateCustomProduct[key]
+            }
+          }
+        }
+
+        if (Object.keys(updatedCustomProduct).length > 0){
+          this.logger.log(`CustomProductRepo: changes detected in updatedCustomProduct and it was updated successfully in the product entity .`);
+          Object.assign(product, updatedCustomProduct)
+        }
+        else {
+          this.logger.log(`CustomProductRepo: No changes detected for customProduct with ID "${id}".`);
+          throw new RpcException({
+            code: status.INVALID_ARGUMENT,
+            message: 'No changes detected for customProduct to update.',
+          });
+        }
+        return from(this.CustomProductRepository.save(product)).pipe(
+          map((saveProduct)=>{
+            this.logger.log(`CustomProductRepo: Entity successfully updated`);
+            return this.mappedResponse(saveProduct) ;
+          }),
+          catchError((error)=>{
+            this.logger.error(`CustomProductRepo: Failed to save the updated entity. Error: ${error.message}`);
+            throw new RpcException({
+              code: status.INTERNAL,
+              message: messages.PRODUCTS.FAILED_TO_UPDATE_CUSTOM_PRODUCT,
+            });
+          })
+        )
+      })
+    )
+  }
+
+  private isEqual (obj1: any, obj2: any): boolean {
+    return JSON.stringify(obj1) === JSON.stringify(obj2);
   }
 
   mappedResponse(product: CustomProductsEntity):CustomProductResponse {
     return {
-      id = product.id,
-      productId = product.product,
-      userId = product.userId,
-      design = product.design,
-      placement = product.placement,
-      color = product.color,
-      size = product.size,
-      totalPrice = product.totalPrice,
-      isPublished = product.isPublished,
-      createdAt = dateToTimestamp(product.createdAt),
-      updatedAt = dateToTimestamp(product.updatedAt),
+      id : product.id,
+      productId : product.product.id,
+      userId : product.userId,
+      design : product.design,
+      placement : product.placement?? {},
+      color : product.color,
+      size : product.size,
+      totalPrice : product.totalPrice,
+      isPublished : product.isPublished,
+      createdAt : dateToTimestamp(product.createdAt),
+      updatedAt : dateToTimestamp(product.updatedAt),
     }
   }
 

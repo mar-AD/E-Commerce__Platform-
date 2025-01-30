@@ -18,7 +18,7 @@ import { AdminEntity } from '../admins/entities/admin.entity';
 import { CreateDto, ForgotPasswordDto, LoginDto, RefreshTokenDto, RequestEmailUpdateDto, ResetPasswordDto,
   UpdateEmailDto, UpdatePasswordDto, VerifyEmailCodeDto } from '@app/common/dtos/auth-dtos';
 import { Cron } from '@nestjs/schedule';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy, RmqContext, RpcException } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { UpdateUserProfileDto } from '@app/common/dtos';
 import { status } from '@grpc/grpc-js';
@@ -95,19 +95,17 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
   getUser(findOneDto: FindOneDto): Observable<User> {
     return this.getOne(findOneDto.id, AuthConstants.user);
   }
-
+//for the products microservice
   async getOneUser(data: {id: string}, context: RmqContext): Promise<boolean> {
     const {id} = data;
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
      try {
-       const thisUser = this.userRepository.findOne({where: {id: id}});
+       const thisUser = await this.userRepository.findOne({where: {id: id}});
        if (!thisUser){
          this.logger.log(`user with ${id} not found`);
-         throw new RpcException({
-           status: status.NOT_FOUND,
-           message: messages.USER.NOT_FOUND2
-         })
+         channel.ack(originalMessage);
+         return false;
        }
        channel.ack(originalMessage)
        return true

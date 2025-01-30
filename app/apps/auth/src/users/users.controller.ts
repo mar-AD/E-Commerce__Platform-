@@ -12,7 +12,7 @@ import {
   VerifyEmailCodeRequest,
 } from '@app/common';
 import { CreateDto, ForgotPasswordDto } from '@app/common/dtos/auth-dtos';
-import { MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
+import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 
 @Controller()
 @UserServiceControllerMethods()
@@ -88,7 +88,7 @@ export class UsersController implements UserServiceController{
   }
 
   @MessagePattern('get_user_id')
-  async findOneUser(@Payload() data: {id: string}, @Ctx() context: RmqContext ){
+  async findOneUser(@Payload() data: {id: string}, @Ctx() context: RmqContext ): Promise<boolean>{
     return this.usersService.getOneUser(data, context);
   }
 }

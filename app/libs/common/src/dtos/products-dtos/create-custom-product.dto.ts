@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsObject, IsString, IsUUID } from 'class-validator';
 
 export class CreateCustomProductDto {
   @ApiProperty({
@@ -35,8 +35,8 @@ export class CreateCustomProductDto {
     example: 'Front',
   })
   @IsNotEmpty()
-  @IsString()
-  placement: string;
+  @IsObject()
+  placement: Record<string, string>;
 
   @ApiProperty({
     required: true,

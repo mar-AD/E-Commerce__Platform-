@@ -11,6 +11,7 @@ import { CustomProductController } from './custom-products/custom-products.contr
 import { UserStoresController } from './user-stores/user-stores.controller';
 import { CustomProductsService } from './custom-products/custom-products.service';
 import { UserStoresService } from './user-stores/user-stores.service';
+import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -30,7 +31,12 @@ import { UserStoresService } from './user-stores/user-stores.service';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([ProductEntity, CustomProductsEntity, UserStoreEntity]),
-
+  ],
+  controllers: [ProductsController, CustomProductController, UserStoresController],
+  providers: [
+    ProductsService,
+    CustomProductsService,
+    UserStoresService,
     {
       provide: 'RMQ_PRODUCTS_CLIENT',
       useFactory: (configService: ConfigService) => {
@@ -46,7 +52,6 @@ import { UserStoresService } from './user-stores/user-stores.service';
       inject: [ConfigService],
     }
   ],
-  controllers: [ProductsController, CustomProductController, UserStoresController],
-  providers: [ProductsService, CustomProductsService, UserStoresService, 'RMQ_PRODUCTS_CLIENT'],
+  exports:['RMQ_PRODUCTS_CLIENT'],
 })
 export class ProductsModule {}

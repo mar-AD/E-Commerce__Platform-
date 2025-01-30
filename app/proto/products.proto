@@ -90,7 +90,7 @@ message CreateCustomProductRequest {
   string productId = 1;
   string userId = 2;
   string design = 3;
-  string placement = 4;
+  map<string, string> placement = 4;
   string color = 5;
   string size = 6;
   double totalPrice = 7;
@@ -102,7 +102,7 @@ message CustomProductsByUserRequest {
 
 message UpdateCustomProduct {
   optional string design = 1;
-  optional string placement = 2;
+  map<string, string> placement = 2;
   optional string color = 3;
   optional string size = 4;
   optional double totalPrice = 5;
@@ -119,7 +119,7 @@ message CustomProductResponse {
   string productId = 2;
   string userId = 3;
   string design = 4;
-  string placement = 5;
+  map<string, string> placement = 5;
   string color = 6;
   string size = 7;
   double totalPrice = 8;
