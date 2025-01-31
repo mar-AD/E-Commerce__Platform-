@@ -9,7 +9,7 @@ import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 import { Timestamp } from "google/protobuf/timestamp";
 
-// export const protobufPackage = "products";
+export const protobufPackage = "products";
 
 export interface GetOne {
   id: string;
@@ -65,7 +65,7 @@ export interface CreateCustomProductRequest {
   productId: string;
   userId: string;
   design: string;
-  placement: { [key: string]: string };
+  placement: { [key: string]: { [key: string]: any } | undefined };
   color: string;
   size: string;
   totalPrice: number;
@@ -73,7 +73,7 @@ export interface CreateCustomProductRequest {
 
 export interface CreateCustomProductRequest_PlacementEntry {
   key: string;
-  value: string;
+  value: { [key: string]: any } | undefined;
 }
 
 export interface CustomProductsByUserRequest {
@@ -82,7 +82,7 @@ export interface CustomProductsByUserRequest {
 
 export interface UpdateCustomProduct {
   design?: string | undefined;
-  placement?: { [key: string]: string };
+  placement?: { [key: string]: { [key: string]: any } | undefined };
   color?: string | undefined;
   size?: string | undefined;
   totalPrice?: number | undefined;
@@ -91,7 +91,7 @@ export interface UpdateCustomProduct {
 
 export interface UpdateCustomProduct_PlacementEntry {
   key: string;
-  value: string;
+  value: { [key: string]: any } | undefined;
 }
 
 export interface UpdateCustomProductRequest {
@@ -104,7 +104,7 @@ export interface CustomProductResponse {
   productId: string;
   userId: string;
   design: string;
-  placement: { [key: string]: string };
+  placement: { [key: string]: { [key: string]: any } | undefined };
   color: string;
   size: string;
   totalPrice: number;
@@ -115,7 +115,7 @@ export interface CustomProductResponse {
 
 export interface CustomProductResponse_PlacementEntry {
   key: string;
-  value: string;
+  value: { [key: string]: any } | undefined;
 }
 
 export interface CustomProductListResponse {

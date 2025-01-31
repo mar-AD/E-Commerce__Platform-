@@ -70,7 +70,7 @@ export class CustomProductsService {
         this.logger.log(`CustomProductRepo: created a loop to loop over the updateCustomProduct keys.`);
         for (const key of Object.keys(updateCustomProduct)) {
           if (updateCustomProduct[key] !== undefined){
-            if (typeof (updateCustomProduct[key] === 'object' && typeof (product[key]=== 'object'))){
+            if (typeof updateCustomProduct[key] === 'object' && typeof product[key] === 'object'){
 
               if (!this.isEqual(updateCustomProduct[key], product[key])){
                 this.logger.log(`CustomProductRepo: the object key in the CustomProduct was updated successfully .`);
@@ -119,8 +119,20 @@ export class CustomProductsService {
     )
   }
 
+
+
   private isEqual (obj1: any, obj2: any): boolean {
-    return JSON.stringify(obj1) === JSON.stringify(obj2);
+    if (obj1 === obj2 ) return true;
+
+    if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return false;
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    if ( keys1.length !== keys2.length) return false;
+    for(let key of keys1){
+      if (!keys2.includes(key)) return false;
+      if (!this.isEqual(obj1[key], obj2[key])) return false;
+    }
+    return true;
   }
 
   mappedResponse(product: CustomProductsEntity):CustomProductResponse {

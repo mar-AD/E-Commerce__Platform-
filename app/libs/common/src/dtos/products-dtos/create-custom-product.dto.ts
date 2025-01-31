@@ -36,7 +36,7 @@ export class CreateCustomProductDto {
   })
   @IsNotEmpty()
   @IsObject()
-  placement: Record<string, string>;
+  placement: Record<string, any>;
 
   @ApiProperty({
     required: true,

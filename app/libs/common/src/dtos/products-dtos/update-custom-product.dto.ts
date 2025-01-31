@@ -18,7 +18,7 @@ export class UpdateCustomProductDto {
   })
   @IsOptional()
   @IsObject()
-  placement?: Record<string, string>;
+  placement?: Record<string, any>;
 
   @ApiProperty({
     required: false,

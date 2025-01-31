@@ -24,8 +24,8 @@ export class CustomProductsEntity {
   @Column({ type: 'varchar', nullable: false })
   design: string;
 
-  @Column({ type: 'json', nullable: false })
-  placement: Record<string, string>;
+  @Column({ type: 'jsonb', nullable: false })
+  placement: Record<string, any>;
 
   @Column({ type: 'varchar', nullable: false })
   color: string;
