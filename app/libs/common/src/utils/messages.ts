@@ -107,6 +107,7 @@ export const messages = {
     FAILED_TO_CREATE_CUSTOM_PRODUCT: "Failed to create custom product",
     FAILED_TO_UPDATE_CUSTOM_PRODUCT: "Failed to update custom product",
     FAILED_TO_DELETE_CUSTOM_PRODUCT: "Failed to delete custom product",
+    FAILED_TO_FETCH_CUSTOM_PRODUCT: "Failed to fetch custom product",
 
     // User Store Messages
     USER_STORE_NOT_FOUND: "User store not found or unavailable",

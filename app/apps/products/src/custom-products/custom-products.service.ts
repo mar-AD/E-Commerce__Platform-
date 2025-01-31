@@ -1,8 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomProductsEntity } from './entities/Custom_Products.entity';
 import { Repository } from 'typeorm';
-import { CustomProductResponse, dateToTimestamp, GetOne, LoggerService, messages } from '@app/common';
+import {
+  BaseProductsResponse, CustomProductListResponse,
+  CustomProductResponse, CustomProductsByUserRequest,
+  dateToTimestamp,
+  GetOne,
+  LoggerService,
+  messages,
+} from '@app/common';
 import { CreateCustomProductDto, UpdateCustomProductDto } from '@app/common/dtos';
 import { catchError, from, map, Observable, switchMap } from 'rxjs';
 import { ProductEntity } from '../core-products/entities/products.entity';
@@ -31,7 +38,7 @@ export class CustomProductsService {
             message: messages.PRODUCTS.PRODUCT_NOT_FOUND
           })
         }
-        this.logger.log(`clientProducts: sending get_user_id message... '`);
+        this.logger.log(`CustomProducts: sending get_user_id message... '`);
         return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
           switchMap((userExists) =>{
             if(!userExists){
@@ -119,7 +126,133 @@ export class CustomProductsService {
     )
   }
 
+  getCustomProduct(getOne: GetOne): Observable<CustomProductResponse> {
+    const{id} = getOne;
+    this.logger.log(`CustomProducts: Searching for entity by ID "${id}" in repository...'`);
+    return from(this.CustomProductRepository.findOne({where: {id}})).pipe(
+      map((product)=>{
+        if (!product){
+          this.logger.error(`CustomProducts: custom product with ID "${id}" not found'`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.PRODUCTS.CUSTOM_PRODUCT_NOT_FOUND
+          })
+        }
+        this.logger.log(`CustomProducts:custom product with ID "${id}" found successfully `);
+        return this.mappedResponse(product)
+      }),
+      catchError((error)=>{
+        this.logger.error(`CustomProducts: Failed to fetch custom product with ID "${id}". Error: ${error.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.PRODUCTS.FAILED_TO_FETCH_CUSTOM_PRODUCT
+        })
+      })
+    )
+  }
 
+  getCustomProductByUser(request: CustomProductsByUserRequest): Observable<CustomProductListResponse> {
+    const{userId} = request;
+    this.logger.log(`CustomProducts: sending get_user_id message... '`);
+    return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
+      switchMap((userExists) => {
+        if (!userExists) {
+          this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.USER.NOT_FOUND2
+          });
+        }
+        this.logger.log(`CustomProducts: Searching for entity by ID "${userId}" in repository...'`);
+        return from(this.CustomProductRepository.find({ where: { userId } })).pipe(
+          map((products) => {
+            if (!products) {
+              this.logger.error(`CustomProducts: custom product with ID "${userId}" not found'`);
+              throw new RpcException({
+                code: status.NOT_FOUND,
+                message: messages.PRODUCTS.CUSTOM_PRODUCT_NOT_FOUND
+              })
+            }
+            this.logger.log(`CustomProducts:custom product with ID "${userId}" found successfully `);
+            return { customProducts: products.map((product) => this.mappedResponse(product))}
+          }),
+          catchError((error) => {
+            this.logger.error(`CustomProducts: Failed to fetch custom product with ID "${userId}". Error: ${error.message}`);
+            throw new RpcException({
+              code: status.INTERNAL,
+              message: messages.PRODUCTS.FAILED_TO_FETCH_CUSTOM_PRODUCT
+            })
+          })
+        )
+      })
+    )
+  }
+
+  getCustomProductByStore(request: CustomProductsByUserRequest): Observable<CustomProductListResponse> {
+    const{userId} = request;
+    this.logger.log(`CustomProducts: sending get_user_id message... '`);
+    return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
+      switchMap((userExists) => {
+        if (!userExists) {
+          this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.USER.NOT_FOUND2
+          });
+        }
+        this.logger.log(`CustomProducts: Searching for entity by ID "${userId}" in repository...'`);
+        return from(this.CustomProductRepository.find({ where: { userId: userId, isPublished: true } })).pipe(
+          map((products) => {
+            if (!products) {
+              this.logger.error(`CustomProducts: custom product with ID "${userId}" not found'`);
+              throw new RpcException({
+                code: status.NOT_FOUND,
+                message: messages.PRODUCTS.CUSTOM_PRODUCT_NOT_FOUND
+              })
+            }
+            this.logger.log(`CustomProducts:custom product with ID "${userId}" found successfully `);
+            return { customProducts: products.map((product) => this.mappedResponse(product))}
+          }),
+          catchError((error) => {
+            this.logger.error(`CustomProducts: Failed to fetch custom product with ID "${userId}". Error: ${error.message}`);
+            throw new RpcException({
+              code: status.INTERNAL,
+              message: messages.PRODUCTS.FAILED_TO_FETCH_CUSTOM_PRODUCT
+            })
+          })
+        )
+      })
+    )
+  }
+
+  //removing the cutomProduct from store (making isPublish= false)
+
+  //for the user to delete the custom product from his profile
+  deleteCustomProduct(getOne: GetOne) : Observable<BaseProductsResponse> {
+    const{id} = getOne;
+    return from(this.CustomProductRepository.delete({id})).pipe(
+      map((result)=>{
+        if (result.affected === 0) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.PRODUCTS.CUSTOM_PRODUCT_NOT_FOUND,
+          });
+        }
+        this.logger.log(`ProductRepo: product with ID "${id}" deleted successfully `);
+        return {
+          status: HttpStatus.OK,
+          message: messages.PRODUCTS.CUSTOM_PRODUCT_DELETED_SUCCESSFULLY
+        }
+      }),
+      catchError((error)=>{
+        this.logger.error(`ProductRepo: failed to delete product with ID "${id}". Error: ${error.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.PRODUCTS.FAILED_TO_DELETE_PRODUCT
+        })
+      })
+    )
+  }
 
   private isEqual (obj1: any, obj2: any): boolean {
     if (obj1 === obj2 ) return true;

@@ -36,6 +36,9 @@ export class CustomProductController implements CustomProductsController{
     return this.customProductsService.getCustomProductByStore(request)
   }
 
+  //removing the cutomProduct from store (making isPublish= false)
+
+
   deleteCustomProduct(request: GetOne) {
     return this.customProductsService.deleteCustomProduct(request)
   }
