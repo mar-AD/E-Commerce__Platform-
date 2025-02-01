@@ -9,7 +9,7 @@ import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 import { Timestamp } from "google/protobuf/timestamp";
 
-export const protobufPackage = "products";
+// export const protobufPackage = "products";
 
 export interface GetOne {
   id: string;
@@ -61,9 +61,7 @@ export interface ProductListResponse {
   products: ProductResponse[];
 }
 
-export interface CreateCustomProductRequest {
-  productId: string;
-  userId: string;
+export interface CreateCustomProduct {
   design: string;
   placement: { [key: string]: { [key: string]: any } | undefined };
   color: string;
@@ -71,9 +69,19 @@ export interface CreateCustomProductRequest {
   totalPrice: number;
 }
 
-export interface CreateCustomProductRequest_PlacementEntry {
+export interface CreateCustomProduct_PlacementEntry {
   key: string;
   value: { [key: string]: any } | undefined;
+}
+
+export interface CreateCustomProductRequest {
+  getUser: CustomProductsByUserRequest | undefined;
+  getProduct: GetProductId | undefined;
+  createCustomProduct: CreateCustomProduct | undefined;
+}
+
+export interface GetProductId {
+  productId: string;
 }
 
 export interface CustomProductsByUserRequest {
@@ -101,7 +109,7 @@ export interface UpdateCustomProductRequest {
 
 export interface CustomProductResponse {
   id: string;
-  productId: string;
+  product_id: string;
   userId: string;
   design: string;
   placement: { [key: string]: { [key: string]: any } | undefined };
@@ -229,6 +237,8 @@ export interface CustomProductsClient {
 
   updateCustomProduct(request: UpdateCustomProductRequest): Observable<CustomProductResponse>;
 
+  removeCustomProductFromStore(request: GetOne): Observable<BaseProductsResponse>;
+
   deleteCustomProduct(request: GetOne): Observable<BaseProductsResponse>;
 }
 
@@ -255,6 +265,10 @@ export interface CustomProductsController {
     request: UpdateCustomProductRequest,
   ): Promise<CustomProductResponse> | Observable<CustomProductResponse> | CustomProductResponse;
 
+  removeCustomProductFromStore(
+    request: GetOne,
+  ): Promise<BaseProductsResponse> | Observable<BaseProductsResponse> | BaseProductsResponse;
+
   deleteCustomProduct(
     request: GetOne,
   ): Promise<BaseProductsResponse> | Observable<BaseProductsResponse> | BaseProductsResponse;
@@ -268,6 +282,7 @@ export function CustomProductsControllerMethods() {
       "getCustomProductsByUser",
       "getProductsByStore",
       "updateCustomProduct",
+      "removeCustomProductFromStore",
       "deleteCustomProduct",
     ];
     for (const method of grpcMethods) {

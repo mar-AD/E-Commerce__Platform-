@@ -2,23 +2,23 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsObject, IsString, IsUUID } from 'class-validator';
 
 export class CreateCustomProductDto {
-  @ApiProperty({
-    required: true,
-    description: 'Custom product ID',
-    example: '550e8400-e29b-41d4-a716-446655440000',
-  })
-  @IsNotEmpty()
-  @IsUUID()
-  productId: string;
-
-  @ApiProperty({
-    required: true,
-    description: 'User ID',
-    example: '123456',
-  })
-  @IsNotEmpty()
-  @IsString()
-  userId: string;
+  // @ApiProperty({
+  //   required: true,
+  //   description: 'Custom product ID',
+  //   example: '550e8400-e29b-41d4-a716-446655440000',
+  // })
+  // @IsNotEmpty()
+  // @IsString()
+  // productId: string;
+  //
+  // @ApiProperty({
+  //   required: true,
+  //   description: 'User ID',
+  //   example: '123456',
+  // })
+  // @IsNotEmpty()
+  // @IsString()
+  // userId: string;
 
   @ApiProperty({
     required: true,
@@ -63,5 +63,5 @@ export class CreateCustomProductDto {
   })
   @IsNotEmpty()
   @IsNumber()
-  totalPrice: number; // Changed from string to number
+  totalPrice: number;
 }

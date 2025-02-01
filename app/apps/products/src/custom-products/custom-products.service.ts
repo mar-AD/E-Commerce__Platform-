@@ -6,12 +6,12 @@ import {
   BaseProductsResponse, CustomProductListResponse,
   CustomProductResponse, CustomProductsByUserRequest,
   dateToTimestamp,
-  GetOne,
+  GetOne, GetProductId,
   LoggerService,
-  messages,
+  messages, StoresByUserRequest,
 } from '@app/common';
 import { CreateCustomProductDto, UpdateCustomProductDto } from '@app/common/dtos';
-import { catchError, from, map, Observable, switchMap } from 'rxjs';
+import { catchError, from, map, Observable, switchMap, tap } from 'rxjs';
 import { ProductEntity } from '../core-products/entities/products.entity';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
@@ -26,43 +26,58 @@ export class CustomProductsService {
   ) {
   }
 
-  createCustomProduct(createCustomProduct: CreateCustomProductDto) :Observable<CustomProductResponse> {
-    const {productId, userId} = createCustomProduct;
-    this.logger.log(`ProductRepo: Searching for entity by ID "${productId}" in repository...'`);
-    return from(this.ProductRepository.findOne({where: {id: productId}})).pipe(
-      switchMap((product)=> {
+  createCustomProduct(
+    getUser: CustomProductsByUserRequest,
+    getProduct: GetProductId,
+  createCustomProduct: CreateCustomProductDto,
+
+  ): Observable<CustomProductResponse> {
+    const { productId } = getProduct;
+    const { userId } = getUser;
+
+    this.logger.debug(`Searching for product ID: "${productId}"`);
+
+    return from(this.ProductRepository.findOne({ where: { id: productId } })).pipe(
+      tap(product => {
         if (!product) {
-          this.logger.log(`ProductRepo: entity with ID "${productId}" do not exist.`);
+          this.logger.warn(`Product with ID "${productId}" not found.`);
           throw new RpcException({
             code: status.NOT_FOUND,
             message: messages.PRODUCTS.PRODUCT_NOT_FOUND
-          })
+          });
         }
-        this.logger.log(`CustomProducts: sending get_user_id message... '`);
-        return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
-          switchMap((userExists) =>{
-            if(!userExists){
-              this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
-              throw new RpcException({
-                code: status.NOT_FOUND,
-                message: messages.USER.NOT_FOUND2
-              });
-            }
-            this.logger.log(`CustomProductRepo: entity with ID "${productId}" created successfully .`);
-            return from(this.CustomProductRepository.save(product)).pipe(
-              map((created)=>{
-                return this.mappedResponse(created)
-              })
-            )
-          })
-        )
+      }),
+      switchMap(() => {
+        this.logger.debug(`Sending get_user_id message for user "${userId}"`);
+        return this.clientProducts.send<boolean>('get_user_id', { id: userId });
+      }),
+      tap(userExists => {
+        if (!userExists) {
+          this.logger.warn(`User with ID "${userId}" not found.`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.USER.NOT_FOUND2
+          });
+        }
+      }),
+      switchMap(() => {
+        const product_id = productId
+        const newCreateCustomProduct = { product_id, userId, ...createCustomProduct };
+        this.logger.log(JSON.stringify(newCreateCustomProduct))
+        this.logger.log(`Creating custom product for User ID: "${userId}" and Product ID: "${productId}"`);
+        return from(this.CustomProductRepository.save(newCreateCustomProduct));
+      }),
+      map(created => this.mappedResponse(created)),
+      catchError(err => {
+        this.logger.error(`Failed to create custom product: ${err.message}`);
+        throw err;
       })
-    )
+    );
   }
+
 
   updateCustomProduct(getOne: GetOne, updateCustomProduct: UpdateCustomProductDto) :Observable<CustomProductResponse> {
     const{ id} = getOne;
-    const{  } = updateCustomProduct;
     this.logger.log(`CustomProductRepo: Searching for entity by ID "${id}" in repository...'`);
     return from(this.CustomProductRepository.findOne({where: {id}})).pipe(
       switchMap((product) =>{
@@ -188,7 +203,7 @@ export class CustomProductsService {
     )
   }
 
-  getCustomProductByStore(request: CustomProductsByUserRequest): Observable<CustomProductListResponse> {
+  getCustomProductByStore(request: StoresByUserRequest): Observable<CustomProductListResponse> {
     const{userId} = request;
     this.logger.log(`CustomProducts: sending get_user_id message... '`);
     return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
@@ -225,7 +240,41 @@ export class CustomProductsService {
     )
   }
 
-  //removing the cutomProduct from store (making isPublish= false)
+  //removing the customProduct from store (making isPublish= false)
+  unpublishCustomProduct(request: GetOne) : Observable<BaseProductsResponse> {
+    const{id} = request;
+    this.logger.log(`CustomProducts: Searching for entity by ID "${id}" in repository...'`);
+    return from(this.CustomProductRepository.findOne({where: {id}})).pipe(
+      switchMap((product)=>{
+        if (!product){
+          this.logger.error(`CustomProducts: custom product with ID "${id}" not found'`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.PRODUCTS.CUSTOM_PRODUCT_NOT_FOUND
+          })
+        }
+        this.logger.log(`CustomProducts:custom product with ID "${id}" found successfully `);
+        this.logger.log(`CustomProducts: now pursuing to update the entity by ID "${id}"`);
+        product.isPublished = false;
+        return from(this.CustomProductRepository.save(product)).pipe(
+          map(() =>{
+            this.logger.log(`CustomProducts: custom product with ID "${id}" unpublished successfully `);
+            return{
+              status: HttpStatus.OK,
+              message: 'The custom Product unpublished successfully',
+            }
+          }),
+          catchError((error)=>{
+            this.logger.error(`CustomProducts: Failed to unpublish custom product with ID "${id}". Error: ${error.message}`);
+            throw new RpcException({
+              code: status.INTERNAL,
+              message: 'Failed to unpublish custom product'
+            })
+          })
+        )
+      })
+    )
+  }
 
   //for the user to delete the custom product from his profile
   deleteCustomProduct(getOne: GetOne) : Observable<BaseProductsResponse> {
@@ -271,7 +320,7 @@ export class CustomProductsService {
   mappedResponse(product: CustomProductsEntity):CustomProductResponse {
     return {
       id : product.id,
-      productId : product.product.id,
+      product_id : product.product.id,
       userId : product.userId,
       design : product.design,
       placement : product.placement?? {},

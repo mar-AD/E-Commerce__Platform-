@@ -20,6 +20,7 @@ service CustomProducts{
   rpc GetCustomProductsByUser (CustomProductsByUserRequest) returns (CustomProductListResponse);
   rpc GetProductsByStore (StoresByUserRequest) returns (CustomProductListResponse);
   rpc UpdateCustomProduct (UpdateCustomProductRequest) returns (CustomProductResponse);
+  rpc RemoveCustomProductFromStore(GetOne) returns (BaseProductsResponse);
   rpc DeleteCustomProduct (GetOne) returns (BaseProductsResponse);
 }
   // Store Management
@@ -91,14 +92,22 @@ message ProductListResponse {
 //  map<string, google.protobuf.Struct> positions = 1;
 //}
 
+message CreateCustomProduct {
+  string design = 1;
+  map<string, google.protobuf.Struct> placement = 2;
+  string color = 3;
+  string size = 4;
+  double totalPrice = 5;
+}
+
 message CreateCustomProductRequest {
+  CustomProductsByUserRequest getUser = 1;
+  GetProductId getProduct = 2;
+  CreateCustomProduct createCustomProduct = 3;
+}
+
+message GetProductId {
   string productId = 1;
-  string userId = 2;
-  string design = 3;
-  map<string, google.protobuf.Struct> placement = 4;
-  string color = 5;
-  string size = 6;
-  double totalPrice = 7;
 }
 
 message CustomProductsByUserRequest {

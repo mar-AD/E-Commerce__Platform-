@@ -113,7 +113,7 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
      }
      catch(error) {
        this.logger.error(`Failed to fetch user with ${id}: ${error}`);
-       channel.nack(originalMessage, false, true);
+       channel.nack(originalMessage, false ,false);
        throw new RpcException('User fetch failed');
      }
   }

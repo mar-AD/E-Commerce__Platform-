@@ -5,6 +5,8 @@ import { AUTH_PACKAGE_NAME, PRODUCTS_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
 import { ProductsController } from './controllers/products.controller';
 import { ProductsService } from './services/products.service';
+import { CustomProductsService } from './services/custom-products.service';
+import { CustomProductsController } from './controllers/custom-products.controller';
 
 @Module({
   imports:[
@@ -28,7 +30,7 @@ import { ProductsService } from './services/products.service';
     },
     ])
   ],
-  controllers: [ProductsController],
-  providers: [ProductsService],
+  controllers: [ProductsController, CustomProductsController],
+  providers: [ProductsService, CustomProductsService],
 })
 export class ProductsModule {}

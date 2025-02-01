@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
 import {
+  CreateCustomProductRequest,
   CustomProductsByUserRequest,
   CustomProductsController,
   CustomProductsControllerMethods,
@@ -15,8 +16,9 @@ import { CreateCustomProductDto } from '@app/common/dtos';
 export class CustomProductController implements CustomProductsController{
   constructor(private readonly customProductsService: CustomProductsService ){}
 
-  createCustomProduct(createCustomProduct: CreateCustomProductDto) {
-    return this.customProductsService.createCustomProduct(createCustomProduct);
+  createCustomProduct(createCustomProductDto: CreateCustomProductRequest) {
+    const {getUser, getProduct, createCustomProduct} = createCustomProductDto;
+    return this.customProductsService.createCustomProduct(getUser, getProduct, createCustomProduct);
   }
 
   updateCustomProduct(updateCustomProductRequest: UpdateCustomProductRequest) {
@@ -36,8 +38,10 @@ export class CustomProductController implements CustomProductsController{
     return this.customProductsService.getCustomProductByStore(request)
   }
 
-  //removing the cutomProduct from store (making isPublish= false)
-
+  //removing the customProduct from store (making isPublish= false)
+  removeCustomProductFromStore(request: GetOne) {
+    return this.customProductsService.unpublishCustomProduct(request)
+  }
 
   deleteCustomProduct(request: GetOne) {
     return this.customProductsService.deleteCustomProduct(request)
