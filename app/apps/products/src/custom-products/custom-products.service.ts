@@ -29,7 +29,7 @@ export class CustomProductsService {
   createCustomProduct(
     getUser: CustomProductsByUserRequest,
     getProduct: GetProductId,
-  createCustomProduct: CreateCustomProductDto,
+    createCustomProduct: CreateCustomProductDto,
 
   ): Observable<CustomProductResponse> {
     const { productId } = getProduct;
@@ -38,7 +38,7 @@ export class CustomProductsService {
     this.logger.debug(`Searching for product ID: "${productId}"`);
 
     return from(this.ProductRepository.findOne({ where: { id: productId } })).pipe(
-      tap(product => {
+      switchMap(product => {
         if (!product) {
           this.logger.warn(`Product with ID "${productId}" not found.`);
           throw new RpcException({
@@ -46,32 +46,35 @@ export class CustomProductsService {
             message: messages.PRODUCTS.PRODUCT_NOT_FOUND
           });
         }
-      }),
-      switchMap(() => {
         this.logger.debug(`Sending get_user_id message for user "${userId}"`);
-        return this.clientProducts.send<boolean>('get_user_id', { id: userId });
+        return this.clientProducts.send<boolean>('get_user_id', { id: userId }).pipe(
+          tap(userExists => {
+            if (!userExists) {
+              this.logger.warn(`User with ID "${userId}" not found.`);
+              throw new RpcException({
+                code: status.NOT_FOUND,
+                message: messages.USER.NOT_FOUND2
+              });
+            }
+          }),
+          switchMap(() => {
+            const newCreateCustomProduct = { product, userId, ...createCustomProduct };
+            this.logger.log(JSON.stringify(newCreateCustomProduct))
+            this.logger.log(`Creating custom product for User ID: "${userId}" and Product ID: "${productId}"`);
+            return from(this.CustomProductRepository.save(newCreateCustomProduct)).pipe(
+              map(created => {
+                this.logger.log(JSON.stringify(created.product))
+                this.logger.log(JSON.stringify(created.placement))
+                return this.mappedResponse(created);
+              }),
+              catchError(err => {
+                this.logger.error(`Failed to create custom product: ${err.message}`);
+                throw err;
+              })
+            )
+          }),
+        );
       }),
-      tap(userExists => {
-        if (!userExists) {
-          this.logger.warn(`User with ID "${userId}" not found.`);
-          throw new RpcException({
-            code: status.NOT_FOUND,
-            message: messages.USER.NOT_FOUND2
-          });
-        }
-      }),
-      switchMap(() => {
-        const product_id = productId
-        const newCreateCustomProduct = { product_id, userId, ...createCustomProduct };
-        this.logger.log(JSON.stringify(newCreateCustomProduct))
-        this.logger.log(`Creating custom product for User ID: "${userId}" and Product ID: "${productId}"`);
-        return from(this.CustomProductRepository.save(newCreateCustomProduct));
-      }),
-      map(created => this.mappedResponse(created)),
-      catchError(err => {
-        this.logger.error(`Failed to create custom product: ${err.message}`);
-        throw err;
-      })
     );
   }
 
@@ -79,7 +82,7 @@ export class CustomProductsService {
   updateCustomProduct(getOne: GetOne, updateCustomProduct: UpdateCustomProductDto) :Observable<CustomProductResponse> {
     const{ id} = getOne;
     this.logger.log(`CustomProductRepo: Searching for entity by ID "${id}" in repository...'`);
-    return from(this.CustomProductRepository.findOne({where: {id}})).pipe(
+    return from(this.CustomProductRepository.findOne({where: {id: id}})).pipe(
       switchMap((product) =>{
         if (!product){
           this.logger.log(`CustomProductRepo: entity with ID "${id}" do not exist.`);
@@ -320,7 +323,7 @@ export class CustomProductsService {
   mappedResponse(product: CustomProductsEntity):CustomProductResponse {
     return {
       id : product.id,
-      product_id : product.product.id,
+      product : product.product.id,
       userId : product.userId,
       design : product.design,
       placement : product.placement?? {},

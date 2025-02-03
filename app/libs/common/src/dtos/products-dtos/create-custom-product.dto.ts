@@ -1,25 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsObject, IsString, IsUUID } from 'class-validator';
+import { Placement } from '@app/common';
+
 
 export class CreateCustomProductDto {
-  // @ApiProperty({
-  //   required: true,
-  //   description: 'Custom product ID',
-  //   example: '550e8400-e29b-41d4-a716-446655440000',
-  // })
-  // @IsNotEmpty()
-  // @IsString()
-  // productId: string;
-  //
-  // @ApiProperty({
-  //   required: true,
-  //   description: 'User ID',
-  //   example: '123456',
-  // })
-  // @IsNotEmpty()
-  // @IsString()
-  // userId: string;
-
   @ApiProperty({
     required: true,
     description: 'Design details',
@@ -32,11 +16,14 @@ export class CreateCustomProductDto {
   @ApiProperty({
     required: true,
     description: 'Placement of the design',
-    example: 'Front',
+    example: {
+      front: { x: 50, y: 120, width: 200, height: 150, rotation: 15, scale: 1.2 },
+      back: { x: 10, y: 200, width: 100, height: 80, rotation: 15, scale: 1.2 }
+    }
   })
   @IsNotEmpty()
   @IsObject()
-  placement: Record<string, any>;
+  placement: Placement;
 
   @ApiProperty({
     required: true,

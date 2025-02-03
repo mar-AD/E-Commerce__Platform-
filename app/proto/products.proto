@@ -94,7 +94,7 @@ message ProductListResponse {
 
 message CreateCustomProduct {
   string design = 1;
-  map<string, google.protobuf.Struct> placement = 2;
+  map<string, PlacementDetail> placement = 2;
   string color = 3;
   string size = 4;
   double totalPrice = 5;
@@ -114,9 +114,18 @@ message CustomProductsByUserRequest {
   string userId = 1;
 }
 
+message PlacementDetail {
+  double x = 1;
+  double y = 2;
+  double width = 3;
+  double height = 4;
+  optional double rotation = 5;
+  optional double scale = 6;
+}
+
 message UpdateCustomProduct {
   optional string design = 1;
-  map<string, google.protobuf.Struct> placement = 2;
+  map<string, PlacementDetail> placement = 2;
   optional string color = 3;
   optional string size = 4;
   optional double totalPrice = 5;
@@ -130,10 +139,10 @@ message UpdateCustomProductRequest {
 
 message CustomProductResponse {
   string id = 1;
-  string productId = 2;
+  string product = 2;
   string userId = 3;
   string design = 4;
-  map<string, google.protobuf.Struct> placement = 5;
+  map<string, PlacementDetail> placement = 5;
   string color = 6;
   string size = 7;
   double totalPrice = 8;

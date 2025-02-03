@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ProductEntity } from '../../core-products/entities/products.entity';
+import { Placement } from '@app/common';
 
 @Entity('custom_products')
 export class CustomProductsEntity {
@@ -25,7 +26,7 @@ export class CustomProductsEntity {
   design: string;
 
   @Column({ type: 'jsonb', nullable: false })
-  placement: Record<string, any>;
+  placement: Placement;
 
   @Column({ type: 'varchar', nullable: false })
   color: string;

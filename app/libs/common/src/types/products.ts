@@ -63,7 +63,7 @@ export interface ProductListResponse {
 
 export interface CreateCustomProduct {
   design: string;
-  placement: { [key: string]: { [key: string]: any } | undefined };
+  placement: { [key: string]: PlacementDetail };
   color: string;
   size: string;
   totalPrice: number;
@@ -71,7 +71,7 @@ export interface CreateCustomProduct {
 
 export interface CreateCustomProduct_PlacementEntry {
   key: string;
-  value: { [key: string]: any } | undefined;
+  value: PlacementDetail | undefined;
 }
 
 export interface CreateCustomProductRequest {
@@ -88,9 +88,18 @@ export interface CustomProductsByUserRequest {
   userId: string;
 }
 
+export interface PlacementDetail {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation?: number | undefined;
+  scale?: number | undefined;
+}
+
 export interface UpdateCustomProduct {
   design?: string | undefined;
-  placement?: { [key: string]: { [key: string]: any } | undefined };
+  placement?: { [key: string]: PlacementDetail };
   color?: string | undefined;
   size?: string | undefined;
   totalPrice?: number | undefined;
@@ -99,7 +108,7 @@ export interface UpdateCustomProduct {
 
 export interface UpdateCustomProduct_PlacementEntry {
   key: string;
-  value: { [key: string]: any } | undefined;
+  value: PlacementDetail | undefined;
 }
 
 export interface UpdateCustomProductRequest {
@@ -109,10 +118,10 @@ export interface UpdateCustomProductRequest {
 
 export interface CustomProductResponse {
   id: string;
-  product_id: string;
+  product: string;
   userId: string;
   design: string;
-  placement: { [key: string]: { [key: string]: any } | undefined };
+  placement: { [key: string]: PlacementDetail };
   color: string;
   size: string;
   totalPrice: number;
@@ -123,7 +132,7 @@ export interface CustomProductResponse {
 
 export interface CustomProductResponse_PlacementEntry {
   key: string;
-  value: { [key: string]: any } | undefined;
+  value: PlacementDetail | undefined;
 }
 
 export interface CustomProductListResponse {

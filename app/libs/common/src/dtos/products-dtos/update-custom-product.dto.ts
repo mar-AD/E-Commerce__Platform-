@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsNumber, IsBoolean, IsObject } from 'class-validator';
+import { Placement } from '@app/common';
+
 
 export class UpdateCustomProductDto {
   @ApiProperty({
@@ -18,7 +20,7 @@ export class UpdateCustomProductDto {
   })
   @IsOptional()
   @IsObject()
-  placement?: Record<string, any>;
+  placement?: Placement;
 
   @ApiProperty({
     required: false,
