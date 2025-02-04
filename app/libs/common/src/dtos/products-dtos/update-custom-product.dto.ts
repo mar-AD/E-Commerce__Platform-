@@ -16,7 +16,10 @@ export class UpdateCustomProductDto {
   @ApiProperty({
     required: false,
     description: 'Updated placement of the design on the product',
-    example: 'Back side',
+    example: {
+      front: { x: 50, y: 120, width: 200, height: 150, rotation: 15, scale: 1.2 },
+      back: { x: 10, y: 200, width: 100, height: 80, rotation: 15, scale: 1.2 }
+    }
   })
   @IsOptional()
   @IsObject()

@@ -134,7 +134,8 @@ message UpdateCustomProduct {
 
 message UpdateCustomProductRequest {
   GetOne getOne = 1;
-  UpdateCustomProduct updateCustomProduct = 2;
+  CustomProductsByUserRequest getUser = 2;
+  UpdateCustomProduct updateCustomProduct = 3;
 }
 
 message CustomProductResponse {

@@ -113,6 +113,7 @@ export interface UpdateCustomProduct_PlacementEntry {
 
 export interface UpdateCustomProductRequest {
   getOne: GetOne | undefined;
+  getUser: CustomProductsByUserRequest | undefined;
   updateCustomProduct: UpdateCustomProduct | undefined;
 }
 

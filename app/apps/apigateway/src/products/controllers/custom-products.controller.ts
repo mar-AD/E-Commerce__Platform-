@@ -5,7 +5,7 @@ import {
   CustomProductsByUserRequest,
   GetOne,
   getPermissionName, GetProductId, isPublic,
-  JwtAuthGuard,
+  JwtAuthGuard, LoggerService,
   Permissions,
   PermissionsAndAccess, StoresByUserRequest, UpdateCustomProductRequest,
 } from '@app/common';
@@ -18,7 +18,7 @@ import { Request } from 'express';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('CustomProducts')
 export class CustomProductsController {
-  constructor(private readonly customProductsService: CustomProductsService) {
+  constructor(private readonly customProductsService: CustomProductsService, private readonly logger: LoggerService) {
   }
 
   @Post('create/custom/product/:productId')
@@ -35,9 +35,11 @@ export class CustomProductsController {
   @Patch('/:id')
   @ApiBearerAuth()
   @PermissionsAndAccess({accessType: ['user']})
-  updateCustomProduct(@Param('id') id: string, @Body() updateCustomProduct: UpdateCustomProductDto) {
-    const getOne: GetOne = {id};
-    const updateCustomProductRequest : UpdateCustomProductRequest = { getOne, updateCustomProduct};
+  updateCustomProduct(@Req() req: Request, @Param('id') id: string, @Body() updateCustomProduct: UpdateCustomProductDto) {
+    const userId = req['user']['payload'].id;
+    const getUser: CustomProductsByUserRequest = { userId };
+    const getOne: GetOne = { id };
+    const updateCustomProductRequest : UpdateCustomProductRequest = { getOne, getUser, updateCustomProduct};
     return this.customProductsService.update(updateCustomProductRequest);
   }
 

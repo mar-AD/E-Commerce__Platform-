@@ -7,7 +7,6 @@ import {
 } from '@app/common';
 import { PRODUCTS_SERVICE } from '../../constants';
 import { ClientGrpc } from '@nestjs/microservices';
-import { CreateCustomProductDto } from '@app/common/dtos';
 
 @Injectable()
 export class CustomProductsService implements OnModuleInit{
@@ -22,7 +21,7 @@ export class CustomProductsService implements OnModuleInit{
     return this.customProductService.createCustomProduct(createCustomProductDto)
   }
 
-  update(updateCustomProductRequest : UpdateCustomProductRequest){
+  update(updateCustomProductRequest: UpdateCustomProductRequest){
     return this.customProductService.updateCustomProduct(updateCustomProductRequest)
   }
 

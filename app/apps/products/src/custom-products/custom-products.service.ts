@@ -11,7 +11,7 @@ import {
   messages, StoresByUserRequest,
 } from '@app/common';
 import { CreateCustomProductDto, UpdateCustomProductDto } from '@app/common/dtos';
-import { catchError, from, map, Observable, switchMap, tap } from 'rxjs';
+import { catchError, defer, from, map, Observable, switchMap, tap } from 'rxjs';
 import { ProductEntity } from '../core-products/entities/products.entity';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
@@ -79,10 +79,11 @@ export class CustomProductsService {
   }
 
 
-  updateCustomProduct(getOne: GetOne, updateCustomProduct: UpdateCustomProductDto) :Observable<CustomProductResponse> {
+  updateCustomProduct(getOne: GetOne, getUser: CustomProductsByUserRequest, updateCustomProduct: UpdateCustomProductDto) :Observable<CustomProductResponse> {
     const{ id} = getOne;
+    const { userId } = getUser
     this.logger.log(`CustomProductRepo: Searching for entity by ID "${id}" in repository...'`);
-    return from(this.CustomProductRepository.findOne({where: {id: id}})).pipe(
+    return from(this.CustomProductRepository.findOne({where: {id: id, userId: userId}, relations: ['product']})).pipe(
       switchMap((product) =>{
         if (!product){
           this.logger.log(`CustomProductRepo: entity with ID "${id}" do not exist.`);
@@ -93,25 +94,27 @@ export class CustomProductsService {
         }
         const updatedCustomProduct = {};
         this.logger.log(`CustomProductRepo: created a loop to loop over the updateCustomProduct keys.`);
-        for (const key of Object.keys(updateCustomProduct)) {
-          if (updateCustomProduct[key] !== undefined){
-            if (typeof updateCustomProduct[key] === 'object' && typeof product[key] === 'object'){
 
-              if (!this.isEqual(updateCustomProduct[key], product[key])){
-                this.logger.log(`CustomProductRepo: the object key in the CustomProduct was updated successfully .`);
+        this.logger.log(`CustomProductRepo: created a loop to loop over the updateCustomProduct keys.`);
+        for (const key of Object.keys(updateCustomProduct)) {
+          if (updateCustomProduct[key] !== undefined) {
+            if (typeof updateCustomProduct[key] === 'object' && typeof product[key] === 'object') {
+              if (!this.isEqual(updateCustomProduct[key], product[key])) {
+                this.logger.log(`CustomProductRepo: the object key in the CustomProduct was updated successfully.`);
+                updatedCustomProduct[key] = updateCustomProduct[key];
+              }
+            }
+            else if(typeof updateCustomProduct[key] === 'number' && typeof product[key] === 'string'){
+              product[key] = parseFloat(product[key]);
+              if (updateCustomProduct[key] !== product[key]){
+               this.logger.log(`CustomProductRepo: the number key in the CustomProduct was updated successfully .`);
                 updatedCustomProduct[key] = updateCustomProduct[key]
               }
             }
-            // else if(typeof updateCustomProduct[key] === 'number' && typeof product[key] === 'string'){
-            //   product[key] = parseFloat(product[key]);
-            //   if (updatedCustomProduct[key] !== product[key]){
-            //    this.logger.log(`CustomProductRepo: the number key in the CustomProduct was updated successfully .`);
-            //     updatedCustomProduct[key] = updateCustomProduct[key]
-            //   }
-            // }
-            else if (updatedCustomProduct[key] !== product[key]){
-              this.logger.log(`CustomProductRepo: every other key was updated successfully .`);
-              updatedCustomProduct[key] = updateCustomProduct[key]
+            // Ensure we compare values correctly and avoid unnecessary updates
+            else if (JSON.stringify(updateCustomProduct[key]) !== JSON.stringify(product[key])) {
+              this.logger.log(`CustomProductRepo: every other key was updated successfully.`);
+              updatedCustomProduct[key] = updateCustomProduct[key];
             }
           }
         }
@@ -127,9 +130,9 @@ export class CustomProductsService {
             message: 'No changes detected for customProduct to update.',
           });
         }
-        return from(this.CustomProductRepository.save(product)).pipe(
+        return from( this.CustomProductRepository.save(product)).pipe(
           map((saveProduct)=>{
-            this.logger.log(`CustomProductRepo: Entity successfully updated`);
+            this.logger.log(`CustomProductRepo: Entity successfully updated: ${JSON.stringify(saveProduct, null, 2)}`);
             return this.mappedResponse(saveProduct) ;
           }),
           catchError((error)=>{
@@ -147,7 +150,7 @@ export class CustomProductsService {
   getCustomProduct(getOne: GetOne): Observable<CustomProductResponse> {
     const{id} = getOne;
     this.logger.log(`CustomProducts: Searching for entity by ID "${id}" in repository...'`);
-    return from(this.CustomProductRepository.findOne({where: {id}})).pipe(
+    return from(this.CustomProductRepository.findOne({where: {id}, relations: ['product']})).pipe(
       map((product)=>{
         if (!product){
           this.logger.error(`CustomProducts: custom product with ID "${id}" not found'`);
@@ -182,7 +185,7 @@ export class CustomProductsService {
           });
         }
         this.logger.log(`CustomProducts: Searching for entity by ID "${userId}" in repository...'`);
-        return from(this.CustomProductRepository.find({ where: { userId } })).pipe(
+        return from(this.CustomProductRepository.find({ where: { userId }, relations: ['product'] })).pipe(
           map((products) => {
             if (!products) {
               this.logger.error(`CustomProducts: custom product with ID "${userId}" not found'`);
@@ -219,7 +222,7 @@ export class CustomProductsService {
           });
         }
         this.logger.log(`CustomProducts: Searching for entity by ID "${userId}" in repository...'`);
-        return from(this.CustomProductRepository.find({ where: { userId: userId, isPublished: true } })).pipe(
+        return from(this.CustomProductRepository.find({ where: { userId: userId, isPublished: true }, relations: ['product'] })).pipe(
           map((products) => {
             if (!products) {
               this.logger.error(`CustomProducts: custom product with ID "${userId}" not found'`);
@@ -258,6 +261,12 @@ export class CustomProductsService {
         }
         this.logger.log(`CustomProducts:custom product with ID "${id}" found successfully `);
         this.logger.log(`CustomProducts: now pursuing to update the entity by ID "${id}"`);
+        if (product.isPublished === false){
+          throw new RpcException({
+            code: status.INVALID_ARGUMENT,
+            message: 'this custom product is already not published'
+          })
+        }
         product.isPublished = false;
         return from(this.CustomProductRepository.save(product)).pipe(
           map(() =>{

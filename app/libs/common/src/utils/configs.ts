@@ -82,6 +82,6 @@ export function getPermissionName(value: number): string | undefined {
   return PermissionsName[value] ?? undefined;
 }
 
-
+//for customProducts entity and dtos
 export type Placement = Record<string, PlacementDetail>;
 

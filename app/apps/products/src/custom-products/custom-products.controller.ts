@@ -22,8 +22,8 @@ export class CustomProductController implements CustomProductsController{
   }
 
   updateCustomProduct(updateCustomProductRequest: UpdateCustomProductRequest) {
-    const {getOne, updateCustomProduct } = updateCustomProductRequest;
-    return this.customProductsService.updateCustomProduct (getOne, updateCustomProduct)
+    const {getOne, getUser,  updateCustomProduct } = updateCustomProductRequest;
+    return this.customProductsService.updateCustomProduct (getOne, getUser, updateCustomProduct)
   }
 
   getCustomProductById(request: GetOne){
