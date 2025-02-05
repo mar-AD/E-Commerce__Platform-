@@ -11,7 +11,7 @@ export class UserStoreEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'uuid', nullable: false })
+  @Column({ type: 'uuid', nullable: false, unique: true})
   userId: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })

@@ -140,10 +140,14 @@ export interface CustomProductListResponse {
   customProducts: CustomProductResponse[];
 }
 
-export interface CreateStoreRequest {
-  userId: string;
+export interface CreateStoreDto {
   storeName: string;
   storeDescription: string;
+}
+
+export interface CreateStoreRequest {
+  getUser: StoresByUserRequest | undefined;
+  createStoreRequestDto: CreateStoreDto | undefined;
 }
 
 export interface StoresByUserRequest {
@@ -157,7 +161,8 @@ export interface UpdateStore {
 }
 
 export interface UpdateStoreRequest {
-  getOne: GetOne | undefined;
+  getId: GetOne | undefined;
+  getUser: StoresByUserRequest | undefined;
   updateStore: UpdateStore | undefined;
 }
 

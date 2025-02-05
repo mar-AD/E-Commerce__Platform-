@@ -59,17 +59,18 @@ export class CustomProductsService {
           }),
           switchMap(() => {
             const newCreateCustomProduct = { product, userId, ...createCustomProduct };
-            this.logger.log(JSON.stringify(newCreateCustomProduct))
             this.logger.log(`Creating custom product for User ID: "${userId}" and Product ID: "${productId}"`);
             return from(this.CustomProductRepository.save(newCreateCustomProduct)).pipe(
               map(created => {
-                this.logger.log(JSON.stringify(created.product))
-                this.logger.log(JSON.stringify(created.placement))
+
                 return this.mappedResponse(created);
               }),
               catchError(err => {
                 this.logger.error(`Failed to create custom product: ${err.message}`);
-                throw err;
+                throw new RpcException({
+                  code: status.INTERNAL,
+                  message: messages.PRODUCTS.FAILED_TO_CREATE_CUSTOM_PRODUCT
+                });
               })
             )
           }),
