@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserStoreEntity } from './entities/user_store.entity';
 import { Repository } from 'typeorm';
-import { dateToTimestamp, LoggerService, messages, StoreResponse, StoresByUserRequest } from '@app/common';
-import { CreateStoreDto } from '@app/common/dtos';
+import { dateToTimestamp, GetOne, LoggerService, messages, StoreResponse, StoresByUserRequest } from '@app/common';
+import { CreateStoreDto, UpdateStoreDto } from '@app/common/dtos';
 import { catchError, from, map, Observable, switchMap, tap } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
@@ -19,17 +19,17 @@ export class UserStoresService {
 
   createUserStore(getUser:StoresByUserRequest, createStoreRequestDto: CreateStoreDto): Observable<StoreResponse> {
     const {userId} = getUser;
-
+    this.logger.log(`trying to find a store with user Id "${userId}"`);
     return from(this.userStoreRepository.findOne({where: {userId}})).pipe(
       switchMap(store => {
         if (store) {
-          this.logger.warn(`Product with ID "${userId}" found.`);
+          this.logger.warn(`Store with user ID "${userId}" found.`);
           throw new RpcException({
             code: status.ALREADY_EXISTS,
             message: 'You already have a store'
           });
         }
-        this.logger.debug(`Sending get_user_id message for user "${userId}"`);
+        this.logger.log(`Sending get_user_id message for user "${userId}"`);
         return this.ClientStore.send<boolean>('get_user_id', { id: userId }).pipe(
           tap(userExists => {
             if (!userExists) {
@@ -53,6 +53,67 @@ export class UserStoresService {
                 throw new RpcException({
                   code: status.INTERNAL,
                   message: messages.PRODUCTS.FAILED_TO_CREATE_USER_STORE
+                });
+              })
+            )
+          })
+        )
+      })
+    )
+  }
+
+  updateUserStore(getId: GetOne, getUser: StoresByUserRequest, updateStore: UpdateStoreDto): Observable<StoreResponse>{
+    const {userId} = getUser;
+    const { id } = getId;
+    this.logger.debug(`trung to find store with ID "${id}"`);
+    return from(this.userStoreRepository.findOne({where: {id}})).pipe(
+      switchMap(store => {
+        if (!store) {
+          this.logger.warn(`Store with ID "${id}" not found.`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.PRODUCTS.USER_STORE_NOT_FOUND
+          });
+        }
+        this.logger.log(`Sending get_user_id message for user "${userId}"`);
+        return this.ClientStore.send<boolean>('get_user_id', { id: userId }).pipe(
+          tap(userExists => {
+            if (!userExists) {
+              this.logger.warn(`User with ID "${userId}" not found.`);
+              throw new RpcException({
+                code: status.NOT_FOUND,
+                message: messages.USER.NOT_FOUND2
+              });
+            }
+          }),
+          switchMap(()=>{
+            this.logger.log(`UserStoreRepo: lopping over the updateStoreDto to update changed fields.`);
+            let hasChanges = false;
+            for (const key in updateStore) {
+              if (updateStore[key] !== undefined && updateStore[key] !== store[key]) {
+                store[key] = updateStore[key];
+                hasChanges = true;
+              }
+            }
+
+            if (!hasChanges) {
+              this.logger.log(`No changes detected for store with ID "${id}".`);
+              throw new RpcException({
+                code: status.INVALID_ARGUMENT,
+                message: 'No changes detected for store to update.',
+              });
+            }
+            this.logger.log(`UserStoreRepo: Trying to save updates for store with ID "${id}"...`);
+            return from(this.userStoreRepository.save(store)).pipe(
+              map((savedStore)=>{
+                this.logger.log(`UserStoreRepo: store with ID "${id}" updated successfully.`);
+                return this.mappedResponse(savedStore)
+              }),
+              catchError((err)=>{
+                this.logger.error(`Failed to update store: ${err.message}`);
+                throw new RpcException({
+                  code: status.INTERNAL,
+                  message: messages.PRODUCTS.FAILED_TO_UPDATE_USER_STORE
                 });
               })
             )
