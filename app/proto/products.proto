@@ -27,7 +27,7 @@ service CustomProducts{
 service UserStore{
   rpc CreateStore (CreateStoreRequest) returns (StoreResponse);
   rpc GetStoreById (GetOne) returns (StoreResponse);
-  rpc GetStoresByUser (StoresByUserRequest) returns (StoreListResponse);
+  rpc GetStoresByUser (StoresByUserRequest) returns (StoreResponse);
   rpc UpdateStore (UpdateStoreRequest) returns (StoreResponse);
   rpc DeleteStore (GetOne) returns (BaseProductsResponse);
 
@@ -194,9 +194,9 @@ message StoreResponse {
   google.protobuf.Timestamp updatedAt = 7;
 }
 
-message StoreListResponse {
-  repeated StoreResponse stores = 1;
-}
+//message StoreListResponse {
+//  repeated StoreResponse stores = 1;
+//}
 
 //optional
 

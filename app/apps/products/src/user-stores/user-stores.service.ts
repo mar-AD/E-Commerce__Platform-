@@ -1,8 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserStoreEntity } from './entities/user_store.entity';
 import { Repository } from 'typeorm';
-import { dateToTimestamp, GetOne, LoggerService, messages, StoreResponse, StoresByUserRequest } from '@app/common';
+import {
+  BaseProductsResponse,
+  dateToTimestamp,
+  GetOne,
+  LoggerService,
+  messages,
+  StoreResponse,
+  StoresByUserRequest,
+} from '@app/common';
 import { CreateStoreDto, UpdateStoreDto } from '@app/common/dtos';
 import { catchError, from, map, Observable, switchMap, tap } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
@@ -12,7 +20,7 @@ import { status } from '@grpc/grpc-js';
 export class UserStoresService {
   constructor(
     @InjectRepository(UserStoreEntity) private readonly userStoreRepository: Repository<UserStoreEntity>,
-    @Inject('RMQ_PRODUCTS_CLIENT') private readonly ClientStore: ClientProxy,
+    @Inject('RMQ_PRODUCTS_CLIENT') private readonly clientStore: ClientProxy,
     private readonly logger: LoggerService,
   ) {
   }
@@ -30,7 +38,7 @@ export class UserStoresService {
           });
         }
         this.logger.log(`Sending get_user_id message for user "${userId}"`);
-        return this.ClientStore.send<boolean>('get_user_id', { id: userId }).pipe(
+        return this.clientStore.send<boolean>('get_user_id', { id: userId }).pipe(
           tap(userExists => {
             if (!userExists) {
               this.logger.warn(`User with ID "${userId}" not found.`);
@@ -65,18 +73,18 @@ export class UserStoresService {
   updateUserStore(getId: GetOne, getUser: StoresByUserRequest, updateStore: UpdateStoreDto): Observable<StoreResponse>{
     const {userId} = getUser;
     const { id } = getId;
-    this.logger.debug(`trung to find store with ID "${id}"`);
+    this.logger.debug(`UserStoreRepo:trung to find store with ID "${id}"`);
     return from(this.userStoreRepository.findOne({where: {id}})).pipe(
       switchMap(store => {
         if (!store) {
-          this.logger.warn(`Store with ID "${id}" not found.`);
+          this.logger.warn(`UserStoreRepo:Store with ID "${id}" not found.`);
           throw new RpcException({
             code: status.NOT_FOUND,
             message: messages.PRODUCTS.USER_STORE_NOT_FOUND
           });
         }
         this.logger.log(`Sending get_user_id message for user "${userId}"`);
-        return this.ClientStore.send<boolean>('get_user_id', { id: userId }).pipe(
+        return this.clientStore.send<boolean>('get_user_id', { id: userId }).pipe(
           tap(userExists => {
             if (!userExists) {
               this.logger.warn(`User with ID "${userId}" not found.`);
@@ -97,7 +105,7 @@ export class UserStoresService {
             }
 
             if (!hasChanges) {
-              this.logger.log(`No changes detected for store with ID "${id}".`);
+              this.logger.log(`UserStoreRepo:No changes detected for store with ID "${id}".`);
               throw new RpcException({
                 code: status.INVALID_ARGUMENT,
                 message: 'No changes detected for store to update.',
@@ -110,7 +118,7 @@ export class UserStoresService {
                 return this.mappedResponse(savedStore)
               }),
               catchError((err)=>{
-                this.logger.error(`Failed to update store: ${err.message}`);
+                this.logger.error(`UserStoreRepo:Failed to update store: ${err.message}`);
                 throw new RpcException({
                   code: status.INTERNAL,
                   message: messages.PRODUCTS.FAILED_TO_UPDATE_USER_STORE
@@ -122,6 +130,95 @@ export class UserStoresService {
       })
     )
   }
+
+  getStore(getId: GetOne): Observable<StoreResponse> {
+    const{id} = getId;
+    this.logger.log(`UserStoreRepo: Searching for entity by ID "${id}" in repository...'`);
+    return from(this.userStoreRepository.findOne({where: {id: id, isActive: true}})).pipe(
+      map((store)=>{
+        if (!store){
+          this.logger.error(`UserStoreRepo: store with ID "${id}" not found'`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.PRODUCTS.USER_STORE_NOT_FOUND
+          })
+        }
+        this.logger.log(`UserStoreRepo: store with ID "${id}" found successfully `);
+        return this.mappedResponse(store)
+      }),
+      catchError((error)=>{
+        this.logger.error(`UserStoreRepo: Failed to fetch store with ID "${id}". Error: ${error.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.PRODUCTS.FAILED_TO_FETCH_USER_STORE
+        })
+      })
+    )
+  }
+
+  getStoreByUserId(request: StoresByUserRequest): Observable<StoreResponse> {
+    const{userId} = request;
+    this.logger.log(`UserStoreRepo: sending get_user_id message... '`);
+    return this.clientStore.send<boolean>('get_user_id', {id: userId}).pipe(
+      switchMap((userExists) => {
+        if (!userExists) {
+          this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.USER.NOT_FOUND2
+          });
+        }
+        this.logger.log(`UserStoreRepo: Searching for entity by ID "${userId}" in repository...'`);
+        return from(this.userStoreRepository.findOne({ where: { userId: userId, isActive: true }})).pipe(
+          map((store) => {
+            if (!store) {
+              this.logger.error(`UserStoreRepo: store with user ID "${userId}" not found'`);
+              throw new RpcException({
+                code: status.NOT_FOUND,
+                message: messages.PRODUCTS.USER_STORE_NOT_FOUND
+              })
+            }
+            this.logger.log(`UserStoreRepo:store with user ID "${userId}" found successfully `);
+            return this.mappedResponse(store)
+          }),
+          catchError((error) => {
+            this.logger.error(`UserStoreRepo: Failed to fetch store with user ID "${userId}". Error: ${error.message}`);
+            throw new RpcException({
+              code: status.INTERNAL,
+              message: messages.PRODUCTS.FAILED_TO_FETCH_USER_STORE
+            })
+          })
+        )
+      })
+    )
+  }
+
+  removeStore(request: GetOne): Observable<BaseProductsResponse> {
+    const{id} = request;
+    return from(this.userStoreRepository.delete({id})).pipe(
+      map((result)=>{
+        if (result.affected === 0) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.PRODUCTS.USER_STORE_NOT_FOUND
+          });
+        }
+        this.logger.log(`UserStoreRepo: store with ID "${id}" deleted successfully `);
+        return {
+          status: HttpStatus.OK,
+          message: messages.PRODUCTS.CUSTOM_PRODUCT_DELETED_SUCCESSFULLY
+        }
+      }),
+      catchError((error)=>{
+        this.logger.error(`UserStoreRepo: failed to delete store with ID "${id}". Error: ${error.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.PRODUCTS.FAILED_TO_DELETE_USER_STORE
+        })
+      })
+    )
+  }
+
 
   mappedResponse (store: UserStoreEntity): StoreResponse {
     return {

@@ -176,10 +176,6 @@ export interface StoreResponse {
   updatedAt: Timestamp | undefined;
 }
 
-export interface StoreListResponse {
-  stores: StoreResponse[];
-}
-
 export interface PublishCustomProductRequest {
   customProductId: string;
 }
@@ -321,7 +317,7 @@ export interface UserStoreClient {
 
   getStoreById(request: GetOne): Observable<StoreResponse>;
 
-  getStoresByUser(request: StoresByUserRequest): Observable<StoreListResponse>;
+  getStoresByUser(request: StoresByUserRequest): Observable<StoreResponse>;
 
   updateStore(request: UpdateStoreRequest): Observable<StoreResponse>;
 
@@ -335,9 +331,7 @@ export interface UserStoreController {
 
   getStoreById(request: GetOne): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
 
-  getStoresByUser(
-    request: StoresByUserRequest,
-  ): Promise<StoreListResponse> | Observable<StoreListResponse> | StoreListResponse;
+  getStoresByUser(request: StoresByUserRequest): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
 
   updateStore(request: UpdateStoreRequest): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
 

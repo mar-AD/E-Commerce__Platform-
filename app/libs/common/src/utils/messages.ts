@@ -117,6 +117,7 @@ export const messages = {
     FAILED_TO_CREATE_USER_STORE: "Failed to create user store",
     FAILED_TO_UPDATE_USER_STORE: "Failed to update user store",
     FAILED_TO_DELETE_USER_STORE: "Failed to delete user store",
+    FAILED_TO_FETCH_USER_STORE: "Failed to fetch user store",
 
     // Validation and Error Messages
     INVALID_PRODUCT_DETAILS: "Invalid product details provided",

@@ -7,6 +7,8 @@ import { ProductsController } from './controllers/products.controller';
 import { ProductsService } from './services/products.service';
 import { CustomProductsService } from './services/custom-products.service';
 import { CustomProductsController } from './controllers/custom-products.controller';
+import { StoreController } from './controllers/store.controller';
+import { StoreService } from './services/store.service';
 
 @Module({
   imports:[
@@ -30,7 +32,7 @@ import { CustomProductsController } from './controllers/custom-products.controll
     },
     ])
   ],
-  controllers: [ProductsController, CustomProductsController],
-  providers: [ProductsService, CustomProductsService],
+  controllers: [ProductsController, CustomProductsController, StoreController],
+  providers: [ProductsService, CustomProductsService, StoreService],
 })
 export class ProductsModule {}
