@@ -87,7 +87,7 @@ export class CustomProductsController {
     return this.customProductsService.getCustomProductsByStore(storesByUserRequest)
   }
 
-  @Patch('Custom/products/:id')
+  @Patch('custom/products/:id')
   @ApiBearerAuth()
   @PermissionsAndAccess({accessType: ['admin', 'user'], permission: getPermissionName(Permissions.MANAGE_PRODUCTS)})
   unpublishCustomProductFromStore(@Param('id') id: string) {

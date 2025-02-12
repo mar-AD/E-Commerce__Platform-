@@ -2,9 +2,9 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } fro
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   CreateStoreRequest,
-  GetOne,
+  GetOne, getPermissionName,
   isPublic,
-  JwtAuthGuard,
+  JwtAuthGuard, Permissions,
   PermissionsAndAccess, StoresByUserRequest,
   UpdateStoreRequest,
 } from '@app/common';
@@ -48,8 +48,9 @@ export class StoreController {
     return this.storeService.getOneStore(getOne)
   }
 
-  @Get('byUserId')
-  @isPublic()
+  @Get('my/store')
+  @ApiBearerAuth()
+  @PermissionsAndAccess({accessType: ['user']})
   getStoreByUser(@Req() req: Request) {
     const userId = req['user']['payload'].id;
     const getUser: StoresByUserRequest = { userId };

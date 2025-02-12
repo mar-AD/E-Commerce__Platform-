@@ -145,13 +145,6 @@ export class UserStoresService {
         }
         this.logger.log(`UserStoreRepo: store with ID "${id}" found successfully `);
         return this.mappedResponse(store)
-      }),
-      catchError((error)=>{
-        this.logger.error(`UserStoreRepo: Failed to fetch store with ID "${id}". Error: ${error.message}`);
-        throw new RpcException({
-          code: status.INTERNAL,
-          message: messages.PRODUCTS.FAILED_TO_FETCH_USER_STORE
-        })
       })
     )
   }
@@ -169,7 +162,7 @@ export class UserStoresService {
           });
         }
         this.logger.log(`UserStoreRepo: Searching for entity by ID "${userId}" in repository...'`);
-        return from(this.userStoreRepository.findOne({ where: { userId: userId, isActive: true }})).pipe(
+        return from(this.userStoreRepository.findOne({ where: { userId: userId}})).pipe(
           map((store) => {
             if (!store) {
               this.logger.error(`UserStoreRepo: store with user ID "${userId}" not found'`);
@@ -180,13 +173,6 @@ export class UserStoresService {
             }
             this.logger.log(`UserStoreRepo:store with user ID "${userId}" found successfully `);
             return this.mappedResponse(store)
-          }),
-          catchError((error) => {
-            this.logger.error(`UserStoreRepo: Failed to fetch store with user ID "${userId}". Error: ${error.message}`);
-            throw new RpcException({
-              code: status.INTERNAL,
-              message: messages.PRODUCTS.FAILED_TO_FETCH_USER_STORE
-            })
           })
         )
       })

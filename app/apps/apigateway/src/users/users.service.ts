@@ -2,24 +2,27 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   FindOneDto,
   GetUserProfileRequest, Non, None, timestampToDate,
-  USER_SERVICE_NAME, USERS_PROFILE_SERVICE_NAME,
-  UserServiceClient, UsersProfileServiceClient,
+  USER_SERVICE_NAME, USER_STORE_SERVICE_NAME, USERS_PROFILE_SERVICE_NAME,
+  UserServiceClient, UsersProfileServiceClient, UserStoreClient,
 } from '@app/common';
-import { AUTH_SERVICE, USERS_SERVICE } from '../constants';
+import { AUTH_SERVICE, PRODUCTS_SERVICE, USERS_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
 import { forkJoin, map } from 'rxjs';
 
 @Injectable()
 export class UsersService implements OnModuleInit{
   private usersService : UsersProfileServiceClient;
-  private authService: UserServiceClient
+  private authService: UserServiceClient;
+  private productsService : UserStoreClient;
   constructor(
     @Inject(USERS_SERVICE) private usersClient: ClientGrpc,
-    @Inject(AUTH_SERVICE) private authClient: ClientGrpc
+    @Inject(AUTH_SERVICE) private authClient: ClientGrpc,
+    @Inject(PRODUCTS_SERVICE) private productsClient: ClientGrpc
   ) {}
   onModuleInit() {
     this.usersService = this.usersClient.getService<UsersProfileServiceClient>(USERS_PROFILE_SERVICE_NAME);
-    this.authService = this.authClient.getService<UserServiceClient>(USER_SERVICE_NAME)
+    this.authService = this.authClient.getService<UserServiceClient>(USER_SERVICE_NAME);
+    this.productsService = this.productsClient.getService<UserStoreClient>(USER_STORE_SERVICE_NAME)
 
     // console.log('Users Client Connected:', !!this.usersService);
     // console.log('Auth Client Connected:', !!this.authService);
@@ -30,8 +33,9 @@ export class UsersService implements OnModuleInit{
     return forkJoin({
       authData: this.authService.findOne(findOneDto),
       profileData: this.usersService.getUserProfile(request),
+      storeData: this.productsService.getStoresByUser(request)
     }).pipe(
-      map(({ authData, profileData }) => {
+      map(({ authData, profileData, storeData }) => {
         const createdAt = authData.createdAt ? timestampToDate(authData.createdAt) : null;
         const updatedAt = authData.updatedAt ? timestampToDate(authData.updatedAt) : null;
         const deletedAt = authData.deletedAt ? timestampToDate(authData.deletedAt) : null;
@@ -42,6 +46,9 @@ export class UsersService implements OnModuleInit{
           createdAt,
           updatedAt,
           deletedAt,
+          store: {
+            ...storeData
+          }
         }
       })
     );

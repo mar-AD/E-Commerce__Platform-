@@ -157,6 +157,8 @@ export interface StoresByUserRequest {
 export interface UpdateStore {
   storeName?: string | undefined;
   storeDescription?: string | undefined;
+  storePic?: string | undefined;
+  storeBanner?: string | undefined;
   isActive?: boolean | undefined;
 }
 
@@ -171,9 +173,15 @@ export interface StoreResponse {
   userId: string;
   storeName: string;
   storeDescription: string;
+  storePic: string;
+  storeBanner: string;
   isActive: boolean;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
+}
+
+export interface StoreListResponse {
+  stores: StoreResponse[];
 }
 
 export interface PublishCustomProductRequest {
@@ -246,6 +254,8 @@ export interface CustomProductsClient {
 
   getProductsByStore(request: StoresByUserRequest): Observable<CustomProductListResponse>;
 
+  getAllCustomProducts(request: EmptyRequest): Observable<CustomProductListResponse>;
+
   updateCustomProduct(request: UpdateCustomProductRequest): Observable<CustomProductResponse>;
 
   removeCustomProductFromStore(request: GetOne): Observable<BaseProductsResponse>;
@@ -272,6 +282,10 @@ export interface CustomProductsController {
     request: StoresByUserRequest,
   ): Promise<CustomProductListResponse> | Observable<CustomProductListResponse> | CustomProductListResponse;
 
+  getAllCustomProducts(
+    request: EmptyRequest,
+  ): Promise<CustomProductListResponse> | Observable<CustomProductListResponse> | CustomProductListResponse;
+
   updateCustomProduct(
     request: UpdateCustomProductRequest,
   ): Promise<CustomProductResponse> | Observable<CustomProductResponse> | CustomProductResponse;
@@ -292,6 +306,7 @@ export function CustomProductsControllerMethods() {
       "getCustomProductById",
       "getCustomProductsByUser",
       "getProductsByStore",
+      "getAllCustomProducts",
       "updateCustomProduct",
       "removeCustomProductFromStore",
       "deleteCustomProduct",
@@ -321,6 +336,8 @@ export interface UserStoreClient {
 
   updateStore(request: UpdateStoreRequest): Observable<StoreResponse>;
 
+  getAllStores(request: EmptyRequest): Observable<StoreListResponse>;
+
   deleteStore(request: GetOne): Observable<BaseProductsResponse>;
 }
 
@@ -335,12 +352,21 @@ export interface UserStoreController {
 
   updateStore(request: UpdateStoreRequest): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
 
+  getAllStores(request: EmptyRequest): Promise<StoreListResponse> | Observable<StoreListResponse> | StoreListResponse;
+
   deleteStore(request: GetOne): Promise<BaseProductsResponse> | Observable<BaseProductsResponse> | BaseProductsResponse;
 }
 
 export function UserStoreControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["createStore", "getStoreById", "getStoresByUser", "updateStore", "deleteStore"];
+    const grpcMethods: string[] = [
+      "createStore",
+      "getStoreById",
+      "getStoresByUser",
+      "updateStore",
+      "getAllStores",
+      "deleteStore",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("UserStore", method)(constructor.prototype[method], method, descriptor);
