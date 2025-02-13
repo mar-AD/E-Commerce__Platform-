@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import {
-  CreateCustomProductRequest,
+  CreateCustomProductRequest, CustomFilter, CustomProductListResponse,
   CustomProductsByUserRequest,
   CustomProductsController,
   CustomProductsControllerMethods,
@@ -8,7 +8,6 @@ import {
   UpdateCustomProductRequest,
 } from '@app/common';
 import { CustomProductsService } from './custom-products.service';
-import { CreateCustomProductDto } from '@app/common/dtos';
 
 
 @Controller('custom-products')
@@ -36,6 +35,10 @@ export class CustomProductController implements CustomProductsController{
 
   getProductsByStore(request: StoresByUserRequest) {
     return this.customProductsService.getCustomProductByStore(request)
+  }
+
+  getAllCustomProducts(request: CustomFilter) {
+    return this.customProductsService.getAll(request)
   }
 
   //removing the customProduct from store (making isPublish= false)

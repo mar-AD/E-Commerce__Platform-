@@ -1,6 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
-  CreateStoreRequest,
+  CreateStoreRequest, Filter,
   GetOne,
   StoresByUserRequest,
   UpdateStoreRequest,
@@ -32,6 +32,10 @@ export class StoreService implements OnModuleInit{
 
   getStoreByUser(request: StoresByUserRequest){
     return this.userStoreService.getStoresByUser(request)
+  }
+
+  getAll(request: Filter) {
+    return this.userStoreService.getAllStores(request)
   }
 
   deleteStore(request: GetOne){

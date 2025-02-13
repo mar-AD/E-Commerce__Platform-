@@ -4,10 +4,10 @@ import { UserStoreEntity } from './entities/user_store.entity';
 import { Repository } from 'typeorm';
 import {
   BaseProductsResponse,
-  dateToTimestamp,
+  dateToTimestamp, EmptyRequest, Filter,
   GetOne,
   LoggerService,
-  messages,
+  messages, StoreListResponse,
   StoreResponse,
   StoresByUserRequest,
 } from '@app/common';
@@ -179,6 +179,29 @@ export class UserStoresService {
     )
   }
 
+  getAll(request: Filter): Observable<StoreListResponse> {
+    const filter = request.isActive !== undefined ? { isActive: request.isActive } : {};
+
+    this.logger.log(`Fetching stores with filter: ${JSON.stringify(filter)}`);
+
+    return from(this.userStoreRepository.find({ where: filter })).pipe(
+      map((stores) => {
+        this.logger.log(`Successfully fetched ${stores.length} stores`);
+
+        return { stores: stores.map((store) => this.mappedResponse(store)) };
+      }),
+      catchError((err) => {
+        this.logger.error(`Failed to fetch stores. Error: ${err.message}`);
+
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.PRODUCTS.FAILED_TO_FETCH_STORES
+        });
+      })
+    );
+  }
+
+
   removeStore(request: GetOne): Observable<BaseProductsResponse> {
     const{id} = request;
     return from(this.userStoreRepository.delete({id})).pipe(
@@ -212,6 +235,8 @@ export class UserStoresService {
       userId: store.userId,
       storeName: store.storeName,
       storeDescription: store.storeDescription,
+      storePic: store.storePic,
+      storeBanner: store.storeBanner,
       isActive: store.isActive,
       createdAt: dateToTimestamp(store.createdAt),
       updatedAt: dateToTimestamp(store.updatedAt)

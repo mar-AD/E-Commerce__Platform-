@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   CreateCustomProductRequest,
@@ -85,6 +85,13 @@ export class CustomProductsController {
     const userId = id;
     const storesByUserRequest : StoresByUserRequest = {userId}
     return this.customProductsService.getCustomProductsByStore(storesByUserRequest)
+  }
+
+  @Get('AllCustomProducts')
+  @isPublic()
+  getAll(@Query('isPublished') isPublished: string) {
+    const request= isPublished === 'true'? {isPublished: true}: isPublished === 'false'? {isPublished: false}: {};
+    return this.customProductsService.getAll(request)
   }
 
   @Patch('custom/products/:id')

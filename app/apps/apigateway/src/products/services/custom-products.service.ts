@@ -1,8 +1,8 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   CreateCustomProductRequest,
-  CUSTOM_PRODUCTS_SERVICE_NAME, CustomProductsByUserRequest,
-  CustomProductsClient,
+  CUSTOM_PRODUCTS_SERVICE_NAME, CustomFilter, CustomProductsByUserRequest,
+  CustomProductsClient, Filter,
   GetOne, StoresByUserRequest, UpdateCustomProductRequest,
 } from '@app/common';
 import { PRODUCTS_SERVICE } from '../../constants';
@@ -35,6 +35,10 @@ export class CustomProductsService implements OnModuleInit{
 
   getCustomProductsByStore(storesByUserRequest : StoresByUserRequest){
     return this.customProductService.getProductsByStore(storesByUserRequest)
+  }
+
+  getAll(request: CustomFilter) {
+    return this.customProductService.getAllCustomProducts(request)
   }
 
   unpublish(request: GetOne){

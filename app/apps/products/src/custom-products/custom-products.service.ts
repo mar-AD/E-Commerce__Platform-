@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CustomProductsEntity } from './entities/Custom_Products.entity';
 import { Repository } from 'typeorm';
 import {
-  BaseProductsResponse, CustomProductListResponse,
+  BaseProductsResponse, CustomFilter, CustomProductListResponse,
   CustomProductResponse, CustomProductsByUserRequest,
-  dateToTimestamp,
+  dateToTimestamp, EmptyRequest,
   GetOne, GetProductId,
   LoggerService,
   messages, StoresByUserRequest,
@@ -246,6 +246,29 @@ export class CustomProductsService {
       })
     )
   }
+
+  getAll(request: CustomFilter): Observable<CustomProductListResponse> {
+    const filter = request.isPublished !== undefined ? { isPublished: request.isPublished } : {};
+
+    this.logger.log(`Fetching custom products with filter: ${JSON.stringify(filter)}`);
+
+    return from(this.CustomProductRepository.find({ where: filter, relations: ['product'] })).pipe(
+      map((customProducts) => {
+        this.logger.log(`Successfully fetched ${customProducts.length} custom products`);
+        console.log(customProducts);
+        return { customProducts: customProducts.map((customProduct) => this.mappedResponse(customProduct)) };
+      }),
+      catchError((err) => {
+        this.logger.error(`'Failed to fetch custom products'. Error: ${err.message}`);
+
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.PRODUCTS.FAILED_TO_FETCH_CUSTOM_PRODUCTS
+        });
+      })
+    );
+  }
+
 
   //removing the customProduct from store (making isPublish= false)
   unpublishCustomProduct(request: GetOne) : Observable<BaseProductsResponse> {

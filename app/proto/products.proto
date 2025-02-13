@@ -19,7 +19,7 @@ service CustomProducts{
   rpc GetCustomProductById (GetOne) returns (CustomProductResponse);
   rpc GetCustomProductsByUser (CustomProductsByUserRequest) returns (CustomProductListResponse);
   rpc GetProductsByStore (StoresByUserRequest) returns (CustomProductListResponse);
-  rpc GetAllCustomProducts (EmptyRequest) returns (CustomProductListResponse);
+  rpc GetAllCustomProducts (CustomFilter) returns (CustomProductListResponse);
   rpc UpdateCustomProduct (UpdateCustomProductRequest) returns (CustomProductResponse);
   rpc RemoveCustomProductFromStore(GetOne) returns (BaseProductsResponse);
   rpc DeleteCustomProduct (GetOne) returns (BaseProductsResponse);
@@ -30,7 +30,7 @@ service UserStore{
   rpc GetStoreById (GetOne) returns (StoreResponse);
   rpc GetStoresByUser (StoresByUserRequest) returns (StoreResponse);
   rpc UpdateStore (UpdateStoreRequest) returns (StoreResponse);
-  rpc GetAllStores (EmptyRequest) returns (StoreListResponse);
+  rpc GetAllStores (Filter) returns (StoreListResponse);
   rpc DeleteStore (GetOne) returns (BaseProductsResponse);
 
   // Optional Features
@@ -93,6 +93,10 @@ message ProductListResponse {
 //message Placement {
 //  map<string, google.protobuf.Struct> positions = 1;
 //}
+
+message CustomFilter {
+  optional bool isPublished = 1;
+}
 
 message CreateCustomProduct {
   string design = 1;
@@ -159,6 +163,10 @@ message CustomProductListResponse {
 }
 
 //store management
+
+message Filter {
+  optional bool isActive = 1;
+}
 
 message CreateStoreDto {
   string storeName = 1;

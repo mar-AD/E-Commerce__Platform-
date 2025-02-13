@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import {
-  CreateStoreRequest,
+  CreateStoreRequest, Filter,
   GetOne, StoresByUserRequest,
   UpdateStoreRequest,
   UserStoreController,
@@ -30,6 +30,10 @@ export class UserStoresController implements UserStoreController{
 
   getStoresByUser(request: StoresByUserRequest){
     return this.userStoreService.getStoreByUserId(request)
+  }
+
+  getAllStores(request: Filter) {
+    return this.userStoreService.getAll(request)
   }
 
   deleteStore(request: GetOne) {

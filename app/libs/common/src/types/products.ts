@@ -61,6 +61,10 @@ export interface ProductListResponse {
   products: ProductResponse[];
 }
 
+export interface CustomFilter {
+  isPublished?: boolean | undefined;
+}
+
 export interface CreateCustomProduct {
   design: string;
   placement: { [key: string]: PlacementDetail };
@@ -138,6 +142,10 @@ export interface CustomProductResponse_PlacementEntry {
 
 export interface CustomProductListResponse {
   customProducts: CustomProductResponse[];
+}
+
+export interface Filter {
+  isActive?: boolean | undefined;
 }
 
 export interface CreateStoreDto {
@@ -254,7 +262,7 @@ export interface CustomProductsClient {
 
   getProductsByStore(request: StoresByUserRequest): Observable<CustomProductListResponse>;
 
-  getAllCustomProducts(request: EmptyRequest): Observable<CustomProductListResponse>;
+  getAllCustomProducts(request: CustomFilter): Observable<CustomProductListResponse>;
 
   updateCustomProduct(request: UpdateCustomProductRequest): Observable<CustomProductResponse>;
 
@@ -283,7 +291,7 @@ export interface CustomProductsController {
   ): Promise<CustomProductListResponse> | Observable<CustomProductListResponse> | CustomProductListResponse;
 
   getAllCustomProducts(
-    request: EmptyRequest,
+    request: CustomFilter,
   ): Promise<CustomProductListResponse> | Observable<CustomProductListResponse> | CustomProductListResponse;
 
   updateCustomProduct(
@@ -336,7 +344,7 @@ export interface UserStoreClient {
 
   updateStore(request: UpdateStoreRequest): Observable<StoreResponse>;
 
-  getAllStores(request: EmptyRequest): Observable<StoreListResponse>;
+  getAllStores(request: Filter): Observable<StoreListResponse>;
 
   deleteStore(request: GetOne): Observable<BaseProductsResponse>;
 }
@@ -352,7 +360,7 @@ export interface UserStoreController {
 
   updateStore(request: UpdateStoreRequest): Promise<StoreResponse> | Observable<StoreResponse> | StoreResponse;
 
-  getAllStores(request: EmptyRequest): Promise<StoreListResponse> | Observable<StoreListResponse> | StoreListResponse;
+  getAllStores(request: Filter): Promise<StoreListResponse> | Observable<StoreListResponse> | StoreListResponse;
 
   deleteStore(request: GetOne): Promise<BaseProductsResponse> | Observable<BaseProductsResponse> | BaseProductsResponse;
 }

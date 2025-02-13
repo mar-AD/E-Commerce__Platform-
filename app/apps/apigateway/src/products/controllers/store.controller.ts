@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   CreateStoreRequest,
@@ -55,6 +55,14 @@ export class StoreController {
     const userId = req['user']['payload'].id;
     const getUser: StoresByUserRequest = { userId };
     return this.storeService.getStoreByUser(getUser)
+  }
+
+  @Get('All/Stores')
+  @ApiBearerAuth()
+  @isPublic()
+  getAllStores(@Query('isActive') isActive: string) {
+    const request= isActive === 'true'? {isActive: true}: isActive === 'false'? {isActive: false}: {};
+    return this.storeService.getAll(request)
   }
 
   @Delete('remove/:id')

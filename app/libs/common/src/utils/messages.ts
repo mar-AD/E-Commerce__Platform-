@@ -108,6 +108,7 @@ export const messages = {
     FAILED_TO_UPDATE_CUSTOM_PRODUCT: "Failed to update custom product",
     FAILED_TO_DELETE_CUSTOM_PRODUCT: "Failed to delete custom product",
     FAILED_TO_FETCH_CUSTOM_PRODUCT: "Failed to fetch custom product",
+    FAILED_TO_FETCH_CUSTOM_PRODUCTS: "Failed to fetch custom products",
 
     // User Store Messages
     USER_STORE_NOT_FOUND: "User store not found or unavailable",
@@ -118,7 +119,7 @@ export const messages = {
     FAILED_TO_UPDATE_USER_STORE: "Failed to update user store",
     FAILED_TO_DELETE_USER_STORE: "Failed to delete user store",
     FAILED_TO_FETCH_USER_STORE: "Failed to fetch user store",
-
+    FAILED_TO_FETCH_STORES: "Failed to fetch stores",
     // Validation and Error Messages
     INVALID_PRODUCT_DETAILS: "Invalid product details provided",
     INVALID_STORE_DETAILS: "Invalid store details provided"
