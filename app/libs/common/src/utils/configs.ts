@@ -3,6 +3,7 @@ import { catchError, from, Observable, switchMap } from 'rxjs';
 import { messages } from '@app/common/utils/messages';
 import { RpcException } from '@nestjs/microservices';
 import {status} from '@grpc/grpc-js';
+import { PlacementDetail } from '@app/common/types';
 
 //this for hashing password
 export const hashPassword = (password: string):Observable<string> => {
@@ -80,4 +81,7 @@ export const PermissionsName = {
 export function getPermissionName(value: number): string | undefined {
   return PermissionsName[value] ?? undefined;
 }
+
+//for customProducts entity and dtos
+export type Placement = Record<string, PlacementDetail>;
 

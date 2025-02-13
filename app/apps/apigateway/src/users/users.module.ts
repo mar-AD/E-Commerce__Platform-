@@ -2,9 +2,9 @@
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AUTH_PACKAGE_NAME, USERS_PACKAGE_NAME } from '@app/common';
+import { AUTH_PACKAGE_NAME, PRODUCTS_PACKAGE_NAME, USERS_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
-import { AUTH_SERVICE, USERS_SERVICE } from '../constants';
+import { AUTH_SERVICE, PRODUCTS_SERVICE, USERS_SERVICE } from '../constants';
 
 @Module({
   imports:[
@@ -27,6 +27,15 @@ import { AUTH_SERVICE, USERS_SERVICE } from '../constants';
           url: 'auth:50051',
         },
       },
+      {
+        name: PRODUCTS_SERVICE,
+        transport: Transport.GRPC,
+        options: {
+          package: PRODUCTS_PACKAGE_NAME,
+          protoPath: join(__dirname, '../proto/products.proto'),
+          url: 'products:50057',
+        }
+      }
     ])
   ],
   providers: [UsersService],

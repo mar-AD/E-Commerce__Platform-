@@ -1,0 +1,232 @@
+syntax= "proto3";
+
+package products;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+// Base Product Management
+service ProductService {
+  rpc GetProducts (EmptyRequest) returns (ProductListResponse);
+  rpc GetProductById (GetOne) returns (ProductResponse);
+  rpc CreateProduct (CreateProductRequest) returns (ProductResponse);
+  rpc UpdateProduct (UpdateProductRequest) returns (ProductResponse);
+  rpc DeleteProduct (GetOne) returns (BaseProductsResponse);
+}
+  // Custom Product Management
+service CustomProducts{
+  rpc CreateCustomProduct (CreateCustomProductRequest) returns (CustomProductResponse);
+  rpc GetCustomProductById (GetOne) returns (CustomProductResponse);
+  rpc GetCustomProductsByUser (CustomProductsByUserRequest) returns (CustomProductListResponse);
+  rpc GetProductsByStore (StoresByUserRequest) returns (CustomProductListResponse);
+  rpc GetAllCustomProducts (CustomFilter) returns (CustomProductListResponse);
+  rpc UpdateCustomProduct (UpdateCustomProductRequest) returns (CustomProductResponse);
+  rpc RemoveCustomProductFromStore(GetOne) returns (BaseProductsResponse);
+  rpc DeleteCustomProduct (GetOne) returns (BaseProductsResponse);
+}
+  // Store Management
+service UserStore{
+  rpc CreateStore (CreateStoreRequest) returns (StoreResponse);
+  rpc GetStoreById (GetOne) returns (StoreResponse);
+  rpc GetStoresByUser (StoresByUserRequest) returns (StoreResponse);
+  rpc UpdateStore (UpdateStoreRequest) returns (StoreResponse);
+  rpc GetAllStores (Filter) returns (StoreListResponse);
+  rpc DeleteStore (GetOne) returns (BaseProductsResponse);
+
+  // Optional Features
+//  rpc GetTrendingDesigns (EmptyRequest) returns (DesignListResponse);
+}
+
+
+message GetOne {
+  string id = 1;
+}
+message EmptyRequest {}
+
+message BaseProductsResponse {
+  int32 status = 1;
+  string message = 2;
+}
+// Base Product Management
+
+
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  double price = 3;
+  repeated string image = 4;
+  repeated string template = 5;
+}
+
+message UpdateProduct {
+  optional string name = 1;
+  optional string description = 2;
+  optional double price = 3;
+  repeated string image = 4;
+  repeated string template = 5;
+  optional bool isActive = 6;
+}
+
+message UpdateProductRequest {
+  GetOne getOne = 1;
+  UpdateProduct updateProduct = 2;
+}
+
+message ProductResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  double price = 4;
+  repeated string image = 5;
+  repeated string template = 6;
+  bool isActive = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+}
+
+message ProductListResponse {
+  repeated ProductResponse products = 1;
+}
+
+    //Custom Product Management
+
+//message Placement {
+//  map<string, google.protobuf.Struct> positions = 1;
+//}
+
+message CustomFilter {
+  optional bool isPublished = 1;
+}
+
+message CreateCustomProduct {
+  string design = 1;
+  map<string, PlacementDetail> placement = 2;
+  string color = 3;
+  string size = 4;
+  double totalPrice = 5;
+}
+
+message CreateCustomProductRequest {
+  CustomProductsByUserRequest getUser = 1;
+  GetProductId getProduct = 2;
+  CreateCustomProduct createCustomProduct = 3;
+}
+
+message GetProductId {
+  string productId = 1;
+}
+
+message CustomProductsByUserRequest {
+  string userId = 1;
+}
+
+message PlacementDetail {
+  double x = 1;
+  double y = 2;
+  double width = 3;
+  double height = 4;
+  optional double rotation = 5;
+  optional double scale = 6;
+}
+
+message UpdateCustomProduct {
+  optional string design = 1;
+  map<string, PlacementDetail> placement = 2;
+  optional string color = 3;
+  optional string size = 4;
+  optional double totalPrice = 5;
+  optional bool isPublished = 6;
+}
+
+message UpdateCustomProductRequest {
+  GetOne getOne = 1;
+  CustomProductsByUserRequest getUser = 2;
+  UpdateCustomProduct updateCustomProduct = 3;
+}
+
+message CustomProductResponse {
+  string id = 1;
+  string product = 2;
+  string userId = 3;
+  string design = 4;
+  map<string, PlacementDetail> placement = 5;
+  string color = 6;
+  string size = 7;
+  double totalPrice = 8;
+  bool isPublished = 9;
+  google.protobuf.Timestamp createdAt = 10;
+  google.protobuf.Timestamp updatedAt = 11;
+}
+
+message CustomProductListResponse {
+  repeated CustomProductResponse customProducts = 1;
+}
+
+//store management
+
+message Filter {
+  optional bool isActive = 1;
+}
+
+message CreateStoreDto {
+  string storeName = 1;
+  string storeDescription = 2;
+}
+
+message CreateStoreRequest {
+  StoresByUserRequest getUser = 1;
+  CreateStoreDto createStoreRequestDto = 2;
+}
+
+message StoresByUserRequest {
+  string userId = 1;
+}
+
+message UpdateStore {
+  optional string storeName = 1;
+  optional string storeDescription = 2;
+  optional string storePic = 3;
+  optional string storeBanner = 4;
+  optional bool isActive = 5;
+}
+
+
+message UpdateStoreRequest {
+  GetOne getId = 1;
+  StoresByUserRequest getUser = 2;
+  UpdateStore updateStore = 3;
+}
+
+message StoreResponse {
+  string id = 1;
+  string userId = 2;
+  string storeName = 3;
+  string storeDescription = 4;
+  string storePic = 5;
+  string storeBanner = 6;
+  bool isActive = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+}
+
+
+message StoreListResponse {
+  repeated StoreResponse stores = 1;
+}
+
+//optional
+
+message PublishCustomProductRequest {
+  string customProductId = 1;
+}
+
+//message DesignListResponse {
+//  repeated DesignResponse designs = 1;
+//}
+//
+//message DesignResponse {
+//  string id = 1;
+//  string designUrl = 2;
+//  int32 likes = 3;
+//  string createdAt = 4;
+//}

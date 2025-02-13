@@ -9,6 +9,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AUTH_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
 import { AUTH_SERVICE } from '../constants';
+import { PermissionsGuard } from './guards/auth.guard';
 
 @Module({
   imports: [

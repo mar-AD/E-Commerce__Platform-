@@ -92,6 +92,22 @@
         ],
         "watchAssets": true
       }
+    },
+    "products": {
+      "type": "application",
+      "root": "apps/products",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
+      "compilerOptions": {
+        "tsConfigPath": "apps/products/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "proto/**/*.proto",
+            "outDir": "dist/apps/products/proto"
+          }
+        ],
+        "watchAssets": true
+      }
     }
   }
 }

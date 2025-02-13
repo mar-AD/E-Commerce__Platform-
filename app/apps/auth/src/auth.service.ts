@@ -73,7 +73,7 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
     return from(repository.findOne({ where: { email } })).pipe(
       switchMap((existingEntity)=>{
         if(existingEntity){
-          this.logger.error(`${type+'Repo'}: entity with email "${email}" already exists.`);
+          this.logger.log(`${type+'Repo'}: entity with email "${email}" already exists.`);
           throw new RpcException({
             code: status.ALREADY_EXISTS,
             message: `${type} with email: ${email} already exists.`,
@@ -810,7 +810,8 @@ export abstract class  BaseService<E,T extends { entities: E[] }> {
               this.logger.log(`Emitting delete_user_profile event for "${thisEntity.id}".`);
               this.clientUser.emit('delete_user_profile', {id: findOneDto.id})
             }else if (type === AuthConstants.admin){
-              /////////////////////////////////////////// later //////////////////////////
+              this.logger.log(`Emitting delete_user_profile event for "${thisEntity.id}".`);
+              this.clientAdmin.emit('delete_admin_profile', {id: findOneDto.id})
             }
             return {
               result:{

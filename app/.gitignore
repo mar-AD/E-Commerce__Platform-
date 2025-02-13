@@ -5,6 +5,7 @@
 /db/auth-data
 /db/users-data
 /db/admins-data
+/db/products-data
 
 # Logs
 logs
