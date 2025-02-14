@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package orders;
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
+  rpc GetOrderById(GetOrderByIdRequest) returns (OrderResponse);
+  rpc GetOrdersByUserId(GetOrdersByUserIdRequest) returns (OrdersListResponse);
+  rpc GetAllOrders(Empty) returns (OrdersListResponse);
+  rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (OrderResponse);
+}
+
+message Empty {}
+
+enum OrderStatus {
+  PENDING = 0;
+  CONFIRMED = 1;
+  CANCELED = 2;
+  SHIPPED = 3;
+}
+
+message ProductItem {
+  string customProductId = 1;
+  int32 quantity = 2;
+}
+
+message CreateOrder {
+  repeated ProductItem products = 2;
+  double totalPrice = 3;
+}
+
+message CreateOrderRequest {
+  GetOrdersByUserIdRequest getUser = 1;
+  CreateOrder createOrderDto = 2;
+}
+
+
+message OrderResponse {
+  string id = 1;
+  string userId = 2;
+  repeated ProductItem products = 3;
+  double totalPrice = 4;
+  OrderStatus status = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+}
+
+message GetOrderByIdRequest {
+  string orderId = 1;
+}
+
+message GetOrdersByUserIdRequest {
+  string userId = 1;
+}
+
+message OrdersListResponse {
+  repeated OrderResponse orders = 1;
+}
+
+message UpdateOrder {
+  repeated ProductItem products = 1;
+  optional OrderStatus status= 2;
+  optional double totalPrice = 3;
+}
+
+message UpdateOrderStatusRequest {
+  GetOrderByIdRequest getOrder = 1;
+  GetOrdersByUserIdRequest getUser = 2;
+  UpdateOrder updateOrderDto = 3;
+}

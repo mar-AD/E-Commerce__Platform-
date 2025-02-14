@@ -4,7 +4,7 @@ import { UserStoreEntity } from './entities/user_store.entity';
 import { Repository } from 'typeorm';
 import {
   BaseProductsResponse,
-  dateToTimestamp, EmptyRequest, Filter,
+  dateToTimestamp, Filter,
   GetOne,
   LoggerService,
   messages, StoreListResponse,
