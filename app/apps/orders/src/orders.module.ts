@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CommonModule } from '@app/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersEntity } from './entities/orders.entity';
+import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -26,6 +27,23 @@ import { OrdersEntity } from './entities/orders.entity';
     TypeOrmModule.forFeature([OrdersEntity]),
   ],
   controllers: [OrdersController],
-  providers: [OrdersService],
+  providers: [
+    OrdersService,
+    {
+      provide: 'RMQ_ORDERS_CLIENT',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_ORDERS_QUEUE'),
+            queueOptions: { durable: true },
+          }
+        })
+      },
+      inject: [ConfigService],
+    }
+  ],
+  exports: ['RMQ_ORDERS_CLIENT'],
 })
 export class OrdersModule {}

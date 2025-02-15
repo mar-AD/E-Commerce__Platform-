@@ -112,10 +112,17 @@
     "orders": {
       "type": "application",
       "root": "apps/orders",
-      "entryFile": "main",
-      "sourceRoot": "apps/orders/src",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
       "compilerOptions": {
-        "tsConfigPath": "apps/orders/tsconfig.app.json"
+        "tsConfigPath": "apps/orders/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "proto/**/*.proto",
+            "outDir": "dist/apps/orders/proto"
+          }
+        ],
+        "watchAssets": true
       }
     }
   }

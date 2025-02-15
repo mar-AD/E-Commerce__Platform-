@@ -2,15 +2,20 @@ syntax = "proto3";
 
 package orders;
 
+import "google/protobuf/timestamp.proto";
+
 service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
   rpc GetOrderById(GetOrderByIdRequest) returns (OrderResponse);
   rpc GetOrdersByUserId(GetOrdersByUserIdRequest) returns (OrdersListResponse);
-  rpc GetAllOrders(Empty) returns (OrdersListResponse);
+  rpc GetAllOrders(stream PaginationRequest) returns (stream OrdersListResponse);
   rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (OrderResponse);
 }
 
-message Empty {}
+message PaginationRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
 
 enum OrderStatus {
   PENDING = 0;
@@ -41,8 +46,8 @@ message OrderResponse {
   repeated ProductItem products = 3;
   double totalPrice = 4;
   OrderStatus status = 5;
-  string createdAt = 6;
-  string updatedAt = 7;
+  google.protobuf.Timestamp createdAt = 6;
+  google.protobuf.Timestamp updatedAt = 7;
 }
 
 message GetOrderByIdRequest {
@@ -55,6 +60,7 @@ message GetOrdersByUserIdRequest {
 
 message OrdersListResponse {
   repeated OrderResponse orders = 1;
+  int32 total = 2;
 }
 
 message UpdateOrder {

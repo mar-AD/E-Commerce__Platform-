@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+import { OrderStatus } from '@app/common';
 
 @Entity()
 export class OrdersEntity {
@@ -14,8 +15,12 @@ export class OrdersEntity {
   @Column()
   totalPrice: number;
 
-  @Column({ default: 'pending' })
-  status: string;
+  @Column({
+    type: 'enum',
+    enum: OrderStatus,
+    default: OrderStatus.PENDING
+  })
+  status: OrderStatus;
 
   @CreateDateColumn()
   createdAt: Date;
