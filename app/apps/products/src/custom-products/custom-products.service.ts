@@ -21,7 +21,7 @@ export class CustomProductsService {
   constructor(
     @InjectRepository(CustomProductsEntity) private readonly CustomProductRepository: Repository<CustomProductsEntity>,
     @InjectRepository(ProductEntity) private readonly ProductRepository: Repository<ProductEntity>,
-    @Inject('RMQ_PRODUCTS_CLIENT') protected readonly clientProducts: ClientProxy,
+    @Inject('RMQ_AUTH_CLIENT') protected readonly clientAuth: ClientProxy,
     private readonly logger: LoggerService,
   ) {
   }
@@ -47,7 +47,7 @@ export class CustomProductsService {
           });
         }
         this.logger.debug(`Sending get_user_id message for user "${userId}"`);
-        return this.clientProducts.send<boolean>('get_user_id', { id: userId }).pipe(
+        return this.clientAuth.send<boolean>('get_user_id', { id: userId }).pipe(
           tap(userExists => {
             if (!userExists) {
               this.logger.warn(`User with ID "${userId}" not found.`);
@@ -61,10 +61,7 @@ export class CustomProductsService {
             const newCreateCustomProduct = { product, userId, ...createCustomProduct };
             this.logger.log(`Creating custom product for User ID: "${userId}" and Product ID: "${productId}"`);
             return from(this.CustomProductRepository.save(newCreateCustomProduct)).pipe(
-              map(created => {
-
-                return this.mappedResponse(created);
-              }),
+              map(created => this.mappedResponse(created)),
               catchError(err => {
                 this.logger.error(`Failed to create custom product: ${err.message}`);
                 throw new RpcException({
@@ -176,7 +173,7 @@ export class CustomProductsService {
   getCustomProductByUser(request: CustomProductsByUserRequest): Observable<CustomProductListResponse> {
     const{userId} = request;
     this.logger.log(`CustomProducts: sending get_user_id message... '`);
-    return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
+    return this.clientAuth.send<boolean>('get_user_id', {id: userId}).pipe(
       switchMap((userExists) => {
         if (!userExists) {
           this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
@@ -213,7 +210,7 @@ export class CustomProductsService {
   getCustomProductByStore(request: StoresByUserRequest): Observable<CustomProductListResponse> {
     const{userId} = request;
     this.logger.log(`CustomProducts: sending get_user_id message... '`);
-    return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
+    return this.clientAuth.send<boolean>('get_user_id', {id: userId}).pipe(
       switchMap((userExists) => {
         if (!userExists) {
           this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);

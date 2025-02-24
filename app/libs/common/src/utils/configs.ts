@@ -85,3 +85,23 @@ export function getPermissionName(value: number): string | undefined {
 //for customProducts entity and dtos
 export type Placement = Record<string, PlacementDetail>;
 
+//for delevery date
+export function getDeliveryDate(shippingMethod: string): string {
+  const today = new Date();
+  let deliveryDays = 0;
+
+  switch (shippingMethod.toLowerCase()) {
+    case "standard":
+      deliveryDays = Math.floor(Math.random() * (5 - 3 + 1)) + 3; // 3-5 days
+      break;
+    case "express":
+      deliveryDays = Math.floor(Math.random() * (2 - 1 + 1)) + 1; // 1-2 days
+      break;
+    default:
+      deliveryDays = 5; // Default to 5 days if shipping method is unknown
+  }
+
+  today.setDate(today.getDate() + deliveryDays);
+  return today.toDateString(); // Example: "Tue, Aug 27 2024"
+}
+

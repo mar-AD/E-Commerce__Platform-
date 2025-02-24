@@ -170,15 +170,15 @@ services:
       - ./db/products-data:/var/lib/postgresql/data
       - ./db/init-products.sql:/docker-entrypoint-initdb.d/init-products.sql
 
-    orders-db:
-      image: postgres:16
-      env_file:
-        - ./apps/orders/.env
-      ports:
-        - '5437:5432'
-      volumes:
-        - ./db/orders-data:/var/lib/postgresql/data
-        - ./db/init-orders.sql:/docker-entrypoint-initdb.d/init-orders.sql
+  orders-db:
+    image: postgres:16
+    env_file:
+      - ./apps/orders/.env
+    ports:
+      - '5437:5432'
+    volumes:
+      - ./db/orders-data:/var/lib/postgresql/data
+      - ./db/init-orders.sql:/docker-entrypoint-initdb.d/init-orders.sql
 
   rabbitmq:
     image: rabbitmq:4.0.4-management

@@ -1,19 +1,22 @@
 import { Entity, Column, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn } from 'typeorm';
-import { OrderStatus } from '@app/common';
+import { getDeliveryDate, OrderStatus, ProductItem } from '@app/common';
 
 @Entity()
 export class OrdersEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   userId: string;
 
   @Column('jsonb')
-  products: { customProductId: string; quantity: number }[];
+  products: ProductItem[];
 
   @Column()
   totalPrice: number;
+
+  @Column( {default: getDeliveryDate("standard")})
+  deliveryDate: Date;
 
   @Column({
     type: 'enum',

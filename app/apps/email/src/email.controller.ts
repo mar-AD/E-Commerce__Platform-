@@ -28,4 +28,23 @@ export class EmailController {
     await this.emailService.sendEmailUpdateReqEmail(data, context);
   }
 
+  @EventPattern('place_order_email')
+  async handlePlaceOrderEmail(@Payload() data:
+    {
+      email: string,
+      orderId: string,
+      customerName: string,
+      orderDate: string,
+      orderTotal: string,
+      customerAddress: string,
+      deliveryDate: string,
+      items: { id: string; quantity: number }[]
+    },
+     @Ctx() context: RmqContext
+  ){
+    this.logger.log(`Controller received 'place_order_email' event for ${data.email}`)
+    await this.emailService.sendPlaceOrderEmail(data, context);
+  }
+
+
 }

@@ -150,6 +150,27 @@ export class UsersService {
     }
   }
 
+  async getProfile(data: { id: string }, context: RmqContext): Promise<GetUserProfileResponse | boolean> {
+    const { id } = data;
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+
+    try {
+      const profileExist = await this.usersRepository.findOne({where: { userId: id }});
+      if (!profileExist){
+        channel.ack(originalMessage);
+        return false;
+      }
+      channel.ack(originalMessage)
+      return this.mapUsersProfileResponse(profileExist);
+    }
+    catch (err) {
+      this.logger.error(`Failed to get user profile with userId: ${id}`);
+      channel.nack(originalMessage, false, true);
+      throw new RpcException('User profile not found');
+    }
+  }
+
 
   mapUsersProfileResponse (users: UsersEntity): GetUserProfileResponse {
     return {

@@ -30,13 +30,41 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
   providers: [
     OrdersService,
     {
-      provide: 'RMQ_ORDERS_CLIENT',
+      provide: 'RMQ_USERS_CLIENT',
       useFactory: (configService: ConfigService) => {
         return ClientProxyFactory.create({
           transport: Transport.RMQ,
           options: {
             urls: [configService.get<string>('RABBITMQ_URL')],
-            queue: configService.get<string>('RABBITMQ_ORDERS_QUEUE'),
+            queue: configService.get<string>('RABBITMQ_USERS_QUEUE'),
+            queueOptions: { durable: true },
+          }
+        })
+      },
+      inject: [ConfigService],
+    },
+    {
+      provide: 'RMQ_AUTH_CLIENT',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_AUTH_QUEUE'),
+            queueOptions: { durable: true },
+          }
+        })
+      },
+      inject: [ConfigService],
+    },
+    {
+      provide: 'RMQ_EMAIL_CLIENT',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_EMAIL_QUEUE'),
             queueOptions: { durable: true },
           }
         })
@@ -44,6 +72,10 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
       inject: [ConfigService],
     }
   ],
-  exports: ['RMQ_ORDERS_CLIENT'],
+  exports: [
+    'RMQ_USERS_CLIENT',
+    'RMQ_EMAIL_CLIENT',
+    'RMQ_AUTH_CLIENT'
+  ],
 })
 export class OrdersModule {}

@@ -20,7 +20,7 @@ import { status } from '@grpc/grpc-js';
 export class UserStoresService {
   constructor(
     @InjectRepository(UserStoreEntity) private readonly userStoreRepository: Repository<UserStoreEntity>,
-    @Inject('RMQ_PRODUCTS_CLIENT') private readonly clientStore: ClientProxy,
+    @Inject('RMQ_AUTH_CLIENT') private readonly clientAuth: ClientProxy,
     private readonly logger: LoggerService,
   ) {
   }
@@ -38,7 +38,7 @@ export class UserStoresService {
           });
         }
         this.logger.log(`Sending get_user_id message for user "${userId}"`);
-        return this.clientStore.send<boolean>('get_user_id', { id: userId }).pipe(
+        return this.clientAuth.send<boolean>('get_user_id', { id: userId }).pipe(
           tap(userExists => {
             if (!userExists) {
               this.logger.warn(`User with ID "${userId}" not found.`);
@@ -84,7 +84,7 @@ export class UserStoresService {
           });
         }
         this.logger.log(`Sending get_user_id message for user "${userId}"`);
-        return this.clientStore.send<boolean>('get_user_id', { id: userId }).pipe(
+        return this.clientAuth.send<boolean>('get_user_id', { id: userId }).pipe(
           tap(userExists => {
             if (!userExists) {
               this.logger.warn(`User with ID "${userId}" not found.`);
@@ -152,7 +152,7 @@ export class UserStoresService {
   getStoreByUserId(request: StoresByUserRequest): Observable<StoreResponse> {
     const{userId} = request;
     this.logger.log(`UserStoreRepo: sending get_user_id message... '`);
-    return this.clientStore.send<boolean>('get_user_id', {id: userId}).pipe(
+    return this.clientAuth.send<boolean>('get_user_id', {id: userId}).pipe(
       switchMap((userExists) => {
         if (!userExists) {
           this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
