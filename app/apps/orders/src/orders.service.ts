@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OrdersEntity } from './entities/orders.entity';
 import { Repository } from 'typeorm';
 import {
-  dateToTimestamp, GetOrdersByUserIdRequest,
+  dateToTimestamp, getDeliveryDate, GetOrdersByUserIdRequest,
   LoggerService,
   messages,
   OrderResponse,
@@ -51,10 +51,11 @@ export class OrdersService {
                 message: messages.USER.NOT_FOUND2
               });
             }
+            const deliveryDate = getDeliveryDate(createOrderDto.deliveryDate);
 
             const { firstName, lastName, address } = profileExists;
             const customerName = `${firstName} ${lastName}`;
-            const createOrder = { userId, ...createOrderDto };
+            const createOrder = { userId, deliveryDate, ...createOrderDto };
 
             this.logger.log(`Placing order for User ID: "${userId}"`);
             return from(this.ordersRepository.save(createOrder)).pipe(
@@ -79,7 +80,7 @@ export class OrdersService {
                     );
                     return of(null);
                   })
-                ).subscribe(); // Subscribe here since it's a side effect
+                ).subscribe();
               }),
               map((createdOrder) => this.mappedResponse(createdOrder)),
               catchError((err) => {
@@ -95,7 +96,6 @@ export class OrdersService {
       })
     );
   }
-
 
   getAllOrders(request: Observable<PaginationRequest>): Observable<OrdersListResponse> {
     return from(request).pipe(
@@ -130,13 +130,15 @@ export class OrdersService {
 
 
 
+
+
   mappedResponse(order: OrdersEntity): OrderResponse{
     return {
       id: order.id,
       userId: order.userId,
       products: order.products,
       totalPrice: order.totalPrice,
-      deliveryDate: order.deliveryDate,
+      deliveryDate: dateToTimestamp(order.deliveryDate),
       status: order.status,
       createdAt: dateToTimestamp(order.createdAt),
       updatedAt: dateToTimestamp(order.updatedAt)

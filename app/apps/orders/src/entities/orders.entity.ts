@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn } from 'typeorm';
 import { getDeliveryDate, OrderStatus, ProductItem } from '@app/common';
+import { DeliveryType } from '@app/common/utils/configs';
 
 @Entity()
 export class OrdersEntity {
@@ -15,7 +16,7 @@ export class OrdersEntity {
   @Column()
   totalPrice: number;
 
-  @Column( {default: getDeliveryDate("standard")})
+  @Column( {default: getDeliveryDate(DeliveryType.STANDARD)})
   deliveryDate: Date;
 
   @Column({

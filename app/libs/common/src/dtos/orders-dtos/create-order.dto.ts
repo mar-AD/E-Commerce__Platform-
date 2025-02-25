@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsDate, IsNotEmpty, IsNumber, IsUUID, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsUUID, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+import { DeliveryType } from '@app/common/utils/configs';
 
 class OrderProductDto {
   @ApiProperty()
@@ -42,7 +43,7 @@ export class CreateOrderDto {
   @Min(0, { message: 'Total price cannot be negative' })
   totalPrice: number
 
-  @ApiProperty({example: "standard"})
+  @ApiProperty({example: DeliveryType.EXPRESS})
   @IsNotEmpty()
-  deliveryDate: string
+  deliveryDate: DeliveryType
 }

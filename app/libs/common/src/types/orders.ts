@@ -19,6 +19,17 @@ export enum OrderStatus {
   UNRECOGNIZED = -1,
 }
 
+export enum DeliveryType {
+  STANDARD = 0,
+  EXPRESS = 1,
+  UNRECOGNIZED = -1,
+}
+
+export interface OrderBaseResponse {
+  status: number;
+  message: string;
+}
+
 export interface PaginationRequest {
   page: number;
   limit: number;
@@ -32,6 +43,7 @@ export interface ProductItem {
 export interface CreateOrder {
   products: ProductItem[];
   totalPrice: number;
+  deliveryDate: DeliveryType;
 }
 
 export interface CreateOrderRequest {
@@ -44,6 +56,7 @@ export interface OrderResponse {
   userId: string;
   products: ProductItem[];
   totalPrice: number;
+  deliveryDate: Timestamp | undefined;
   status: OrderStatus;
   createdAt: Timestamp | undefined;
   updatedAt: Timestamp | undefined;
@@ -86,6 +99,8 @@ export interface OrderServiceClient {
   getAllOrders(request: Observable<PaginationRequest>): Observable<OrdersListResponse>;
 
   updateOrderStatus(request: UpdateOrderStatusRequest): Observable<OrderResponse>;
+
+  cancelOrder(request: GetOrderByIdRequest): Observable<OrderBaseResponse>;
 }
 
 export interface OrderServiceController {
@@ -102,11 +117,21 @@ export interface OrderServiceController {
   updateOrderStatus(
     request: UpdateOrderStatusRequest,
   ): Promise<OrderResponse> | Observable<OrderResponse> | OrderResponse;
+
+  cancelOrder(
+    request: GetOrderByIdRequest,
+  ): Promise<OrderBaseResponse> | Observable<OrderBaseResponse> | OrderBaseResponse;
 }
 
 export function OrderServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["createOrder", "getOrderById", "getOrdersByUserId", "updateOrderStatus"];
+    const grpcMethods: string[] = [
+      "createOrder",
+      "getOrderById",
+      "getOrdersByUserId",
+      "updateOrderStatus",
+      "cancelOrder",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("OrderService", method)(constructor.prototype[method], method, descriptor);

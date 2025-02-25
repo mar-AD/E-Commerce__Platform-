@@ -4,6 +4,8 @@ import { messages } from '@app/common/utils/messages';
 import { RpcException } from '@nestjs/microservices';
 import {status} from '@grpc/grpc-js';
 import { PlacementDetail } from '@app/common/types';
+import { dateToTimestamp } from '@app/common/utils/timestamp-converter';
+import { Timestamp } from 'google/protobuf/timestamp';
 
 //this for hashing password
 export const hashPassword = (password: string):Observable<string> => {
@@ -85,16 +87,16 @@ export function getPermissionName(value: number): string | undefined {
 //for customProducts entity and dtos
 export type Placement = Record<string, PlacementDetail>;
 
-//for delevery date
-export function getDeliveryDate(shippingMethod: string): string {
+//for delivery date
+export function getDeliveryDate(shippingMethod: DeliveryType): Timestamp {
   const today = new Date();
   let deliveryDays = 0;
 
   switch (shippingMethod.toLowerCase()) {
-    case "standard":
+    case "STANDARD":
       deliveryDays = Math.floor(Math.random() * (5 - 3 + 1)) + 3; // 3-5 days
       break;
-    case "express":
+    case "EXPRESS":
       deliveryDays = Math.floor(Math.random() * (2 - 1 + 1)) + 1; // 1-2 days
       break;
     default:
@@ -102,6 +104,12 @@ export function getDeliveryDate(shippingMethod: string): string {
   }
 
   today.setDate(today.getDate() + deliveryDays);
-  return today.toDateString(); // Example: "Tue, Aug 27 2024"
+  return dateToTimestamp(today)
 }
+
+export enum DeliveryType {
+  STANDARD = 'STANDARD',
+  EXPRESS = 'EXPRESS',
+}
+
 
