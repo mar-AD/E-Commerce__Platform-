@@ -1,11 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrdersEntity } from './entities/orders.entity';
 import { Repository } from 'typeorm';
 import {
-  dateToTimestamp, getDeliveryDate, GetOrdersByUserIdRequest,
+  dateToTimestamp, getDeliveryDate, getDeliveryType, GetOrderByIdRequest, GetOrdersByUserIdRequest,
   LoggerService,
-  messages,
+  messages, OrderBaseResponse,
   OrderResponse,
   OrdersListResponse,
   PaginationRequest, timestampToDate,
@@ -51,7 +51,8 @@ export class OrdersService {
                 message: messages.USER.NOT_FOUND2
               });
             }
-            const deliveryDate = getDeliveryDate(createOrderDto.deliveryDate);
+            const type = getDeliveryType(createOrderDto.deliveryDate)
+            const deliveryDate = getDeliveryDate(type);
 
             const { firstName, lastName, address } = profileExists;
             const customerName = `${firstName} ${lastName}`;
@@ -127,9 +128,94 @@ export class OrdersService {
     );
   }
 
+  getOneOrder(request: GetOrderByIdRequest): Observable<OrderResponse> {
+    const{orderId} = request;
+    this.logger.log(`OrdersRepo: Searching for entity by ID "${orderId}" in repository...'`);
+    return from(this.ordersRepository.findOne({where: {id: orderId}})).pipe(
+      map((order)=>{
+        if (!order){
+          this.logger.error(`OrdersRepo: order with ID "${orderId}" not found'`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.ORDERS.ORDER_NOT_FOUND
+          })
+        }
+        this.logger.log(`OrdersRepo: order with ID "${orderId}" found successfully `);
+        return this.mappedResponse(order)
+      }),
+      catchError((error)=>{
+        this.logger.error(`OrdersRepo: Failed to fetch order with ID "${orderId}". Error: ${error.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.ORDERS.FAILED_TO_FETCH_ORDER
+        })
+      })
+    )
+  }
 
+  getOrdersByUser(request: GetOrdersByUserIdRequest): Observable<OrdersListResponse> {
+    const{userId} = request;
+    this.logger.log(`Orders: sending get_user_id message... '`);
+    return this.clientAuth.send<boolean>('get_user_id', {id: userId}).pipe(
+      switchMap((userExists) => {
+        if (!userExists) {
+          this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.USER.NOT_FOUND2
+          });
+        }
+        this.logger.log(`OrdersRepo: Searching for entity by ID "${userId}" in repository...'`);
+        return from(this.ordersRepository.findAndCount({ where: { userId }})).pipe(
+          map(([orders, count]) => {
+            if (!orders) {
+              this.logger.error(`OrdersRepo: order with ID "${userId}" not found'`);
+              throw new RpcException({
+                code: status.NOT_FOUND,
+                message: messages.ORDERS.ORDER_NOT_FOUND
+              })
+            }
+            this.logger.log(`OrdersRepo:order with ID "${userId}" found successfully `);
+            return {
+              orders: orders.map((product) => this.mappedResponse(product)),
+              total: count
+            }
+          }),
+          catchError((error) => {
+            this.logger.error(`OrdersRepo: Failed to fetch order with ID "${userId}". Error: ${error.message}`);
+            throw new RpcException({
+              code: status.INTERNAL,
+              message: messages.ORDERS.FAILED_TO_FETCH_ORDER
+            })
+          })
+        )
+      })
+    )
+  }
 
+  cancelOrder(request: GetOrderByIdRequest): Observable<OrderBaseResponse> {
+    const{orderId} = request;
+    return from(this.ordersRepository.findOne({id: orderId})).pipe(
+      switchMap((order)=>{
+        if (!order) {
+          throw new RpcException({
+            code: status.NOT_FOUND,
+            message: messages.ORDERS.ORDER_NOT_FOUND,
+          });
+        }
 
+        const cancelPeriod = order.createdAt + 1800
+        if ( )
+      }),
+      catchError((error)=>{
+        this.logger.error(`OrdersRepo: failed to cancel order with ID "${orderId}". Error: ${error.message}`);
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.ORDERS.FAILED_TO_CANCEL_ORDER
+        })
+      })
+    )
+  }
 
 
   mappedResponse(order: OrdersEntity): OrderResponse{

@@ -112,4 +112,13 @@ export enum DeliveryType {
   EXPRESS = 'EXPRESS',
 }
 
+const DeliveryTypeType = {
+  0 : 'STANDARD',
+  1 : 'EXPRESS',
+}
+
+export function getDeliveryType (type: number){
+  return DeliveryTypeType[type] ?? undefined;
+}
+
 

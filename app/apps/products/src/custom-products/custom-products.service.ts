@@ -11,7 +11,7 @@ import {
   messages, StoresByUserRequest,
 } from '@app/common';
 import { CreateCustomProductDto, UpdateCustomProductDto } from '@app/common/dtos';
-import { catchError, defer, from, map, Observable, switchMap, tap } from 'rxjs';
+import { catchError, from, map, Observable, switchMap, tap } from 'rxjs';
 import { ProductEntity } from '../core-products/entities/products.entity';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';

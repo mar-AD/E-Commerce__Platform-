@@ -132,6 +132,7 @@ export const messages = {
     FAILED_TO_PLACE_ORDER: "Failed to place order",
     FAILED_TO_UPDATE_ORDER: "Failed to update order",
     FAILED_TO_FETCH_ORDER: "Failed to fetch order",
+    FAILED_TO_CANCEL_ORDER: "Failed to cancel order",
     FAILED_TO_FETCH_ALL_ORDERS: "Failed to fetch all orders",
     ORDER_ALREADY_COMPLETED: "Order has already been completed",
     INVALID_ORDER_STATUS: "Invalid order status",

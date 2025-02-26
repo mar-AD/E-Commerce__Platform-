@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsNumber, IsUUID, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { DeliveryType } from '@app/common/utils/configs';
+import { DeliveryType } from '@app/common';
 
 class OrderProductDto {
   @ApiProperty()
