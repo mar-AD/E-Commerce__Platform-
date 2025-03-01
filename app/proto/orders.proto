@@ -72,14 +72,11 @@ message OrdersListResponse {
 }
 
 message UpdateOrder {
-  repeated ProductItem products = 1;
   optional OrderStatus status= 2;
-  optional double totalPrice = 3;
 }
 
 message UpdateOrderStatusRequest {
   GetOrderByIdRequest getOrder = 1;
-  GetOrdersByUserIdRequest getUser = 2;
   UpdateOrder updateOrderDto = 3;
 }
 

@@ -20,8 +20,8 @@ export class OrdersController implements OrderServiceController{
   }
 
   updateOrderStatus(request: UpdateOrderStatusRequest){
-    const {getOrder, getUser, updateOrderDto} = request;
-    return this.ordersService.update(getOrder, getUser, updateOrderDto)
+    const {getOrder, updateOrderDto} = request;
+    return this.ordersService.update(getOrder, updateOrderDto)
   }
 
   getOrderById(request: GetOrderByIdRequest) {

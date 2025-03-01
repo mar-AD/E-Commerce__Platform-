@@ -76,14 +76,11 @@ export interface OrdersListResponse {
 }
 
 export interface UpdateOrder {
-  products?: ProductItem[];
   status?: OrderStatus | undefined;
-  totalPrice?: number | undefined;
 }
 
 export interface UpdateOrderStatusRequest {
   getOrder: GetOrderByIdRequest | undefined;
-  getUser: GetOrdersByUserIdRequest | undefined;
   updateOrderDto: UpdateOrder | undefined;
 }
 

@@ -7,13 +7,14 @@ import {
   LoggerService,
   messages, OrderBaseResponse,
   OrderResponse,
-  OrdersListResponse,
+  OrdersListResponse, OrderStatus,
   PaginationRequest, timestampToDate,
 } from '@app/common';
 import { catchError, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { CreateOrderDto } from '@app/common/dtos';
+import now = jest.now;
 
 @Injectable()
 export class OrdersService {
@@ -97,6 +98,8 @@ export class OrdersService {
       })
     );
   }
+
+  update()
 
   getAllOrders(request: Observable<PaginationRequest>): Observable<OrdersListResponse> {
     return from(request).pipe(
@@ -195,7 +198,7 @@ export class OrdersService {
 
   cancelOrder(request: GetOrderByIdRequest): Observable<OrderBaseResponse> {
     const{orderId} = request;
-    return from(this.ordersRepository.findOne({id: orderId})).pipe(
+    return from(this.ordersRepository.findOne({where: {id : orderId}})).pipe(
       switchMap((order)=>{
         if (!order) {
           throw new RpcException({
@@ -204,8 +207,30 @@ export class OrdersService {
           });
         }
 
-        const cancelPeriod = order.createdAt + 1800
-        if ( )
+        const cancelPeriod = new Date(order.createdAt.getTime() + 30 * 60 * 1000)
+        const currentDate = new Date()
+        if ( currentDate > cancelPeriod){
+          throw new RpcException({
+            code: status.FAILED_PRECONDITION,
+            message: "Order cancellation is no longer possible as the allowed time has passed."
+          })
+        }
+        return from(this.ordersRepository.update(orderId, {status: OrderStatus.CANCELED})).pipe(
+          map(()=>{
+            this.logger.log(`OrderRepo: order with ID "${orderId}" canceled successfully `);
+            return {
+              status: HttpStatus.OK,
+              message: messages.ORDERS.ORDER_CANCEL_SUCCESSFULLY
+            }
+          }),
+          catchError((error)=>{
+            this.logger.error(`OrderRepo: failed to cancel order with ID "${orderId}". Error: ${error.message}`);
+            throw new RpcException({
+              code: status.INTERNAL,
+              message: messages.ORDERS.FAILED_TO_CANCEL_ORDER
+            })
+          })
+        )
       }),
       catchError((error)=>{
         this.logger.error(`OrdersRepo: failed to cancel order with ID "${orderId}". Error: ${error.message}`);
