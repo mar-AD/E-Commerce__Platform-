@@ -100,13 +100,14 @@ export function getDeliveryDate(shippingMethod: DeliveryType): Timestamp {
       deliveryDays = Math.floor(Math.random() * (2 - 1 + 1)) + 1; // 1-2 days
       break;
     default:
-      deliveryDays = 5; // Default to 5 days if shipping method is unknown
+      deliveryDays = 5;
   }
 
   today.setDate(today.getDate() + deliveryDays);
   return dateToTimestamp(today)
 }
 
+//for order deliveryType
 export enum DeliveryType {
   STANDARD = 'STANDARD',
   EXPRESS = 'EXPRESS',
@@ -119,6 +120,26 @@ const DeliveryTypeType = {
 
 export function getDeliveryType (type: number){
   return DeliveryTypeType[type] ?? undefined;
+}
+
+
+//for order status
+export enum StatusType {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  CANCELED = 'CANCELED',
+  SHIPPED = 'SHIPPED',
+}
+
+const Status = {
+  0 : 'PENDING',
+  1 : 'CONFIRMED',
+  2 : 'CANCELED',
+  3 : 'SHIPPED'
+}
+
+export function getStatus (type: number){
+  return Status[type] ?? undefined;
 }
 
 

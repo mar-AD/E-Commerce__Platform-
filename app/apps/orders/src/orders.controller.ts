@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import {
-  CreateOrderRequest, GetOrderByIdRequest, GetOrdersByUserIdRequest, OrderBaseResponse,
+  CreateOrderRequest, GetOrderByIdRequest, GetOrdersByUserIdRequest, GetOrdersRequest, OrderBaseResponse,
   OrderServiceController,
   OrderServiceControllerMethods, OrdersListResponse, PaginationRequest,
   UpdateOrderStatusRequest,
@@ -36,7 +36,7 @@ export class OrdersController implements OrderServiceController{
     return this.ordersService.getAllOrders(request)
   }
 
-  cancelOrder(request: GetOrderByIdRequest) {
+  cancelOrder(request: GetOrdersRequest) {
     return this.ordersService.cancelOrder(request)
   }
 }

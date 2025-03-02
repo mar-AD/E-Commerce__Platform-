@@ -43,7 +43,6 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { RoleEntity } from './roles/entities/role.entity';
 import { ConfigService } from '@nestjs/config';
-import { UpdateAdminProfileDto, UpdateUserProfileDto } from '@app/common/dtos';
 
 
 @Injectable()

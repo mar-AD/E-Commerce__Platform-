@@ -10,7 +10,12 @@ service OrderService {
   rpc GetOrdersByUserId(GetOrdersByUserIdRequest) returns (OrdersListResponse);
   rpc GetAllOrders(stream PaginationRequest) returns (stream OrdersListResponse);
   rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (OrderResponse);
-  rpc CancelOrder(GetOrderByIdRequest) returns (OrderBaseResponse);
+  rpc CancelOrder(GetOrdersRequest) returns (OrderBaseResponse);
+}
+
+message GetOrdersRequest {
+  string userId = 1;
+  string orderId = 2;
 }
 
 message OrderBaseResponse {

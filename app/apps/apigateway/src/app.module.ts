@@ -5,6 +5,9 @@ import { CommonModule } from '@app/common';
 import { UsersModule } from './users/users.module';
 import { AdminsModule } from './admins/admins.module';
 import { ProductsModule } from './products/products.module';
+import { OrdersService } from './orders/orders.service';
+import { OrdersController } from './orders/orders.controller';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -14,8 +17,9 @@ import { ProductsModule } from './products/products.module';
     UsersModule,
     AdminsModule,
     ProductsModule,
+    OrdersModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [OrdersController],
+  providers: [OrdersService],
 })
 export class AppModule {}

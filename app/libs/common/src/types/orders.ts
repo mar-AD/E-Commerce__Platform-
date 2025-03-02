@@ -25,6 +25,11 @@ export enum DeliveryType {
   UNRECOGNIZED = -1,
 }
 
+export interface GetOrdersRequest {
+  userId: string;
+  orderId: string;
+}
+
 export interface OrderBaseResponse {
   status: number;
   message: string;
@@ -97,7 +102,7 @@ export interface OrderServiceClient {
 
   updateOrderStatus(request: UpdateOrderStatusRequest): Observable<OrderResponse>;
 
-  cancelOrder(request: GetOrderByIdRequest): Observable<OrderBaseResponse>;
+  cancelOrder(request: GetOrdersRequest): Observable<OrderBaseResponse>;
 }
 
 export interface OrderServiceController {
@@ -116,7 +121,7 @@ export interface OrderServiceController {
   ): Promise<OrderResponse> | Observable<OrderResponse> | OrderResponse;
 
   cancelOrder(
-    request: GetOrderByIdRequest,
+    request: GetOrdersRequest,
   ): Promise<OrderBaseResponse> | Observable<OrderBaseResponse> | OrderBaseResponse;
 }
 
