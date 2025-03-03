@@ -124,7 +124,7 @@ services:
     depends_on:
       - orders-db
     ports:
-      - '50060:50059'
+      - '50050:50059'
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

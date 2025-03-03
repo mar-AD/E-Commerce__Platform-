@@ -108,7 +108,7 @@ export function getDeliveryDate(shippingMethod: DeliveryType): Timestamp {
 }
 
 //for order deliveryType
-export enum DeliveryType {
+enum DeliveryType {
   STANDARD = 'STANDARD',
   EXPRESS = 'EXPRESS',
 }
