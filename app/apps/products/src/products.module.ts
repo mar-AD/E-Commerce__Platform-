@@ -16,9 +16,9 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 @Module({
   imports: [
     ConfigModule.forRoot({
-    isGlobal: true,
-    envFilePath: ['./apps/products/.env', './.env']
-  }),
+      isGlobal: true,
+      envFilePath: ['./apps/products/.env', './.env']
+    }),
     CommonModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

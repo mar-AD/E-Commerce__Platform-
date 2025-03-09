@@ -59,13 +59,17 @@ export class OrdersService {
                 message: messages.USER.NOT_FOUND2
               });
             }
+            const { deliveryDate, ...rest} = createOrderDto
             const type = getDeliveryType(createOrderDto.deliveryDate)
-            const deliveryDate = getDeliveryDate(type);
+            console.log(typeof type);
+            const calculatedDeliveryDate  = getDeliveryDate(type);
+            console.log(calculatedDeliveryDate);
 
             const { firstName, lastName, address } = profileExists;
             const customerName = `${firstName} ${lastName}`;
-            const createOrder = { userId, deliveryDate, ...createOrderDto };
 
+            const createOrder = { userId, deliveryDate: calculatedDeliveryDate, ...rest };
+            console.log(createOrder);
             this.logger.log(`Placing order for User ID: "${userId}"`);
             return from(this.ordersRepository.save(createOrder)).pipe(
               tap((createdOrder) => {

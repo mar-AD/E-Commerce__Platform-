@@ -4,7 +4,6 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ORDERS_PACKAGE_NAME } from '@app/common';
 
-
 async function bootstrap() {
   try {
     const app = await NestFactory.createMicroservice<MicroserviceOptions>(

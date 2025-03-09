@@ -88,15 +88,15 @@ export function getPermissionName(value: number): string | undefined {
 export type Placement = Record<string, PlacementDetail>;
 
 //for delivery date
-export function getDeliveryDate(shippingMethod: DeliveryType): Timestamp {
+export function getDeliveryDate(shippingMethod: DeliveryType): Date {
   const today = new Date();
   let deliveryDays = 0;
 
   switch (shippingMethod.toLowerCase()) {
-    case "STANDARD":
+    case "standard":
       deliveryDays = Math.floor(Math.random() * (5 - 3 + 1)) + 3; // 3-5 days
       break;
-    case "EXPRESS":
+    case "express":
       deliveryDays = Math.floor(Math.random() * (2 - 1 + 1)) + 1; // 1-2 days
       break;
     default:
@@ -104,7 +104,7 @@ export function getDeliveryDate(shippingMethod: DeliveryType): Timestamp {
   }
 
   today.setDate(today.getDate() + deliveryDays);
-  return dateToTimestamp(today)
+  return today
 }
 
 //for order deliveryType

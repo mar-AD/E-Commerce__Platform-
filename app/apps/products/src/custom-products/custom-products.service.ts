@@ -13,8 +13,9 @@ import {
 import { CreateCustomProductDto, UpdateCustomProductDto } from '@app/common/dtos';
 import { catchError, from, map, Observable, switchMap, tap } from 'rxjs';
 import { ProductEntity } from '../core-products/entities/products.entity';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy, Ctx, RmqContext, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { Product } from '../constants';
 
 @Injectable()
 export class CustomProductsService {
@@ -334,6 +335,55 @@ export class CustomProductsService {
         })
       })
     )
+  }
+
+
+
+  async getSingleCustomProduct(data: { id: string }, context: RmqContext  ): Promise<Product>{
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+   try {
+     const customProduct = await this.CustomProductRepository.findOne({where: {id: data.id}})
+     if (!customProduct){
+       channel.nack(originalMessage, false ,false);
+       throw new RpcException({
+         code: status.NOT_FOUND,
+         message: messages.PRODUCTS.FAILED_TO_FETCH_CUSTOM_PRODUCT
+       })
+     }
+     const design = customProduct.design
+     const color = customProduct.color
+     const size = customProduct.size
+     const totalPrice = customProduct.totalPrice
+
+     const product = await this.ProductRepository.findOne({where: {id: customProduct.product.id}})
+     if (!product){
+       channel.nack(originalMessage, false ,false);
+       throw new RpcException({
+         code: status.NOT_FOUND,
+         message: messages.PRODUCTS.FAILED_TO_FETCH_PRODUCT
+       })
+     }
+
+     const name = product.name
+     const image = product.image[0]
+
+     channel.ack(originalMessage)
+     return {
+       name,
+       image,
+       design,
+       color,
+       size,
+       totalPrice
+     }
+
+   }
+   catch (err){
+     this.logger.error(`Failed to fetch product with ${data.id} : ${err}`);
+     channel.nack(originalMessage, true ,false);
+     throw new RpcException('product fetch failed');
+   }
   }
 
   private isEqual (obj1: any, obj2: any): boolean {

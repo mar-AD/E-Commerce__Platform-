@@ -19,11 +19,11 @@ export class CreateOrderDto {
     description: 'List of products included in the order',
     example: [
       {
-        productId: '123456',
+        customProductId: '123456',
         quantity: 2
       },
       {
-        productId: '789012',
+        customProductId: '789012',
         quantity: 1
       }
     ]

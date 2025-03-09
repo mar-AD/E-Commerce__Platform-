@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Permissions } from '@app/common';
+import { Permissions } from '@app/common/types/auth';
 
 @Entity('roles')
 export class RoleEntity {

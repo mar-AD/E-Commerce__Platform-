@@ -2,18 +2,18 @@ import { Module } from '@nestjs/common';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CommonModule } from '@app/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersEntity } from './entities/orders.entity';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { CommonModule } from '@app/common';
 
 @Module({
   imports: [
+    CommonModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['./apps/orders/.env', './.env']
     }),
-    CommonModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -70,12 +70,26 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
         })
       },
       inject: [ConfigService],
+    },
+    {
+      provide: 'RMQ_PRODUCTS_CLIENT',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_PRODUCTS_QUEUE'),
+            queueOptions: { durable: true },
+          }
+        })
+      },
     }
   ],
   exports: [
     'RMQ_USERS_CLIENT',
     'RMQ_EMAIL_CLIENT',
-    'RMQ_AUTH_CLIENT'
+    'RMQ_AUTH_CLIENT',
+    'RMQ_PRODUCTS_CLIENT'
   ],
 })
 export class OrdersModule {}

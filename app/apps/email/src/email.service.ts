@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { RmqContext, RpcException } from '@nestjs/microservices';
 import { LoggerService } from '@app/common';
-import { EMAIL_SUBJECTS, emailStructure } from './constants';
+import { EMAIL_SUBJECTS, emailStructure, exactDate } from './constants';
 import { welcomeEmailHtml } from './templates/welcome-email';
 import { resetPassHtml } from './templates/reset-password-email';
 import { emailUpdateRequestHtml } from './templates/req-email-update-email';
@@ -99,7 +99,7 @@ export class EmailService {
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
 
-    const html = orderConfirmationEmail(orderId, orderTotal, orderDate, deliveryDate, customerName, customerAddress, items)
+    const html = orderConfirmationEmail(orderId, customerName, exactDate(orderDate), orderTotal, customerAddress, exactDate(deliveryDate), items)
     const subject =  EMAIL_SUBJECTS.PLACE_ORDER
     const resetPassMail = emailStructure( email, subject, html)
 

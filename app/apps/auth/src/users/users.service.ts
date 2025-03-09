@@ -104,7 +104,7 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
        const thisUser = await this.userRepository.findOne({where: {id: id}});
        if (!thisUser){
          this.logger.log(`user with ${id} not found`);
-         channel.ack(originalMessage);
+         channel.nack(originalMessage, false, false);
          return false;
        }
        channel.ack(originalMessage)
@@ -113,7 +113,7 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
      }
      catch(error) {
        this.logger.error(`Failed to fetch user with ${id}: ${error}`);
-       channel.nack(originalMessage, false ,false);
+       channel.nack(originalMessage, true ,false);
        throw new RpcException('User fetch failed');
      }
   }

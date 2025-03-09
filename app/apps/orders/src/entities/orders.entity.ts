@@ -1,5 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn } from 'typeorm';
-import { DeliveryType, getDeliveryDate, getDeliveryType, OrderStatus, ProductItem } from '@app/common';
+import { getDeliveryDate, getDeliveryType } from '@app/common/utils/configs';
+import { DeliveryType, OrderStatus, ProductItem } from '@app/common/types/orders';
+
+
 
 @Entity()
 export class OrdersEntity {
@@ -12,10 +15,10 @@ export class OrdersEntity {
   @Column('jsonb')
   products: ProductItem[];
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalPrice: number;
 
-  @Column( {default: getDeliveryDate(getDeliveryType(DeliveryType.STANDARD))})
+  @Column( {type:'timestamp', default: getDeliveryDate(getDeliveryType(DeliveryType.STANDARD))})
   deliveryDate: Date;
 
   @Column({
