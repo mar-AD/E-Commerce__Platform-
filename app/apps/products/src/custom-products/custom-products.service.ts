@@ -338,14 +338,18 @@ export class CustomProductsService {
   }
 
 
-
+  //for the set orders method
   async getSingleCustomProduct(data: { id: string }, context: RmqContext  ): Promise<Product>{
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
+    console.log('service :', data.id);
    try {
+     this.logger.log(`looking for customProduct with ${data.id}`);
      const customProduct = await this.CustomProductRepository.findOne({where: {id: data.id}})
+     this.logger.log(customProduct)
      if (!customProduct){
-       channel.nack(originalMessage, false ,false);
+       this.logger.log(`customProduct with ${data.id} not found`);
+       channel.nack(originalMessage, false, true);  // Rejected but not requeued
        throw new RpcException({
          code: status.NOT_FOUND,
          message: messages.PRODUCTS.FAILED_TO_FETCH_CUSTOM_PRODUCT
@@ -356,9 +360,11 @@ export class CustomProductsService {
      const size = customProduct.size
      const totalPrice = customProduct.totalPrice
 
-     const product = await this.ProductRepository.findOne({where: {id: customProduct.product.id}})
+     this.logger.log(`looking for product with ${customProduct.product.id}`);
+     const product = await this.ProductRepository.findOne({where: {id: customProduct.product.id, isActive: true}})
      if (!product){
-       channel.nack(originalMessage, false ,false);
+       this.logger.log(`product with ${data.id} not found`);
+       channel.nack(originalMessage, false, true);
        throw new RpcException({
          code: status.NOT_FOUND,
          message: messages.PRODUCTS.FAILED_TO_FETCH_PRODUCT

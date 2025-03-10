@@ -38,7 +38,7 @@ export class EmailController {
       orderTotal: string,
       customerAddress: string,
       deliveryDate: string,
-      items: { id: string; quantity: number }[]
+      items: { name: string; image: string; design: string; color: string; size: string; quantity: number; totalPrice: string }[]
     },
      @Ctx() context: RmqContext
   ){

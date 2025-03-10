@@ -83,6 +83,7 @@ import { CommonModule } from '@app/common';
           }
         })
       },
+      inject: [ConfigService],
     }
   ],
   exports: [

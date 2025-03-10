@@ -90,7 +90,7 @@ export class EmailService {
       orderTotal: string,
       customerAddress: string,
       deliveryDate: string,
-      items: { id: string; quantity: number }[]
+      items: { name: string; image: string; design: string; color: string; size: string; quantity: number; totalPrice: string }[]
     },
     context: RmqContext
   ): Promise<void>{
@@ -99,7 +99,15 @@ export class EmailService {
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
 
-    const html = orderConfirmationEmail(orderId, customerName, exactDate(orderDate), orderTotal, customerAddress, exactDate(deliveryDate), items)
+    const html = orderConfirmationEmail(orderId, customerName, exactDate(orderDate), orderTotal, customerAddress, exactDate(deliveryDate), items.map((item)=>({
+      name: item.name,
+      image: item.image,
+      design:item.design,
+      color: item.color,
+      size: item.size,
+      quantity: item.quantity,
+      totalPrice: item.totalPrice,
+    })))
     const subject =  EMAIL_SUBJECTS.PLACE_ORDER
     const resetPassMail = emailStructure( email, subject, html)
 

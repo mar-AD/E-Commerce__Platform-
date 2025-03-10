@@ -104,7 +104,7 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
        const thisUser = await this.userRepository.findOne({where: {id: id}});
        if (!thisUser){
          this.logger.log(`user with ${id} not found`);
-         channel.nack(originalMessage, false, false);
+         channel.ack(originalMessage);
          return false;
        }
        channel.ack(originalMessage)

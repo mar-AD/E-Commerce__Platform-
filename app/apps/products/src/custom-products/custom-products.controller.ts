@@ -52,8 +52,10 @@ export class CustomProductController implements CustomProductsController{
     return this.customProductsService.deleteCustomProduct(request)
   }
 
-  @MessagePattern('get-custom-products')
+  @MessagePattern('get_custom_products')
   async getCustomProduct(@Payload() data: { id: string }, @Ctx() context: RmqContext  ): Promise<Product> {
+
+    console.log('custom product id that is cut in the controller:', data);
     return  this.customProductsService.getSingleCustomProduct(data, context)
   }
 }

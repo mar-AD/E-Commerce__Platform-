@@ -108,6 +108,7 @@ services:
       - ./apps/products/.env
     depends_on:
       - products-db
+      - rabbitmq
     ports:
       - '50058:50057'
     volumes:

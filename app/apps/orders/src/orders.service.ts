@@ -17,7 +17,7 @@ import {
   OrderStatus,
   PaginationRequest,
 } from '@app/common';
-import { catchError, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
+import { catchError, forkJoin, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { CreateOrderDto, UpdateOrderStatusDto } from '@app/common/dtos';
@@ -30,6 +30,7 @@ export class OrdersService {
     @Inject('RMQ_USERS_CLIENT') private readonly clientUsers: ClientProxy,
     @Inject('RMQ_EMAIL_CLIENT') private readonly clientEmail: ClientProxy,
     @Inject('RMQ_AUTH_CLIENT') private readonly clientAuth: ClientProxy,
+    @Inject('RMQ_PRODUCTS_CLIENT') private readonly clientProducts: ClientProxy,
     private readonly logger: LoggerService,
   ) {
   }
@@ -68,42 +69,66 @@ export class OrdersService {
             const { firstName, lastName, address } = profileExists;
             const customerName = `${firstName} ${lastName}`;
 
-            const createOrder = { userId, deliveryDate: calculatedDeliveryDate, ...rest };
-            console.log(createOrder);
-            this.logger.log(`Placing order for User ID: "${userId}"`);
-            return from(this.ordersRepository.save(createOrder)).pipe(
-              tap((createdOrder) => {
-                // Emit email event as a side effect
-                this.clientEmail.emit('place_order_email', {
-                  email,
-                  orderId: createdOrder.id,
-                  customerName,
-                  orderDate: createdOrder.createdAt,
-                  orderTotal: createdOrder.totalPrice,
-                  customerAddress: address,
-                  deliveryDate: createdOrder.deliveryDate,
-                  items: createdOrder.products
-                }).pipe(
-                  tap(() => {
-                    this.logger.log(`Successfully emitted place_order_email event for ${email}.`);
+            const customProductRequests  = createOrderDto.products.map((product)=>{
+              this.logger.debug(`Sending get-custom-products message for customProduct "${product.customProductId}"`);
+              return this.clientProducts.send('get_custom_products', { id: product.customProductId }).pipe(
+                catchError((err) => {
+                  this.logger.error(`Failed to fetch custom product with ID "${product.customProductId}": ${err.message}`);
+                  return throwError(() => new RpcException({
+                    code: status.NOT_FOUND,
+                    message: messages.PRODUCTS.FAILED_TO_FETCH_CUSTOM_PRODUCT
+                  }));
+                })
+              )
+            })
+
+            return forkJoin(customProductRequests).pipe(
+              switchMap((customProduct) => {
+                const createOrder = { userId, deliveryDate: calculatedDeliveryDate, ...rest };
+                this.logger.log(`Placing order for User ID: "${userId}"`);
+                return from(this.ordersRepository.save(createOrder)).pipe(
+                  tap((createdOrder) => {
+                    // Emit email event as a side effect
+                    this.clientEmail.emit('place_order_email', {
+                      email,
+                      orderId: createdOrder.id,
+                      customerName,
+                      orderDate: createdOrder.createdAt,
+                      orderTotal: createdOrder.totalPrice,
+                      customerAddress: address,
+                      deliveryDate: createdOrder.deliveryDate,
+                      items: customProduct.map((item)=>({
+                        name: item.name,
+                        image: item.image,
+                        design:item.design,
+                        color: item.color,
+                        size: item.size,
+                        quantity: item.quantity,
+                        totalPrice: item.totalPrice,
+                      }))
+                    }).pipe(
+                      tap(() => {
+                        this.logger.log(`Successfully emitted place_order_email event for ${email}.`);
+                      }),
+                      catchError((err) => {
+                        this.logger.error(
+                          `Failed to emit place_order_email event for ${email}. Error: ${err.message}`
+                        );
+                        return of(null);
+                      })
+                    ).subscribe();
                   }),
+                  map((createdOrder) => this.mappedResponse(createdOrder)),
                   catchError((err) => {
-                    this.logger.error(
-                      `Failed to emit place_order_email event for ${email}. Error: ${err.message}`
-                    );
-                    return of(null);
+                    this.logger.error(`Failed to place order: ${err.message}`);
+                    return throwError(() => new RpcException({
+                      code: status.INTERNAL,
+                      message: messages.ORDERS.FAILED_TO_PLACE_ORDER
+                    }));
                   })
-                ).subscribe();
-              }),
-              map((createdOrder) => this.mappedResponse(createdOrder)),
-              catchError((err) => {
-                this.logger.error(`Failed to place order: ${err.message}`);
-                return throwError(() => new RpcException({
-                  code: status.INTERNAL,
-                  message: messages.ORDERS.FAILED_TO_PLACE_ORDER
-                }));
+                );
               })
-            );
+            )
           })
         );
       })
