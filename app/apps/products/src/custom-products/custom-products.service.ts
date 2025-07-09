@@ -345,15 +345,15 @@ export class CustomProductsService {
     console.log('service :', data.id);
    try {
      this.logger.log(`looking for customProduct with ${data.id}`);
-     const customProduct = await this.CustomProductRepository.findOne({where: {id: data.id}})
-     this.logger.log(customProduct)
-     if (!customProduct){
-       this.logger.log(`customProduct with ${data.id} not found`);
-       channel.nack(originalMessage, false, true);  // Rejected but not requeued
+     const customProduct = await this.CustomProductRepository.findOne({where: {id: data.id}, relations: ['product']})
+     this.logger.log(`here is the product ', ${JSON.stringify(customProduct) }`)
+     if (!customProduct?.product?.id) {
+       this.logger.error(`customProduct.product is missing or invalid for id ${data.id}`);
+       channel.nack(originalMessage, false, true);
        throw new RpcException({
          code: status.NOT_FOUND,
-         message: messages.PRODUCTS.FAILED_TO_FETCH_CUSTOM_PRODUCT
-       })
+         message: 'Product relation not found in customProduct',
+       });
      }
      const design = customProduct.design
      const color = customProduct.color

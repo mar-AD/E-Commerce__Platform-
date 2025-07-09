@@ -53,6 +53,8 @@ export class OrdersService {
         this.logger.debug(`Sending get_user_profile message for user "${userId}"`);
         return this.clientUsers.send('get_user_profile', { id: userId }).pipe(
           switchMap((profileExists) => {
+            this.logger.log(`here is the user profile ', ${profileExists}`)
+
             if (!profileExists) {
               this.logger.warn(`User profile for ID "${userId}" not found.`);
               throw new RpcException({
@@ -64,7 +66,6 @@ export class OrdersService {
             const type = getDeliveryType(createOrderDto.deliveryDate)
             console.log(typeof type);
             const calculatedDeliveryDate  = getDeliveryDate(type);
-            console.log(calculatedDeliveryDate);
 
             const { firstName, lastName, address } = profileExists;
             const customerName = `${firstName} ${lastName}`;
@@ -72,6 +73,10 @@ export class OrdersService {
             const customProductRequests  = createOrderDto.products.map((product)=>{
               this.logger.debug(`Sending get-custom-products message for customProduct "${product.customProductId}"`);
               return this.clientProducts.send('get_custom_products', { id: product.customProductId }).pipe(
+                map((customProduct)=>({
+                  ...customProduct,
+                  quantity: product.quantity
+                })),
                 catchError((err) => {
                   this.logger.error(`Failed to fetch custom product with ID "${product.customProductId}": ${err.message}`);
                   return throwError(() => new RpcException({
@@ -84,11 +89,13 @@ export class OrdersService {
 
             return forkJoin(customProductRequests).pipe(
               switchMap((customProduct) => {
+                this.logger.log(`here is the csutom product ', ${JSON.stringify(customProduct)}`)
                 const createOrder = { userId, deliveryDate: calculatedDeliveryDate, ...rest };
                 this.logger.log(`Placing order for User ID: "${userId}"`);
                 return from(this.ordersRepository.save(createOrder)).pipe(
                   tap((createdOrder) => {
                     // Emit email event as a side effect
+
                     this.clientEmail.emit('place_order_email', {
                       email,
                       orderId: createdOrder.id,
@@ -178,32 +185,30 @@ export class OrdersService {
     )
   }
 
-  getAllOrders(request: Observable<PaginationRequest>): Observable<OrdersListResponse> {
-    return from(request).pipe(
-      switchMap(({ page, limit }) => {
-        this.logger.log(`Fetching orders with pagination - Page: ${page}, Limit: ${limit}`);
+  getAllOrders(request: PaginationRequest): Observable<OrdersListResponse> {
+    const { page, limit} = request
+    this.logger.log(`Fetching orders with pagination - Page: ${page}, Limit: ${limit}`);
 
-        return from(this.ordersRepository.findAndCount({
-          skip: (page - 1) * limit,
-          take: limit,
-        })).pipe(
-          map(([orders, count]) => {
-            this.logger.log(`Successfully fetched ${orders.length} orders (Total: ${count})`);
+    return from(this.ordersRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    })).pipe(
 
-            return {
-              orders: orders.map((order) => this.mappedResponse(order)),
-              total: count
-            };
-          }),
-          catchError((err) => {
-            this.logger.error(`Failed to fetch orders. Error: ${err.message}`);
+      map(([orders, count]) => {
+        this.logger.log(`Successfully fetched ${orders.length} orders (Total: ${count})`);
 
-            throw new RpcException({
-              code: status.INTERNAL,
-              message: messages.ORDERS.FAILED_TO_FETCH_ALL_ORDERS
-            });
-          })
-        );
+        return {
+          orders: orders.map((order) => this.mappedResponse(order)),
+          total: count
+        };
+      }),
+      catchError((err) => {
+        this.logger.error(`Failed to fetch orders. Error: ${err.message}`);
+
+        throw new RpcException({
+          code: status.INTERNAL,
+          message: messages.ORDERS.FAILED_TO_FETCH_ALL_ORDERS
+        });
       })
     );
   }
@@ -275,7 +280,7 @@ export class OrdersService {
 
   cancelOrder(request: GetOrdersRequest): Observable<OrderBaseResponse> {
     const{userId, orderId} = request;
-    return this.clientAuth.send<boolean>('get_one_id', { id: userId }).pipe(
+    return this.clientAuth.send<boolean>('get_user_id', { id: userId }).pipe(
       switchMap((userExists) => {
         if (!userExists) {
           this.logger.warn(`User with ID "${userId}" not found.`);
@@ -293,9 +298,11 @@ export class OrdersService {
               });
             }
 
-            const cancelPeriod = new Date(order.createdAt.getTime() + 30 * 60 * 1000)
-            const currentDate = new Date()
-            if ( currentDate > cancelPeriod){
+            const createdAtMs = order.createdAt.getTime();
+            const cancelDeadlineMs = createdAtMs + 30 * 60 * 1000; // +30min
+
+            const nowMs = Date.now(); // UTC millisec
+            if ( nowMs > cancelDeadlineMs){
               throw new RpcException({
                 code: status.FAILED_PRECONDITION,
                 message: "Order cancellation is no longer possible as the allowed time has passed."

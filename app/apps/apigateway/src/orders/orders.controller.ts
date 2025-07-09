@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   CreateOrderRequest, GetOrderByIdRequest,
   GetOrdersByUserIdRequest, GetOrdersRequest,
@@ -10,7 +10,6 @@ import {
 import { PermissionsGuard } from '../auth/guards/auth.guard';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from '@app/common/dtos';
-import { Observable, of } from 'rxjs';
 
 @ApiTags('Orders')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -72,9 +71,11 @@ export class OrdersController {
 
   @Get('orders')
   @ApiBearerAuth()
+  @ApiQuery({name: 'page', required: false, type: Number})
+  @ApiQuery({name: 'limit', required: false, type: Number})
   @PermissionsAndAccess({accessType: ['admin'], permission: getPermissionName(Permissions.MANAGE_ORDERS)})
   getAllOrders(@Query('page') page = 1, @Query('limit') limit = 5 ) {
-    const request: Observable<PaginationRequest> = of({ page, limit});
+    const request: PaginationRequest = { page, limit};
 
     return this.ordersService.getAll(request)
   }

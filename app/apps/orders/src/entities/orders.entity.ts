@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, UpdateDateColumn, CreateDateColumn } from 'typeorm';
 import { getDeliveryDate, getDeliveryType } from '@app/common/utils/configs';
-import { DeliveryType, OrderStatus, ProductItem } from '@app/common/types/orders';
+import { DeliveryType, OrderStatus, ProductItem } from '@app/common';
+
 
 
 

@@ -95,7 +95,7 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
   getUser(findOneDto: FindOneDto): Observable<User> {
     return this.getOne(findOneDto.id, AuthConstants.user);
   }
-//for the products microservice
+//for the products and orders..returns id
   async getOneUser(data: {id: string}, context: RmqContext): Promise<boolean> {
     const {id} = data;
     const channel = context.getChannelRef();
@@ -118,7 +118,7 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
      }
   }
 
-  //for Orders
+  //for Orders..returns email
   async getSingleUser(data: {id: string}, context: RmqContext): Promise<string> {
     const {id} = data;
     const channel = context.getChannelRef();

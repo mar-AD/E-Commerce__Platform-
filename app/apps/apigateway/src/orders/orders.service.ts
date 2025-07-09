@@ -8,7 +8,6 @@ import {
 } from '@app/common';
 import { ORDERS_SERVICE } from '../constants';
 import { ClientGrpc } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
 
 @Injectable()
 export class OrdersService implements OnModuleInit {
@@ -39,7 +38,7 @@ export class OrdersService implements OnModuleInit {
     return this.orderService.cancelOrder(request)
   }
 
-  getAll(request: Observable<PaginationRequest>) {
+  getAll(request: PaginationRequest) {
     return this.orderService.getAllOrders(request)
   }
 }

@@ -1,12 +1,11 @@
 import { Controller } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import {
-  CreateOrderRequest, GetOrderByIdRequest, GetOrdersByUserIdRequest, GetOrdersRequest, OrderBaseResponse,
+  CreateOrderRequest, GetOrderByIdRequest, GetOrdersByUserIdRequest, GetOrdersRequest,
   OrderServiceController,
-  OrderServiceControllerMethods, OrdersListResponse, PaginationRequest,
+  OrderServiceControllerMethods, PaginationRequest,
   UpdateOrderStatusRequest,
 } from '@app/common';
-import { Observable } from 'rxjs';
 
 
 @Controller()
@@ -32,7 +31,7 @@ export class OrdersController implements OrderServiceController{
     return this.ordersService.getOrdersByUser(request)
   }
 
-  getAllOrders(request: Observable<PaginationRequest>) {
+  getAllOrders(request: PaginationRequest) {
     return this.ordersService.getAllOrders(request)
   }
 

@@ -8,7 +8,7 @@ service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
   rpc GetOrderById(GetOrderByIdRequest) returns (OrderResponse);
   rpc GetOrdersByUserId(GetOrdersByUserIdRequest) returns (OrdersListResponse);
-  rpc GetAllOrders(stream PaginationRequest) returns (stream OrdersListResponse);
+  rpc GetAllOrders(PaginationRequest) returns ( OrdersListResponse);
   rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (OrderResponse);
   rpc CancelOrder(GetOrdersRequest) returns (OrderBaseResponse);
 }

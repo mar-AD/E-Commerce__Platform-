@@ -98,7 +98,7 @@ export interface OrderServiceClient {
 
   getOrdersByUserId(request: GetOrdersByUserIdRequest): Observable<OrdersListResponse>;
 
-  getAllOrders(request: Observable<PaginationRequest>): Observable<OrdersListResponse>;
+  getAllOrders(request: PaginationRequest): Observable<OrdersListResponse>;
 
   updateOrderStatus(request: UpdateOrderStatusRequest): Observable<OrderResponse>;
 
@@ -114,7 +114,9 @@ export interface OrderServiceController {
     request: GetOrdersByUserIdRequest,
   ): Promise<OrdersListResponse> | Observable<OrdersListResponse> | OrdersListResponse;
 
-  getAllOrders(request: Observable<PaginationRequest>): Observable<OrdersListResponse>;
+  getAllOrders(
+    request: PaginationRequest,
+  ): Promise<OrdersListResponse> | Observable<OrdersListResponse> | OrdersListResponse;
 
   updateOrderStatus(
     request: UpdateOrderStatusRequest,
@@ -131,6 +133,7 @@ export function OrderServiceControllerMethods() {
       "createOrder",
       "getOrderById",
       "getOrdersByUserId",
+      "getAllOrders",
       "updateOrderStatus",
       "cancelOrder",
     ];
@@ -138,7 +141,7 @@ export function OrderServiceControllerMethods() {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("OrderService", method)(constructor.prototype[method], method, descriptor);
     }
-    const grpcStreamMethods: string[] = ["getAllOrders"];
+    const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcStreamMethod("OrderService", method)(constructor.prototype[method], method, descriptor);

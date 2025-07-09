@@ -55,7 +55,7 @@ export class CustomProductController implements CustomProductsController{
   @MessagePattern('get_custom_products')
   async getCustomProduct(@Payload() data: { id: string }, @Ctx() context: RmqContext  ): Promise<Product> {
 
-    console.log('custom product id that is cut in the controller:', data);
+    console.log('custom product id that is caught in the controller:', data);
     return  this.customProductsService.getSingleCustomProduct(data, context)
   }
 }
