@@ -16,9 +16,9 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 @Module({
   imports: [
     ConfigModule.forRoot({
-    isGlobal: true,
-    envFilePath: ['./apps/products/.env', './.env']
-  }),
+      isGlobal: true,
+      envFilePath: ['./apps/products/.env', './.env']
+    }),
     CommonModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -38,13 +38,13 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
     CustomProductsService,
     UserStoresService,
     {
-      provide: 'RMQ_PRODUCTS_CLIENT',
+      provide: 'RMQ_AUTH_CLIENT',
       useFactory: (configService: ConfigService) => {
         return ClientProxyFactory.create({
           transport: Transport.RMQ,
           options: {
             urls: [configService.get<string>('RABBITMQ_URL')],
-            queue: configService.get<string>('RABBITMQ_PRODUCTS_QUEUE'),
+            queue: configService.get<string>('RABBITMQ_AUTH_QUEUE'),
             queueOptions: { durable: true },
           },
         });
@@ -52,6 +52,6 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
       inject: [ConfigService],
     }
   ],
-  exports:['RMQ_PRODUCTS_CLIENT'],
+  exports:['RMQ_AUTH_CLIENT'],
 })
 export class ProductsModule {}

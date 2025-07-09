@@ -2,7 +2,6 @@ syntax= "proto3";
 
 package products;
 
-import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 
 // Base Product Management

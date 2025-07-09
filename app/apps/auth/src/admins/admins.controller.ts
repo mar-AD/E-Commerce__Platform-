@@ -4,7 +4,7 @@ import {
   AdminServiceController,
   AdminServiceControllerMethods, BaseResponse,
   FindOneDto, RequestUpdateAdminProfile,
-  RequestUpdateEmailRequest, RequestUpdateProfile, ResetPasswordRequest,
+  RequestUpdateEmailRequest, ResetPasswordRequest,
   UpdateAdminRoleRequest,
   UpdateEmailRequest,
   UpdatePasswordRequest,
@@ -12,8 +12,6 @@ import {
 } from '@app/common';
 import { CreateAdminDto, LoginDto, RefreshTokenDto, ForgotPasswordDto } from '@app/common/dtos/auth-dtos';
 import { Observable } from 'rxjs';
-import { AuthConstants } from '../constants';
-import { UpdateUserProfileDto } from '@app/common/dtos';
 
 @Controller()
 @AdminServiceControllerMethods()

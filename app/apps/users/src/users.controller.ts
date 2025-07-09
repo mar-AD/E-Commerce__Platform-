@@ -3,8 +3,8 @@ import { UsersService } from './users.service';
 import { Ctx, EventPattern, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import {
   BaseResponse,
-  GetUserProfileRequest,
-  LoggerService, UsersProfileServiceController, UsersProfileServiceControllerMethods,
+  GetUserProfileRequest, GetUserProfileResponse,
+  LoggerService, UserProfile, UsersProfileServiceController, UsersProfileServiceControllerMethods,
 } from '@app/common';
 import { UpdateUserProfileDto } from '@app/common/dtos/users-dtos';
 
@@ -49,5 +49,12 @@ export class UsersController implements UsersProfileServiceController{
   async deleteProfile(@Payload() data: {id: string}, @Ctx() context: RmqContext) {
     this.logger.log(`Controller received 'delete_user_profile' event for ${data.id}`)
     await this.usersService.removeUserProfile(data, context)
+  }
+
+
+  @MessagePattern('get_user_profile')
+  async getProfile(@Payload() data: { id: string }, @Ctx() context: RmqContext): Promise<GetUserProfileResponse | boolean> {
+    this.logger.log(`Controller received 'get_user_profile' event for ${data.id}`)
+    return await this.usersService.getProfile(data, context)
   }
 }

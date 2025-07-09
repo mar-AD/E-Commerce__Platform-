@@ -12,6 +12,7 @@ services:
       - users
       - admins
       - products
+      - orders
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -107,12 +108,29 @@ services:
       - ./apps/products/.env
     depends_on:
       - products-db
+      - rabbitmq
     ports:
       - '50058:50057'
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     command: sh -c "echo 'Starting products Service'; npm run start:dev products"
+
+
+  orders:
+    build:
+      context: ./
+      dockerfile: ./apps/orders/Dockerfile
+    env_file:
+      - ./apps/orders/.env
+    depends_on:
+      - orders-db
+    ports:
+      - '50050:50059'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "echo 'Starting orders Service'; npm run start:dev orders"
 
   auth-db:
     image: postgres:16
@@ -153,6 +171,16 @@ services:
     volumes:
       - ./db/products-data:/var/lib/postgresql/data
       - ./db/init-products.sql:/docker-entrypoint-initdb.d/init-products.sql
+
+  orders-db:
+    image: postgres:16
+    env_file:
+      - ./apps/orders/.env
+    ports:
+      - '5437:5432'
+    volumes:
+      - ./db/orders-data:/var/lib/postgresql/data
+      - ./db/init-orders.sql:/docker-entrypoint-initdb.d/init-orders.sql
 
   rabbitmq:
     image: rabbitmq:4.0.4-management

@@ -123,7 +123,21 @@ export const messages = {
     // Validation and Error Messages
     INVALID_PRODUCT_DETAILS: "Invalid product details provided",
     INVALID_STORE_DETAILS: "Invalid store details provided"
+  },
+  ORDERS: {
+    ORDER_NOT_FOUND: "Order not found or unavailable",
+    ORDER_PLACED_SUCCESSFULLY: "Order placed successfully",
+    ORDER_UPDATED_SUCCESSFULLY: "Order updated successfully",
+    ORDER_CANCEL_SUCCESSFULLY: "Order canceled successfully",
+    FAILED_TO_PLACE_ORDER: "Failed to place order",
+    FAILED_TO_UPDATE_ORDER: "Failed to update order",
+    FAILED_TO_FETCH_ORDER: "Failed to fetch order",
+    FAILED_TO_CANCEL_ORDER: "Failed to cancel order",
+    FAILED_TO_FETCH_ALL_ORDERS: "Failed to fetch all orders",
+    ORDER_ALREADY_COMPLETED: "Order has already been completed",
+    INVALID_ORDER_STATUS: "Invalid order status",
   }
+
 
 
 }

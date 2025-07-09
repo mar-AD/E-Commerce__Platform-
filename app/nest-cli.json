@@ -108,6 +108,22 @@
         ],
         "watchAssets": true
       }
+    },
+    "orders": {
+      "type": "application",
+      "root": "apps/orders",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
+      "compilerOptions": {
+        "tsConfigPath": "apps/orders/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "proto/**/*.proto",
+            "outDir": "dist/apps/orders/proto"
+          }
+        ],
+        "watchAssets": true
+      }
     }
   }
 }

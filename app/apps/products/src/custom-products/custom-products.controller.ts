@@ -8,6 +8,8 @@ import {
   UpdateCustomProductRequest,
 } from '@app/common';
 import { CustomProductsService } from './custom-products.service';
+import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
+import { Product } from '../constants';
 
 
 @Controller('custom-products')
@@ -48,5 +50,12 @@ export class CustomProductController implements CustomProductsController{
 
   deleteCustomProduct(request: GetOne) {
     return this.customProductsService.deleteCustomProduct(request)
+  }
+
+  @MessagePattern('get_custom_products')
+  async getCustomProduct(@Payload() data: { id: string }, @Ctx() context: RmqContext  ): Promise<Product> {
+
+    console.log('custom product id that is caught in the controller:', data);
+    return  this.customProductsService.getSingleCustomProduct(data, context)
   }
 }

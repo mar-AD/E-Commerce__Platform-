@@ -8,17 +8,6 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
 
   try {
-    // const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    //   AuthModule,
-    //   {
-    //     transport: Transport.GRPC,
-    //     options: {
-    //       protoPath: join(__dirname, '../proto/auth.proto'),
-    //       package: AUTH_PACKAGE_NAME,
-    //       url: '0.0.0.0:50051',
-    //     },
-    //   },
-    // );
 
     const app = await NestFactory.create(AuthModule);
     const configService = app.get(ConfigService);
@@ -35,7 +24,7 @@ async function bootstrap() {
       transport: Transport.RMQ,
       options: {
         urls: [configService.get<string>('RABBITMQ_URL')],
-        queue: configService.get<string>('RABBITMQ_PRODUCTS_QUEUE'),
+        queue: configService.get<string>('RABBITMQ_AUTH_QUEUE'),
         queueOptions: { durable: true },
         noAck: false,
         persistent: true,

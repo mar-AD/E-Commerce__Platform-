@@ -2,9 +2,9 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuard
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   CreateStoreRequest,
-  GetOne, getPermissionName,
+  GetOne,
   isPublic,
-  JwtAuthGuard, Permissions,
+  JwtAuthGuard,
   PermissionsAndAccess, StoresByUserRequest,
   UpdateStoreRequest,
 } from '@app/common';

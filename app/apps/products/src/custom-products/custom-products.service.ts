@@ -11,17 +11,18 @@ import {
   messages, StoresByUserRequest,
 } from '@app/common';
 import { CreateCustomProductDto, UpdateCustomProductDto } from '@app/common/dtos';
-import { catchError, defer, from, map, Observable, switchMap, tap } from 'rxjs';
+import { catchError, from, map, Observable, switchMap, tap } from 'rxjs';
 import { ProductEntity } from '../core-products/entities/products.entity';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy, Ctx, RmqContext, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { Product } from '../constants';
 
 @Injectable()
 export class CustomProductsService {
   constructor(
     @InjectRepository(CustomProductsEntity) private readonly CustomProductRepository: Repository<CustomProductsEntity>,
     @InjectRepository(ProductEntity) private readonly ProductRepository: Repository<ProductEntity>,
-    @Inject('RMQ_PRODUCTS_CLIENT') protected readonly clientProducts: ClientProxy,
+    @Inject('RMQ_AUTH_CLIENT') protected readonly clientAuth: ClientProxy,
     private readonly logger: LoggerService,
   ) {
   }
@@ -47,7 +48,7 @@ export class CustomProductsService {
           });
         }
         this.logger.debug(`Sending get_user_id message for user "${userId}"`);
-        return this.clientProducts.send<boolean>('get_user_id', { id: userId }).pipe(
+        return this.clientAuth.send<boolean>('get_user_id', { id: userId }).pipe(
           tap(userExists => {
             if (!userExists) {
               this.logger.warn(`User with ID "${userId}" not found.`);
@@ -61,10 +62,7 @@ export class CustomProductsService {
             const newCreateCustomProduct = { product, userId, ...createCustomProduct };
             this.logger.log(`Creating custom product for User ID: "${userId}" and Product ID: "${productId}"`);
             return from(this.CustomProductRepository.save(newCreateCustomProduct)).pipe(
-              map(created => {
-
-                return this.mappedResponse(created);
-              }),
+              map(created => this.mappedResponse(created)),
               catchError(err => {
                 this.logger.error(`Failed to create custom product: ${err.message}`);
                 throw new RpcException({
@@ -176,7 +174,7 @@ export class CustomProductsService {
   getCustomProductByUser(request: CustomProductsByUserRequest): Observable<CustomProductListResponse> {
     const{userId} = request;
     this.logger.log(`CustomProducts: sending get_user_id message... '`);
-    return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
+    return this.clientAuth.send<boolean>('get_user_id', {id: userId}).pipe(
       switchMap((userExists) => {
         if (!userExists) {
           this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
@@ -213,7 +211,7 @@ export class CustomProductsService {
   getCustomProductByStore(request: StoresByUserRequest): Observable<CustomProductListResponse> {
     const{userId} = request;
     this.logger.log(`CustomProducts: sending get_user_id message... '`);
-    return this.clientProducts.send<boolean>('get_user_id', {id: userId}).pipe(
+    return this.clientAuth.send<boolean>('get_user_id', {id: userId}).pipe(
       switchMap((userExists) => {
         if (!userExists) {
           this.logger.log(`UserRepo: entity with ID "${userId}" do not exist.`);
@@ -337,6 +335,61 @@ export class CustomProductsService {
         })
       })
     )
+  }
+
+
+  //for the set orders method
+  async getSingleCustomProduct(data: { id: string }, context: RmqContext  ): Promise<Product>{
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+    console.log('service :', data.id);
+   try {
+     this.logger.log(`looking for customProduct with ${data.id}`);
+     const customProduct = await this.CustomProductRepository.findOne({where: {id: data.id}, relations: ['product']})
+     this.logger.log(`here is the product ', ${JSON.stringify(customProduct) }`)
+     if (!customProduct?.product?.id) {
+       this.logger.error(`customProduct.product is missing or invalid for id ${data.id}`);
+       channel.nack(originalMessage, false, true);
+       throw new RpcException({
+         code: status.NOT_FOUND,
+         message: 'Product relation not found in customProduct',
+       });
+     }
+     const design = customProduct.design
+     const color = customProduct.color
+     const size = customProduct.size
+     const totalPrice = customProduct.totalPrice
+
+     this.logger.log(`looking for product with ${customProduct.product.id}`);
+     const product = await this.ProductRepository.findOne({where: {id: customProduct.product.id, isActive: true}})
+     if (!product){
+       this.logger.log(`product with ${data.id} not found`);
+       channel.nack(originalMessage, false, true);
+       throw new RpcException({
+         code: status.NOT_FOUND,
+         message: messages.PRODUCTS.FAILED_TO_FETCH_PRODUCT
+       })
+     }
+
+     const name = product.name
+     const image = product.image[0]
+
+     channel.ack(originalMessage)
+     return {
+       name,
+       image,
+       design,
+       color,
+       size,
+       totalPrice
+     }
+
+   }
+   catch (err){
+     this.logger.error(`Failed to fetch product with ${data.id} : ${err}`);
+     channel.nack(originalMessage, true ,false);
+     throw new RpcException('product fetch failed');
+   }
   }
 
   private isEqual (obj1: any, obj2: any): boolean {

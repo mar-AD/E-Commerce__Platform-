@@ -4,6 +4,8 @@ import { messages } from '@app/common/utils/messages';
 import { RpcException } from '@nestjs/microservices';
 import {status} from '@grpc/grpc-js';
 import { PlacementDetail } from '@app/common/types';
+import { dateToTimestamp } from '@app/common/utils/timestamp-converter';
+import { Timestamp } from 'google/protobuf/timestamp';
 
 //this for hashing password
 export const hashPassword = (password: string):Observable<string> => {
@@ -84,4 +86,60 @@ export function getPermissionName(value: number): string | undefined {
 
 //for customProducts entity and dtos
 export type Placement = Record<string, PlacementDetail>;
+
+//for delivery date
+export function getDeliveryDate(shippingMethod: DeliveryType): Date {
+  const today = new Date();
+  let deliveryDays = 0;
+
+  switch (shippingMethod.toLowerCase()) {
+    case "standard":
+      deliveryDays = Math.floor(Math.random() * (5 - 3 + 1)) + 3; // 3-5 days
+      break;
+    case "express":
+      deliveryDays = Math.floor(Math.random() * (2 - 1 + 1)) + 1; // 1-2 days
+      break;
+    default:
+      deliveryDays = 5;
+  }
+
+  today.setDate(today.getDate() + deliveryDays);
+  return today
+}
+
+//for order deliveryType
+enum DeliveryType {
+  STANDARD = 'STANDARD',
+  EXPRESS = 'EXPRESS',
+}
+
+const DeliveryTypeType = {
+  0 : 'STANDARD',
+  1 : 'EXPRESS',
+}
+
+export function getDeliveryType (type: number){
+  return DeliveryTypeType[type] ?? undefined;
+}
+
+
+//for order status
+export enum StatusType {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  CANCELED = 'CANCELED',
+  SHIPPED = 'SHIPPED',
+}
+
+const Status = {
+  0 : 'PENDING',
+  1 : 'CONFIRMED',
+  2 : 'CANCELED',
+  3 : 'SHIPPED'
+}
+
+export function getStatus (type: number){
+  return Status[type] ?? undefined;
+}
+
 

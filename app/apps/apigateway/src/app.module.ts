@@ -5,6 +5,7 @@ import { CommonModule } from '@app/common';
 import { UsersModule } from './users/users.module';
 import { AdminsModule } from './admins/admins.module';
 import { ProductsModule } from './products/products.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ProductsModule } from './products/products.module';
     UsersModule,
     AdminsModule,
     ProductsModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [],

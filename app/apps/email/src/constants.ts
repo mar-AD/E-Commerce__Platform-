@@ -16,4 +16,10 @@ export const EMAIL_SUBJECTS = {
   WELCOME: 'Welcome to our Platform!',
   EMAIL_UPDATED: 'Email Update Request',
   RESET_PASSWORD: 'Password Reset Request',
+  PLACE_ORDER: `Your Order Confirmation`,
 };
+
+
+export function exactDate(date: string) {
+  return date.split('T')[0];
+}

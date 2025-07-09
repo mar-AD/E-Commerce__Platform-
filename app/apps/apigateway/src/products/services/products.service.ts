@@ -10,7 +10,7 @@ export class ProductsService implements OnModuleInit{
   constructor(@Inject(PRODUCTS_SERVICE) private client: ClientGrpc){}
 
   onModuleInit() {
-    this.productService= this.client.getService<ProductServiceClient>(PRODUCT_SERVICE_NAME);
+    this.productService = this.client.getService<ProductServiceClient>(PRODUCT_SERVICE_NAME);
   }
 
   CreateProduct(createProductDto: CreateProductDto){

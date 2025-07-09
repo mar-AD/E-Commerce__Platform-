@@ -91,4 +91,10 @@ export class UsersController implements UserServiceController{
   async findOneUser(@Payload() data: {id: string}, @Ctx() context: RmqContext ): Promise<boolean>{
     return this.usersService.getOneUser(data, context);
   }
+
+//for orders
+  @MessagePattern('get_one_user')
+  async findOneSingleUser(@Payload() data: {id: string}, @Ctx() context: RmqContext ): Promise<string>{
+    return this.usersService.getSingleUser(data, context);
+  }
 }

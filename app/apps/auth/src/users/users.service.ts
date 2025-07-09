@@ -95,7 +95,7 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
   getUser(findOneDto: FindOneDto): Observable<User> {
     return this.getOne(findOneDto.id, AuthConstants.user);
   }
-//for the products microservice
+//for the products and orders..returns id
   async getOneUser(data: {id: string}, context: RmqContext): Promise<boolean> {
     const {id} = data;
     const channel = context.getChannelRef();
@@ -113,9 +113,32 @@ export class UsersService extends BaseService<User, GetAllUsersResponse>{
      }
      catch(error) {
        this.logger.error(`Failed to fetch user with ${id}: ${error}`);
-       channel.nack(originalMessage, false ,false);
+       channel.nack(originalMessage, true ,false);
        throw new RpcException('User fetch failed');
      }
+  }
+
+  //for Orders..returns email
+  async getSingleUser(data: {id: string}, context: RmqContext): Promise<string> {
+    const {id} = data;
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+    try {
+      const thisUser = await this.userRepository.findOne({where: {id: id, isEmailVerified: false}});
+      if (!thisUser){
+        this.logger.log(`user with ${id} not found`);
+        channel.ack(originalMessage);
+        return null;
+      }
+      channel.ack(originalMessage)
+      return thisUser.email
+
+    }
+    catch(error) {
+      this.logger.error(`Failed to fetch user with ${id}: ${error}`);
+      channel.nack(originalMessage, false ,false);
+      throw new RpcException('User fetch failed');
+    }
   }
 
   updateUserProfile(userProfileUpdateDto: UpdateUserProfileDto, findOneDto: FindOneDto): Observable<BaseResponse> {
