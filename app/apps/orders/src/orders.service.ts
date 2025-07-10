@@ -298,16 +298,21 @@ export class OrdersService {
               });
             }
 
-            const createdAtMs = order.createdAt.getTime();
-            const cancelDeadlineMs = createdAtMs + 30 * 60 * 1000; // +30min
+            const createdAt = new Date(order.createdAt);
+            const cancelPeriod = new Date(createdAt.getTime() +2 * 60 * 60 * 1000);
+            const currentDate = new Date();
 
-            const nowMs = Date.now(); // UTC millisec
-            if ( nowMs > cancelDeadlineMs){
+            console.log('order createdat:', createdAt);
+            console.log('Current time:', currentDate);
+            console.log('Cancel deadline:', cancelPeriod);
+
+            if (currentDate > cancelPeriod) {
               throw new RpcException({
                 code: status.FAILED_PRECONDITION,
                 message: "Order cancellation is no longer possible as the allowed time has passed."
-              })
+              });
             }
+
             return from(this.ordersRepository.update(orderId, {status: OrderStatus.CANCELED})).pipe(
               map(()=>{
                 this.logger.log(`OrderRepo: order with ID "${orderId}" canceled successfully `);
