@@ -103,24 +103,26 @@ export function orderConfirmationEmail(
           <p><strong>Shipping Address:</strong> ${customerAddress}</p>
           <p><strong>Estimated Delivery Date:</strong> ${deliveryDate}</p>
 
-          <h3 style="border-bottom: 2px solid #4CAF50; padding-bottom: 5px;">Items Ordered</h3>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff;">
-            <thead>
-              <tr style="background-color: #4CAF50; color: white;">
-                <th style="padding: 12px; text-align: center;">Image</th>
-                <th style="padding: 12px; text-align: left;">Item</th>
-                <th style="padding: 12px; text-align: left;">Design</th>
-                <th style="padding: 12px; text-align: center;">Color</th>
-                <th style="padding: 12px; text-align: center;">Size</th>
-                <th style="padding: 12px; text-align: center;">Quantity</th>
-                <th style="padding: 12px; text-align: right;">Total Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
-          </table>
+          <h3 style="border-bottom: 2px solid #333; padding-bottom: 5px;">Items Ordered</h3>
+          <div style="overflow-x: auto;">
+            <table style="min-width: 600px; width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff;">
 
+              <thead>
+                <tr style="background-color: #4CAF50; color: white;">
+                  <th style="padding: 12px; text-align: center;">Image</th>
+                  <th style="padding: 12px; text-align: left;">Item</th>
+                  <th style="padding: 12px; text-align: left;">Design</th>
+                  <th style="padding: 12px; text-align: center;">Color</th>
+                  <th style="padding: 12px; text-align: center;">Size</th>
+                  <th style="padding: 12px; text-align: center;">Quantity</th>
+                  <th style="padding: 12px; text-align: right;">Total Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+          </div>
           <p style="margin-top: 20px;">If you have any questions, feel free to contact our support team.</p>
           <p style="text-align: center;">Thank you for choosing our store!</p>
 

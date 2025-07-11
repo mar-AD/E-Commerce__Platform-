@@ -289,7 +289,7 @@ export class OrdersService {
             message: messages.USER.NOT_FOUND2
           });
         }
-        return from(this.ordersRepository.findOne({where: {userId : userId}})).pipe(
+        return from(this.ordersRepository.findOne({where: {userId : userId, id: orderId}})).pipe(
           switchMap((order)=>{
             if (!order) {
               throw new RpcException({
@@ -299,17 +299,18 @@ export class OrdersService {
             }
 
             const createdAt = new Date(order.createdAt);
-            const cancelPeriod = new Date(createdAt.getTime() +2 * 60 * 60 * 1000);
+            const cancelPeriod = new Date(createdAt.getTime() + 30 * 60 * 1000);
             const currentDate = new Date();
+
 
             console.log('order createdat:', createdAt);
             console.log('Current time:', currentDate);
             console.log('Cancel deadline:', cancelPeriod);
 
-            if (currentDate > cancelPeriod) {
+            if (Date.now() > cancelPeriod.getTime()) {
               throw new RpcException({
                 code: status.FAILED_PRECONDITION,
-                message: "Order cancellation is no longer possible as the allowed time has passed."
+                message: 'Order cancellation is no longer possible as the allowed time has passed.',
               });
             }
 
